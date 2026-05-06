@@ -1,0 +1,25 @@
+.matchesContainer { display: flex; flex-direction: column; gap: 1.5rem; }
+.sectionTitle { font-size: var(--h2); font-weight: 800; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 1rem; margin-bottom: 1rem; }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.matchCard { background: var(--surface); border-radius: var(--radius-md); padding: 1.25rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); transition: transform 0.2s, box-shadow 0.2s; }
+.matchCard:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.matchCard.finished { border-left: 4px solid var(--success); }
+.matchHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); font-size: var(--small); color: var(--text-muted); }
+.matchTime { color: var(--info); font-weight: 700; }
+.courtBadge { background: var(--surface-alt); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-weight: 500; }
+.matchContent { display: flex; justify-content: space-between; align-items: center; margin: 0.75rem 0; }
+.team { display: flex; align-items: center; gap: 0.5rem; flex: 1; }
+.team:last-child { justify-content: flex-end; text-align: right; }
+.miniBadge { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--surface-alt); border: 1px solid var(--border-light); }
+.highlight { font-weight: 700; color: var(--primary); }
+.scoreBoard { font-size: 1.5rem; font-weight: 800; padding: 0 1rem; min-width: 80px; text-align: center; }
+.result { color: var(--success); }
+.liveScore { color: var(--live); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+.vs { color: var(--text-muted); font-size: 1.1rem; }
+.matchMeta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-light); font-size: var(--small); color: var(--text-secondary); }
+.statusBadge { font-weight: 600; }
+.referee { color: var(--warning); font-weight: 500; }
+.format { font-style: italic; }
+.empty { text-align: center; padding: 3rem; background: var(--surface); border-radius: var(--radius-md); color: var(--text-muted); border: 1px dashed var(--border); }
+.loading { text-align: center; padding: 2rem; color: var(--text-muted); }

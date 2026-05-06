@@ -1,0 +1,32 @@
+/* src/design-system/components/Badge/Badge.module.css */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.sizeSM { padding: 0.2rem 0.5rem; font-size: var(--text-xs); }
+.sizeMD { padding: 0.3rem 0.7rem; font-size: var(--text-sm); }
+.sizeLG { padding: 0.4rem 0.9rem; font-size: var(--text-base); }
+
+.variantDefault { background: var(--surface-hover); color: var(--text-secondary); border: 1px solid var(--border-default); }
+.variantPending { background: rgba(245, 158, 11, 0.15); color: var(--status-pending); border: 1px solid var(--status-pending); }
+.variantLive { 
+  background: rgba(244, 63, 94, 0.15); 
+  color: var(--status-live); 
+  border: 1px solid var(--status-live); 
+  animation: pulse 1.5s ease-in-out infinite; 
+}
+.variantFinished { background: rgba(16, 185, 129, 0.15); color: var(--status-finished); border: 1px solid var(--status-finished); }
+.variantScheduled { background: rgba(59, 130, 246, 0.15); color: var(--status-scheduled); border: 1px solid var(--status-scheduled); }
+.variantSuccess { background: rgba(16, 185, 129, 0.15); color: var(--status-success); border: 1px solid var(--status-success); }
+.variantError { background: rgba(239, 68, 68, 0.15); color: var(--status-error); border: 1px solid var(--status-error); }
+
+.icon { font-size: 0.85em; }
+.text { padding-top: 0.05em; }

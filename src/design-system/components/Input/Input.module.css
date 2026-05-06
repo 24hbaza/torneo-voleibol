@@ -1,0 +1,54 @@
+/* src/design-system/components/Input/Input.module.css */
+.wrapper { display: flex; flex-direction: column; gap: var(--space-xs); }
+.fullWidth { width: 100%; }
+
+.label { font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); }
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.hasError { border-color: var(--status-error) !important; }
+.hasError:focus-within { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important; }
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  outline: none;
+}
+
+.input::placeholder { color: var(--text-muted); }
+
+.hasIcon .input { padding-left: 2.5rem; }
+.hasIcon .iconRight ~ .input { padding-right: 2.5rem; }
+
+.iconLeft, .iconRight {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.iconLeft { left: 0.85rem; }
+.iconRight { right: 0.85rem; }
+
+.errorText, .helperText { margin: 0; font-size: var(--text-xs); }
+.errorText { color: var(--status-error); }
+.helperText { color: var(--text-muted); }

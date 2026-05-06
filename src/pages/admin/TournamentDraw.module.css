@@ -1,0 +1,34 @@
+/* src/pages/admin/TournamentDraw.module.css */
+.container { max-width: 1000px; margin: 0 auto; padding: var(--space-xl); }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl); }
+.title { font-family: var(--font-display); margin: 0; color: var(--text-primary); }
+
+.infoGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-xl); }
+.configList { list-style: none; padding: 0; margin: 0; }
+.configList li { padding: var(--space-sm) 0; border-bottom: 1px solid var(--border-default); color: var(--text-secondary); }
+.controlCard { display: flex; flex-direction: column; justify-content: center; gap: var(--space-md); }
+.successMsg { color: var(--status-success); font-weight: bold; text-align: center; margin-top: var(--space-sm); }
+.errorMsg { color: var(--status-error); font-weight: bold; text-align: center; margin-top: var(--space-sm); }
+
+.logsContainer { background: var(--surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-lg); }
+.logsContainer h3 { margin-top: 0; color: var(--text-muted); font-size: var(--text-sm); text-transform: uppercase; }
+.logs { height: 200px; overflow-y: auto; font-family: monospace; font-size: var(--text-sm); background: #000; color: #0f0; padding: var(--space-sm); border-radius: var(--radius-md); }
+.logEntry { margin: 0; border-bottom: 1px solid #222; padding: 0.2rem 0; }
+.emptyLogs { color: #666; font-style: italic; text-align: center; margin-top: 4rem; }
+
+@media (max-width: 768px) { .infoGrid { grid-template-columns: 1fr; } }
+/* Añadir al final de TournamentDraw.module.css */
+.modalOverlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+.modal {
+  background: var(--surface); border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg); padding: var(--space-xl);
+  max-width: 400px; width: 90%; text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+.modal h3 { margin: 0 0 var(--space-md) 0; color: var(--text-primary); }
+.modal p { margin: 0 0 var(--space-lg) 0; color: var(--text-secondary); line-height: 1.5; }
+.modalActions { display: flex; gap: var(--space-md); justify-content: center; }

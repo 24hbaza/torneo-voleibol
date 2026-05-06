@@ -1,0 +1,10 @@
+.container { margin-top: 1rem; }
+.title { font-size: var(--h2); font-weight: 800; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 1rem; margin-bottom: 1rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.liveCard { border: 2px solid var(--live); background: #FFF1F2; }
+.liveBadge { background: var(--live); color: #fff; padding: 0.15rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; animation: pulse 1.5s infinite; }
+.setInfo { text-align: center; font-size: var(--small); color: var(--live); font-weight: 600; margin-top: 0.5rem; }
+.loading { text-align: center; padding: 2rem; color: var(--text-muted); }
+
+/* Reutiliza animación de TeamMatchList */
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }

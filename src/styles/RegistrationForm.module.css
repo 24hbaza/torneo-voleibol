@@ -1,0 +1,252 @@
+/* src/styles/RegistrationForm.module.css */
+
+.form {
+  max-width: 800px;
+  margin: 2rem auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.title {
+  text-align: center;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.field {
+  margin-bottom: 1.2rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.input, .inputSmall {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.input:focus, .inputSmall:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+
+.inputSmall {
+  padding: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.section {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.playerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+  background: #fff;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.playerInputs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 250px;
+}
+
+.playerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 120px;
+}
+
+.captainLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #475569;
+  font-weight: 500;
+}
+
+.captainLabel input[type="radio"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.removeBtn {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.removeBtn:hover {
+  background: #fecaca;
+}
+
+.addBtn {
+  background: #e2e8f0;
+  color: #334155;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 0.5rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: #cbd5e1;
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fileSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.fileInput {
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submitBtn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  display: block;
+}
+
+.success {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .form {
+    margin: 1rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .fileSection {
+    grid-template-columns: 1fr;
+  }
+
+  .playerInputs {
+    grid-template-columns: 1fr 1fr;
+    min-width: 100%;
+  }
+
+  .playerRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .playerActions {
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .playerInputs {
+    grid-template-columns: 1fr;
+  }
+  
+  .inputSmall {
+    padding: 0.75rem;
+  }
+}

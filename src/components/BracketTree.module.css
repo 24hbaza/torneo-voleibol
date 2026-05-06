@@ -1,0 +1,140 @@
+/* src/components/BracketTree.module.css */
+.treeContainer {
+  display: flex;
+  gap: var(--space-xl);
+  overflow-x: auto;
+  padding: var(--space-lg) 0;
+  align-items: flex-start;
+  min-height: 500px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+.treeContainer::-webkit-scrollbar { height: 8px; }
+.treeContainer::-webkit-scrollbar-track { background: transparent; }
+.treeContainer::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 4px; }
+
+.roundColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  min-width: 260px;
+  position: relative;
+}
+.roundColumn::after {
+  content: '';
+  position: absolute;
+  top: 40px;
+  bottom: 40px;
+  right: -12px;
+  width: 2px;
+  background: var(--border-default);
+  opacity: 0.5;
+}
+.roundColumn:last-child::after { display: none; }
+
+.roundTitle {
+  font-family: var(--font-display);
+  color: var(--volley-gold);
+  font-size: var(--text-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 var(--space-md) 0;
+  text-align: center;
+  background: var(--surface);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-default);
+}
+
+.matchesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+.matchBox {
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+.matchBox:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.matchBox.live { border-color: var(--status-live); box-shadow: 0 0 0 1px var(--status-live); }
+.matchBox.finished { background: var(--surface-elevated); border-color: var(--status-success); }
+
+.team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+  gap: var(--space-xs);
+}
+.team:hover { background: var(--surface-hover); }
+.winner { background: rgba(251, 191, 36, 0.15); font-weight: 700; color: var(--volley-gold); }
+
+.seed { font-size: 0.9rem; flex-shrink: 0; }
+.name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--text-sm); }
+.score { 
+  font-family: var(--font-display); 
+  font-weight: 800; 
+  min-width: 24px; 
+  text-align: right; 
+  font-size: var(--text-base);
+}
+
+.statusBadge {
+  display: block;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  text-align: center;
+  font-weight: 500;
+}
+.statusBadge.live { 
+  background: rgba(244, 63, 94, 0.15); 
+  color: var(--status-live); 
+  font-weight: 700;
+  animation: pulse 1.5s infinite;
+}
+.statusBadge.done { 
+  background: rgba(16, 185, 129, 0.15); 
+  color: var(--status-success); 
+  font-weight: 700;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Líneas conectoras entre rondas */
+.connector {
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  width: 24px;
+  height: 2px;
+  background: var(--border-default);
+}
+
+@media (max-width: 900px) {
+  .treeContainer { 
+    flex-direction: column; 
+    align-items: stretch; 
+    overflow-x: visible; 
+  }
+  .roundColumn { min-width: 100%; }
+  .roundColumn::after { display: none; }
+  .matchBox { max-width: 100%; }
+}

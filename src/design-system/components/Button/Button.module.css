@@ -1,0 +1,143 @@
+/* src/design-system/components/Button/Button.module.css */
+.button {
+  font-family: var(--font-body);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== TAMAÑOS ===== */
+.btnSM {
+  padding: 0.5rem 1rem;
+  font-size: var(--text-sm);
+}
+
+.btnMD {
+  padding: 0.75rem 1.5rem;
+  font-size: var(--text-base);
+}
+
+.btnLG {
+  padding: 1rem 2rem;
+  font-size: var(--text-lg);
+}
+
+/* ===== VARIANTES ===== */
+.btnPrimary {
+  background: var(--volley-blue);
+  color: var(--text-inverse);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--volley-blue-hover);
+}
+
+.btnSuccess {
+  background: var(--volley-green);
+  color: var(--text-inverse);
+}
+
+.btnSuccess:hover:not(:disabled) {
+  background: var(--volley-green-hover);
+}
+
+.btnWarning {
+  background: var(--volley-gold);
+  color: var(--text-inverse);
+}
+
+.btnWarning:hover:not(:disabled) {
+  background: var(--volley-gold-hover);
+}
+
+.btnDanger {
+  background: var(--volley-red);
+  color: var(--text-inverse);
+}
+
+.btnDanger:hover:not(:disabled) {
+  background: var(--volley-red-hover);
+}
+
+.btnGhost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+.btnGhost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+/* ===== ESTADOS ===== */
+.fullWidth {
+  width: 100%;
+}
+
+.loading {
+  pointer-events: none;
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* ===== EFECTO RIPPLE (opcional) ===== */
+.button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+}
+
+.button:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 0;
+}

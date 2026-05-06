@@ -1,0 +1,262 @@
+/* src/pages/admin/AdminTeamEditor.module.css */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-muted);
+}
+
+.spinner {
+  font-size: 2rem;
+  animation: spin 1s linear infinite;
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.field label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--volley-blue);
+}
+
+.sectionTitle {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: var(--space-lg) 0 var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 2px solid var(--border-default);
+}
+
+.playersList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.playerRow {
+  display: grid;
+  grid-template-columns: 0.5fr 1.2fr 1.2fr 1fr 1fr auto auto;
+  gap: var(--space-sm);
+  align-items: center;
+  background: var(--surface-hover);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+}
+
+.num {
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.inputSmall {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.inputSmall:focus {
+  outline: none;
+  border-color: var(--volley-blue);
+}
+
+.photoCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  justify-content: center;
+}
+
+.miniPhoto {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-default);
+}
+
+.noPhoto {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: 50%;
+  color: var(--text-muted);
+}
+
+.miniFile {
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+}
+
+.miniFile + label {
+  cursor: pointer;
+  font-size: var(--text-xs);
+  color: var(--volley-blue);
+}
+
+.docsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.docRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.docRow label {
+  min-width: 180px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.fileInput {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem;
+  background: var(--surface);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.docLink {
+  color: var(--volley-blue);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.docLink:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-default);
+}
+
+.addBtn {
+  margin-top: var(--space-sm);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .playerRow {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+  
+  .num {
+    grid-column: 1 / -1;
+    text-align: left;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-default);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-xs);
+  }
+  
+  .inputSmall {
+    grid-column: span 1;
+  }
+  
+  .photoCell {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+  
+  .docRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .docRow label {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .playerRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .inputSmall,
+  .photoCell,
+  .miniFile + label {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+.genderCell { display: flex; gap: var(--space-xs); justify-content: center; }
+.genderCell label { cursor: pointer; font-size: var(--text-lg); }
+.warning { color: var(--volley-red); font-weight: 700; margin-left: var(--space-sm); }
+.photoCell { display: flex; align-items: center; gap: var(--space-xs); }
+.miniPhoto { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-default); }
+.noPhoto { width: 40px; height: 40px; display: grid; place-items: center; background: var(--surface); border-radius: 50%; color: var(--text-muted); }
+.removePhotoBtn { background: transparent; border: none; cursor: pointer; font-size: var(--text-sm); padding: 2px; }
+.miniFile { display: none; }
+.uploadLabel { font-size: var(--text-xs); color: var(--volley-blue); cursor: pointer; font-weight: 500; }
+.uploadLabel:hover { text-decoration: underline; }

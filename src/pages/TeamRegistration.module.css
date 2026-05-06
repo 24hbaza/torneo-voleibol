@@ -1,0 +1,298 @@
+/* src/pages/TeamRegistration.module.css */
+.container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+/* Stepper */
+.stepper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+  position: relative;
+  padding: 0 var(--space-md);
+}
+.stepper::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 40px;
+  right: 40px;
+  height: 2px;
+  background: var(--border-default);
+  z-index: 0;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  z-index: 1;
+  background: var(--surface);
+  padding: 0 var(--space-sm);
+}
+.stepNum {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  border: 2px solid var(--border-default);
+  transition: all var(--transition-fast);
+}
+.active .stepNum { background: var(--volley-blue); color: white; border-color: var(--volley-blue); transform: scale(1.1); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+.completed .stepNum { background: var(--status-success); color: white; border-color: var(--status-success); }
+.stepLabel { font-size: var(--text-sm); color: var(--text-muted); font-weight: 500; }
+.active .stepLabel { color: var(--volley-blue); font-weight: 700; }
+
+/* Content Base */
+.formContent { min-height: 380px; }
+.stepContent { display: flex; flex-direction: column; gap: var(--space-lg); }
+.sectionHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); flex-wrap: wrap; gap: var(--space-md); }
+.sectionHeader h3 { margin: 0; color: var(--text-primary); font-size: var(--text-xl); }
+.counter { background: var(--surface-hover); padding: 0.4rem 0.9rem; border-radius: var(--radius-pill); font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); border: 1px solid var(--border-default); transition: all 0.2s; }
+.counter.warning { background: rgba(239, 68, 68, 0.1); color: var(--volley-red); border-color: rgba(239, 68, 68, 0.3); font-weight: 700; }
+.hint { font-size: var(--text-sm); color: var(--text-muted); margin: 0; line-height: 1.6; }
+.hintBox { background: rgba(59, 130, 246, 0.08); border-left: 3px solid var(--volley-blue); padding: var(--space-md); border-radius: 0 var(--radius-md) var(--radius-md) 0; color: var(--volley-blue); font-size: var(--text-sm); line-height: 1.5; }
+
+/* ✅ PLANTILLA: GRID MODERNO */
+.playersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+/* Tarjeta de Jugador */
+.playerCard {
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  position: relative;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.playerCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--volley-blue);
+}
+
+/* Cabecera de Tarjeta */
+.playerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-default);
+}
+.playerIndex {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.playerIndex::before {
+  content: '#';
+  color: var(--volley-gold);
+  font-size: var(--text-lg);
+}
+
+.playerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Capitán & Eliminar */
+.captainCheck {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: var(--surface-hover);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
+  transition: all 0.2s;
+  user-select: none;
+}
+.captainCheck input { display: none; }
+.captainCheck:has(input:checked) {
+  background: var(--volley-gold);
+  color: #000;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.removeBtn {
+  background: transparent;
+  color: var(--volley-red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  transition: all var(--transition-fast);
+}
+.removeBtn:hover { background: var(--volley-red); color: white; border-color: var(--volley-red); }
+
+/* Zona de Foto */
+.photoUpload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-xs) 0;
+}
+.photoPreview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface-hover);
+}
+.photoPlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  border: 2px dashed var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: var(--text-muted);
+}
+.hiddenFile { display: none; }
+.photoLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--volley-blue);
+  cursor: pointer;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-md);
+  transition: background 0.2s;
+}
+.photoLabel:hover { background: rgba(59, 130, 246, 0.1); }
+
+/* Campos del Jugador */
+.playerFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+.inputSmall {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  transition: all var(--transition-fast);
+}
+.inputSmall::placeholder { color: var(--text-muted); }
+.inputSmall:focus { outline: none; border-color: var(--volley-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+
+/* Selector de Género (Chips) */
+.genderRow {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--space-sm);
+  margin: var(--space-xs) 0;
+}
+.genderLabel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: var(--surface);
+  transition: all 0.2s;
+  user-select: none;
+}
+.genderLabel input { display: none; }
+.genderLabel:has(input:checked) {
+  border-color: var(--volley-blue);
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--volley-blue);
+  font-weight: 600;
+}
+
+/* Botón Añadir Jugador */
+.addBtn {
+  border: 2px dashed var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 1rem;
+  transition: all var(--transition-fast);
+}
+.addBtn:hover {
+  border-color: var(--volley-blue);
+  color: var(--volley-blue);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Documentos */
+.fileGroup { margin-bottom: var(--space-md); }
+.fileLabel { font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: var(--space-sm); }
+.fileInput {
+  padding: 0.8rem;
+  background: transparent;
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  width: 100%;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: border-color var(--transition-fast);
+}
+.fileInput:hover { border-color: var(--volley-blue); }
+.currentFile { margin: var(--space-xs) 0 0 0; font-size: var(--text-sm); color: var(--status-success); font-weight: 500; }
+
+/* Acciones Footer */
+.actions { display: flex; justify-content: space-between; margin-top: var(--space-xl); gap: var(--space-md); }
+.errorBox { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--status-error); color: var(--status-error); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md); text-align: center; font-weight: 500; }
+.successContainer { text-align: center; padding: 4rem 2rem; background: var(--surface); border-radius: var(--radius-lg); margin: 2rem auto; max-width: 600px; border: 1px solid var(--border-default); }
+.successIcon { font-size: 4rem; margin-bottom: var(--space-md); }
+.successContainer h2 { color: var(--status-success); margin: 0 0 var(--space-sm) 0; }
+.successContainer p { color: var(--text-secondary); margin: 0; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .playersGrid { grid-template-columns: 1fr; }
+  .playerFields { grid-template-columns: 1fr; }
+  .stepper::before { display: none; }
+  .stepper { flex-direction: column; gap: var(--space-md); align-items: flex-start; padding: 0; }
+  .step { flex-direction: row; gap: var(--space-md); width: 100%; }
+  .playerHeader { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
+  .playerActions { width: 100%; justify-content: space-between; }
+}

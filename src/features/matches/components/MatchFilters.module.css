@@ -1,0 +1,10 @@
+/* src/features/matches/components/MatchFilters.module.css */
+.container { background: var(--surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-md); margin-bottom: var(--space-lg); }
+.row { display: flex; gap: var(--space-md); align-items: center; flex-wrap: wrap; }
+.row + .row { margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--border-default); }
+.searchInput { flex: 2; min-width: 200px; }
+.select { flex: 1; min-width: 150px; padding: 0.75rem; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary); font-size: var(--text-base); }
+.dateInput { flex: 1; min-width: 140px; }
+.dateSeparator { color: var(--text-muted); font-weight: 600; }
+.actions { display: flex; gap: var(--space-sm); margin-left: auto; }
+@media (max-width: 768px) { .row { flex-direction: column; align-items: stretch; } .actions { margin-left: 0; justify-content: flex-end; } }

@@ -1,0 +1,11 @@
+.container { margin-bottom: 2rem; }
+.title { font-size: 1.5rem; color: #1e293b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+.card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
+.groupName { background: #3b82f6; color: #fff; padding: 0.75rem 1rem; margin: 0; text-align: center; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th { background: #f8fafc; padding: 0.5rem; text-align: center; color: #64748b; font-weight: 600; }
+.table td { padding: 0.5rem; text-align: center; border-bottom: 1px solid #f1f5f9; }
+.teamCell { display: flex; align-items: center; gap: 0.5rem; text-align: left; }
+.miniBadge { width: 20px; height: 20px; border-radius: 50%; }
+.loading { text-align: center; padding: 2rem; color: #64748b; }

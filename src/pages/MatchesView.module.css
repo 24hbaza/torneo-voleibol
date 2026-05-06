@@ -1,0 +1,115 @@
+/* src/pages/MatchesView.module.css */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+/* Header & Tabs */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.tabs {
+  display: inline-flex;
+  gap: var(--space-xs);
+  background: var(--surface);
+  padding: var(--space-xs);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+}
+
+.tab {
+  padding: 0.6rem 1.2rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.tab.active {
+  background: var(--volley-blue);
+  color: white;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Content Sections */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  margin: 0;
+  padding-bottom: var(--space-sm);
+  border-bottom: 2px solid var(--border-default);
+}
+
+/* ✅ LISTA ANCHA Y LEGIBLE */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 100%;
+  max-width: 950px; /* Ancho máximo cómodo para lectura */
+  margin: 0 auto;
+}
+
+/* States */
+.loading, .empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-default);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .tabs {
+    width: 100%;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+  }
+  .list {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,120 @@
+/* src/pages/RefereeScoreboard.module.css */
+.container {
+  min-height: 100vh;
+  background: #000; /* Fondo negro puro para contraste */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display); /* Fuente tipo scoreboard */
+}
+
+/* Header */
+.header {
+  padding: var(--space-md);
+  text-align: center;
+  background: #111;
+  border-bottom: 2px solid #333;
+}
+.setInfo { font-size: var(--text-xl); font-weight: 700; letter-spacing: 2px; color: var(--volley-gold); }
+.matchStatus { font-size: var(--text-sm); color: var(--status-live); margin-top: 0.5rem; font-weight: bold; animation: pulse 1s infinite; }
+
+/* Scoreboard Grid */
+.scoreboard {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+}
+
+.teamPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  background: #1a1a1a;
+  border-radius: var(--radius-lg);
+}
+
+.teamInfo { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md); }
+.teamInfo img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #fff; }
+.teamInfo h2 { font-size: var(--text-lg); margin: 0; text-transform: uppercase; }
+
+.score {
+  font-size: 8rem; /* Número GIGANTE */
+  line-height: 1;
+  font-weight: 900;
+  text-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+
+.setsWon { font-size: var(--text-xl); color: #666; margin-top: var(--space-sm); }
+
+.controls { display: flex; gap: var(--space-sm); margin-top: var(--space-lg); }
+.controls button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+}
+.controls button:first-child { background: var(--volley-green); color: #000; }
+.controls button:last-child { background: var(--volley-red); color: #fff; }
+
+/* Center Info */
+.centerInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+.setsDisplay { font-size: var(--text-4xl); font-weight: bold; color: var(--text-muted); }
+
+.endSetBtn {
+  background: var(--volley-gold);
+  color: #000;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* Footer */
+.footer {
+  padding: var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  border-top: 2px solid #333;
+}
+.backBtn { background: #333; color: #fff; padding: 0.8rem 1.5rem; border: none; border-radius: var(--radius-md); cursor: pointer; }
+.finishMatchBtn { background: transparent; border: 1px solid var(--volley-red); color: var(--volley-red); padding: 0.8rem 1.5rem; border-radius: var(--radius-md); cursor: pointer; }
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.loading { color: #fff; text-align: center; padding: 4rem; font-size: 1.5rem; }
+
+/* Responsive para Tablets/Móviles */
+@media (max-width: 768px) {
+  .scoreboard { grid-template-columns: 1fr; gap: var(--space-lg); }
+  .score { font-size: 5rem; }
+  .teamPanel { flex-direction: row; justify-content: space-between; padding: var(--space-md); }
+  .teamInfo { flex-direction: row; gap: var(--space-md); margin-bottom: 0; }
+  .teamInfo img { width: 40px; height: 40px; }
+  .centerInfo { order: -1; flex-direction: row; justify-content: space-between; width: 100%; padding: 0 var(--space-md); }
+}
+/* MVP Button & Status */
+.mvpBtn {
+  background: var(--volley-gold); color: #000; padding: 1rem 2rem;
+  font-size: 1.1rem; font-weight: 800; border: none; border-radius: var(--radius-pill);
+  cursor: pointer; text-transform: uppercase; animation: pulse 1.5s infinite;
+}
+.mvpAssigned { color: var(--status-success); font-weight: 700; font-size: var(--text-lg); }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.mvpButtons { display: flex; flex-direction: column; gap: var(--space-sm); margin-top: var(--space-md); }
+.mvpBtnMale { background: rgba(59, 130, 246, 0.2); color: var(--volley-blue); padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: 700; border: none; border-radius: var(--radius-pill); cursor: pointer; }
+.mvpBtnFemale { background: rgba(236, 72, 153, 0.2); color: #ec4899; padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: 700; border: none; border-radius: var(--radius-pill); cursor: pointer; }
+.mvpAssigned { color: var(--status-success); font-weight: 600; font-size: var(--text-sm); }

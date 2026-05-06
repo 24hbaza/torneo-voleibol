@@ -1,0 +1,6 @@
+/* src/features/matches/components/MatchViewToggle.module.css */
+.toggle { display: inline-flex; background: var(--surface); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: var(--space-xs); }
+.btn { padding: 0.5rem 1rem; background: transparent; border: none; color: var(--text-secondary); font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition-fast); }
+.btn:hover { color: var(--text-primary); background: var(--surface-hover); }
+.btn.active { background: var(--volley-blue); color: white; font-weight: 600; }
+.btn.active:hover { background: var(--volley-blue-hover); }

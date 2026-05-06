@@ -1,0 +1,76 @@
+.overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: #fff;
+  width: 90%; max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.closeBtn {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: none; font-size: 1.5rem; cursor: pointer;
+  color: #64748b;
+}
+
+.header {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+
+.headerLeft { display: flex; align-items: center; gap: 1rem; }
+.badge { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; }
+
+.header h2 { margin: 0 0 0.25rem 0; font-size: 1.5rem; color: #1e293b; }
+.badgeStatus { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.8rem; font-weight: 600; }
+.accepted { background: #dcfce7; color: #16a34a; }
+.rejected { background: #fee2e2; color: #dc2626; }
+.pending { background: #fef3c7; color: #b45309; }
+
+.dateBox { text-align: right; font-size: 0.9rem; color: #64748b; }
+
+.content { padding: 1.5rem; }
+.section { margin-bottom: 2rem; }
+.section h3 { font-size: 1.1rem; color: #334155; margin-bottom: 1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; }
+
+.docsGrid { display: flex; gap: 1rem; }
+.docLink {
+  display: inline-block; padding: 0.75rem 1.5rem;
+  background: #eff6ff; color: #2563eb; text-decoration: none;
+  border-radius: 8px; font-weight: 500; border: 1px solid #bfdbfe;
+}
+.docLink:hover { background: #dbeafe; }
+
+/* Tabla de Jugadores */
+.playersTable { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+.tableHeader {
+  display: grid; grid-template-columns: 0.5fr 2fr 1fr 1fr 1fr;
+  background: #f1f5f9; font-weight: 600; font-size: 0.85rem; color: #475569;
+  padding: 0.75rem 1rem;
+}
+.tableRow {
+  display: grid; grid-template-columns: 0.5fr 2fr 1fr 1fr 1fr;
+  padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; align-items: center;
+  font-size: 0.9rem;
+}
+.tableRow:last-child { border-bottom: none; }
+.tableRow:nth-child(even) { background: #fafafa; }
+
+.isCaptain { background: #fffbeb !important; }
+.captainTag { background: #f59e0b; color: #fff; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
+.footer { padding: 1rem; border-top: 1px solid #e2e8f0; text-align: right; }
+.closeActionBtn { padding: 0.5rem 1.5rem; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; }
+.closeActionBtn:hover { background: #f1f5f9; }

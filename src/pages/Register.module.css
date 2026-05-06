@@ -1,0 +1,29 @@
+/* src/pages/Register.module.css */
+.form { display: flex; flex-direction: column; gap: var(--space-md); }
+.errorBox {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--status-error);
+  color: var(--status-error);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.successBox {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--status-success);
+  color: var(--status-success);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  text-align: center;
+  margin-bottom: var(--space-sm);
+}
+.footerLink {
+  text-align: center;
+  margin-top: var(--space-lg);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.footerLink a { color: var(--volley-blue); font-weight: 500; }
+.footerLink a:hover { color: var(--volley-blue-hover); text-decoration: underline; }

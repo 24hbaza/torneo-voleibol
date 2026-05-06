@@ -1,0 +1,19 @@
+/* src/components/Layout.module.css */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+}
+.brand { display: flex; align-items: center; gap: 0.75rem; }
+.logoIcon { font-size: 1.8rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+.logoText { font-size: 1.25rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+.seasonBadge { background: var(--accent); color: #fff; padding: 0.3rem 0.8rem; border-radius: var(--pill); font-weight: 600; font-size: var(--small); }
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; flex: 1; width: 100%; }
+.footer { background: var(--surface-alt); padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: var(--small); border-top: 1px solid var(--border-light); margin-top: auto; }
+
+@media (max-width: 768px) {
+  .container { padding: 1.5rem 1rem; }
+  .logoText { font-size: 1.1rem; }
+}

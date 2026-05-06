@@ -1,0 +1,322 @@
+/* src/design-system/themes/volley-pro.module.css */
+/* =========================================
+   VOLLEY PRO - CSS MODULES THEME
+   Variables específicas para componentes
+   ========================================= */
+
+/* ===== BADGES & ESTADOS ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.badgePending {
+  composes: badge;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--status-pending);
+  border: 1px solid var(--status-pending);
+}
+
+.badgeLive {
+  composes: badge;
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--status-live);
+  border: 1px solid var(--status-live);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.badgeFinished {
+  composes: badge;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--status-finished);
+  border: 1px solid var(--status-finished);
+}
+
+.badgeScheduled {
+  composes: badge;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--status-scheduled);
+  border: 1px solid var(--status-scheduled);
+}
+
+/* ===== TARJETAS ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ===== EQUIPOS ===== */
+.teamBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-hover);
+  border: 2px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.teamBadgeSmall {
+  composes: teamBadge;
+  width: 24px;
+  height: 24px;
+  border-width: 1px;
+}
+
+.teamBadgeLarge {
+  composes: teamBadge;
+  width: 64px;
+  height: 64px;
+  border-width: 3px;
+}
+
+.teamName {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teamNameHighlight {
+  composes: teamName;
+  color: var(--volley-gold);
+  font-weight: 700;
+}
+
+/* ===== MARCADORES ===== */
+.scoreDisplay {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 900;
+  color: var(--text-primary);
+  text-align: center;
+  letter-spacing: -1px;
+}
+
+.scoreLive {
+  composes: scoreDisplay;
+  color: var(--status-live);
+  text-shadow: var(--shadow-glow-live);
+}
+
+.scoreSets {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ===== BOTONES TEMÁTICOS ===== */
+.btnPrimary {
+  composes: button from global;
+  background: var(--volley-blue);
+  color: var(--text-inverse);
+}
+
+.btnPrimary:hover {
+  background: var(--volley-blue-hover);
+}
+
+.btnSuccess {
+  composes: button from global;
+  background: var(--volley-green);
+  color: var(--text-inverse);
+}
+
+.btnSuccess:hover {
+  background: var(--volley-green-hover);
+}
+
+.btnWarning {
+  composes: button from global;
+  background: var(--volley-gold);
+  color: var(--text-inverse);
+}
+
+.btnWarning:hover {
+  background: var(--volley-gold-hover);
+}
+
+.btnDanger {
+  composes: button from global;
+  background: var(--volley-red);
+  color: var(--text-inverse);
+}
+
+.btnDanger:hover {
+  background: var(--volley-red-hover);
+}
+
+.btnGhost {
+  composes: button from global;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+.btnGhost:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* ===== INPUTS TEMÁTICOS ===== */
+.input {
+  composes: input from global;
+  width: 100%;
+}
+
+.inputError {
+  composes: input;
+  border-color: var(--status-error);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.inputSuccess {
+  composes: input;
+  border-color: var(--status-success);
+}
+
+.inputSuccess:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* ===== MENSAJES DE ESTADO ===== */
+.message {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.messageError {
+  composes: message;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-error);
+  border: 1px solid var(--status-error);
+}
+
+.messageSuccess {
+  composes: message;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--status-success);
+  border: 1px solid var(--status-success);
+}
+
+.messageWarning {
+  composes: message;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--status-pending);
+  border: 1px solid var(--status-pending);
+}
+
+.messageInfo {
+  composes: message;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--volley-blue);
+  border: 1px solid var(--volley-blue);
+}
+
+/* ===== SKELETON LOADING ===== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--surface-hover) 50%,
+    var(--surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeletonText {
+  composes: skeleton;
+  height: 1rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.skeletonTitle {
+  composes: skeleton;
+  height: 1.5rem;
+  width: 60%;
+  margin-bottom: var(--space-sm);
+}
+
+.skeletonAvatar {
+  composes: skeleton;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* ===== UTILIDADES DE ESPACIADO ===== */
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
+
+.mb-xs { margin-bottom: var(--space-xs); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
+
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+
+/* ===== MEDIA QUERIES UTILS ===== */
+@media (max-width: 768px) {
+  .hideMobile { display: none !important; }
+  .showMobile { display: block !important; }
+}
+
+@media (min-width: 769px) {
+  .hideDesktop { display: none !important; }
+}

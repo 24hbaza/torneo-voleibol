@@ -1,0 +1,25 @@
+/* src/features/standings/components/PositionBadge.module.css */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.pos1 { background: rgba(251, 191, 36, 0.15); color: var(--volley-gold); border-color: var(--volley-gold); }
+.pos2 { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border-color: #94a3b8; }
+.pos3 { background: rgba(180, 83, 9, 0.15); color: #b45309; border-color: #b45309; }
+.posDefault { background: var(--surface-hover); color: var(--text-muted); border-color: var(--border-default); }
+
+/* Resaltado para zonas de clasificación */
+.qualifying {
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.4), 0 2px 8px rgba(0,0,0,0.2);
+  transform: scale(1.05);
+}

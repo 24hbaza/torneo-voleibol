@@ -1,0 +1,318 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* =========================================
+   VOLLEYTOURNAMENT v2.0 - DESIGN SYSTEM
+   Tema: "Volley Pro" - Deportivo Moderno
+   ========================================= */
+
+:root {
+  /* ===== BASE ===== */
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Orbitron', sans-serif;
+  
+  /* ===== COLORES - MODO OSCURO (DEFAULT) ===== */
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1f2937;
+  
+  --surface: #1f2937;
+  --surface-hover: #374151;
+  --surface-elevated: #2d3748;
+  
+  /* ===== TEXTO ===== */
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --text-inverse: #0f172a;
+  
+  /* ===== ACCENTOS DEPORTIVOS ===== */
+  --volley-gold: #fbbf24;
+  --volley-gold-hover: #f59e0b;
+  --volley-red: #ef4444;
+  --volley-red-hover: #dc2626;
+  --volley-blue: #3b82f6;
+  --volley-blue-hover: #2563eb;
+  --volley-green: #10b981;
+  --volley-green-hover: #059669;
+  --volley-purple: #8b5cf6;
+  
+  /* ===== ESTADOS ===== */
+  --status-pending: #f59e0b;
+  --status-live: #f43f5e;
+  --status-finished: #10b981;
+  --status-scheduled: #3b82f6;
+  --status-error: #ef4444;
+  --status-success: #10b981;
+  
+  /* ===== BORDES ===== */
+  --border-default: #374151;
+  --border-light: #4b5563;
+  --border-focus: #3b82f6;
+  
+  /* ===== SOMBRAS & EFECTOS ===== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-glow-live: 0 0 20px rgba(244, 63, 94, 0.6);
+  --shadow-glow-gold: 0 0 20px rgba(251, 191, 36, 0.4);
+  
+  /* ===== RADIOS ===== */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  
+  /* ===== ESPACIADO ===== */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* ===== TIPOGRAFÍA ===== */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-display: 3rem;
+  
+  /* ===== TRANSICIONES ===== */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+  
+  /* ===== Z-INDEX ===== */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
+}
+
+/* ===== MODO CLARO (opcional, activable vía data-theme) ===== */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --surface: #ffffff;
+  --surface-hover: #f8fafc;
+  --surface-elevated: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #f9fafb;
+  --border-default: #e2e8f0;
+  --border-light: #cbd5e1;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* ===== TIPOGRAFÍA ===== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+h1 { font-size: var(--text-display); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+
+p {
+  margin-bottom: var(--space-md);
+  color: var(--text-secondary);
+}
+
+/* ===== ENLACES ===== */
+a {
+  color: var(--volley-blue);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--volley-blue-hover);
+}
+
+/* ===== BOTONES BASE ===== */
+button {
+  font-family: var(--font-body);
+  font-weight: 600;
+  background: var(--volley-blue);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+button:hover {
+  background: var(--volley-blue-hover);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== FORMULARIOS ===== */
+input, select, textarea {
+  font-family: var(--font-body);
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  font-size: var(--text-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===== UTILIDADES ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+
+.hidden { display: none; }
+.block { display: block; }
+.inline-flex { display: inline-flex; }
+
+/* ===== ANIMACIONES ===== */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-pulse { animation: pulse 1.5s ease-in-out infinite; }
+.animate-slideIn { animation: slideIn 0.3s ease-out forwards; }
+.animate-bounce { animation: bounce 1s ease infinite; }
+
+/* ===== SCROLLBAR PERSONALIZADO ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--volley-blue);
+}
+
+/* ===== RESPONSIVE BASE ===== */
+@media (max-width: 1024px) {
+  :root {
+    --text-display: 2.25rem;
+    --text-3xl: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --text-2xl: 1.25rem;
+    --text-xl: 1.125rem;
+  }
+}

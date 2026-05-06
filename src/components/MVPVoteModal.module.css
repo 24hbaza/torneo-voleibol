@@ -1,0 +1,15 @@
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: grid; place-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+.modal { background: var(--surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-xl); max-width: 800px; width: 95%; max-height: 90vh; overflow-y: auto; }
+.modal h2 { margin: 0 0 var(--space-sm) 0; color: var(--volley-gold); text-align: center; }
+.subtitle { text-align: center; color: var(--text-secondary); margin-bottom: var(--space-lg); }
+.mvpSection { margin-bottom: var(--space-lg); padding: var(--space-md); background: var(--surface-hover); border-radius: var(--radius-md); }
+.mvpSection h3 { margin: 0 0 var(--space-md) 0; color: var(--text-primary); font-size: var(--text-lg); }
+.playersGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-sm); }
+.playerBtn { display: flex; flex-direction: column; align-items: center; gap: var(--space-xs); padding: var(--space-sm); background: var(--surface); border: 2px solid transparent; border-radius: var(--radius-md); cursor: pointer; color: var(--text-primary); transition: all 0.2s; text-align: center; }
+.playerBtn:hover { border-color: var(--volley-blue); }
+.playerBtn.selected { border-color: var(--volley-gold); background: rgba(251, 191, 36, 0.15); }
+.playerImg { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: var(--border-default); border: 2px solid var(--border-default); }
+.playerTeam { font-size: var(--text-xs); color: var(--text-muted); }
+.noPlayers { color: var(--text-muted); font-style: italic; text-align: center; padding: var(--space-md); }
+.actions { display: flex; justify-content: flex-end; gap: var(--space-md); margin-top: var(--space-lg); }
+@media (max-width: 600px) { .playersGrid { grid-template-columns: repeat(2, 1fr); } }
