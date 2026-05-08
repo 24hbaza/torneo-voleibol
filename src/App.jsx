@@ -52,7 +52,7 @@ export default function App() {
         fontSize: '1.2rem', 
         fontFamily: 'var(--font-body)' 
       }}>
-        🏐 Inicializando VoleyTournament...
+        🏐 Cargando 24h voleibol Baza...
       </div>
     );
   }
