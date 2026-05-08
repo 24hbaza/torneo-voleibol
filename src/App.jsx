@@ -58,9 +58,9 @@ export default function App() {
   }
 
   return (
-    <RootLayout>
-      {/* ✅ HashRouter para GitHub Pages (sin basename) */}
-      <HashRouter>
+    /* ✅ HashRouter DEBE envolver RootLayout, no al revés */
+    <HashRouter>
+      <RootLayout>
         <Routes>
           {/* ==================== RUTAS PÚBLICAS ==================== */}
           <Route path="/login" element={<Login />} />
@@ -100,7 +100,7 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
-      </HashRouter>
-    </RootLayout>
+      </RootLayout>
+    </HashRouter>
   );
 }
