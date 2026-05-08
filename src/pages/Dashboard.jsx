@@ -248,7 +248,7 @@ export default function Dashboard() {
 
       {/* ✅ REORDENADO: PATROCINADORES AL FINAL */}
       <section className={styles.cleanSection}>
-        <h2 className={styles.sectionTitle}>🤝 Patrocinadores</h2>
+        <h2 className={styles.sectionTitle}>Patrocinadores</h2>
         <div className={styles.sponsorsCleanGrid}>
           {media.sponsors.length > 0 ? (
             media.sponsors.map((sponsor) => (
