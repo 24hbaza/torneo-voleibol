@@ -1,27 +1,34 @@
-// src/components/AdminRoute.jsx
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store';
 
 export default function AdminRoute() {
   const { profile, isLoading } = useAuthStore();
+  const location = useLocation();
 
-  // Mientras carga el perfil, muestra un indicador
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',
-        background: 'var(--bg-primary)', color: 'var(--volley-gold)', fontSize: '1.2rem'
-      }}>
-        🔒 Verificando permisos de administrador...
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: 'var(--volley-gold)',
+          background: 'var(--bg-primary)',
+          fontFamily: 'var(--font-body)',
+          fontSize: '1.1rem',
+        }}
+      >
+        🔐 Verificando permisos de administrador...
       </div>
     );
   }
 
-  // ✅ Solo permite acceso si el perfil tiene is_admin = true
-  if (profile?.is_admin === true) {
-    return <Outlet />;
+  // Solo admins pueden acceder
+  if (!profile?.is_admin) {
+    return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
 
-  // ❌ Si no es admin, redirige silenciosamente al dashboard normal
-  return <Navigate to="/dashboard" replace />;
+  // ✅ CLAVE: En React Router v6, las rutas hijas se renderizan con Outlet
+  return <Outlet />;
 }

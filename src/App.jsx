@@ -1,4 +1,3 @@
-// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Hooks & Store
@@ -30,17 +29,12 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import TeamManagement from './pages/admin/TeamManagement';
 import AdminTeamEditor from './pages/admin/AdminTeamEditor';
 import AdminMVPLeaderboard from './pages/admin/AdminMVPLeaderboard';
-import PlayoffManager from './pages/admin/PlayoffManager'; // ← NUEVO
+import PlayoffManager from './pages/admin/PlayoffManager';
 import TournamentConfig from './pages/admin/TournamentConfig';
 import TournamentDraw from './pages/admin/TournamentDraw';
 import AdminMatches from './pages/admin/AdminMatches';
-
-const Placeholder = ({ title }) => (
-  <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-default)' }}>
-    <h2 style={{ color: 'var(--volley-gold)', marginBottom: '1rem', fontFamily: 'var(--font-display)' }}>🏐 {title}</h2>
-    <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto' }}>Esta sección está en desarrollo...</p>
-  </div>
-);
+import AdminMediaManager from './pages/admin/AdminMediaManager';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 
 export default function App() {
   useAuthSync();
@@ -68,11 +62,13 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/*" element={<DashboardLayout />}>
               
-              {/* --- RUTAS DE USUARIO --- */}
+              {/* --- RUTAS DE USUARIO / ESPECTADOR --- */}
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="dashboard/inscripcion" element={<TeamRegistration />} />
               <Route path="dashboard/partidos" element={<MatchesView />} />
               <Route path="dashboard/clasificacion" element={<StandingsView />} />
+              
+              {/* --- RUTAS SOLO PARA EQUIPOS REGISTRADOS --- */}
+              <Route path="dashboard/inscripcion" element={<TeamRegistration />} />
               
               {/* --- RUTAS SOLO PARA ADMINISTRADORES --- */}
               <Route element={<AdminRoute />}>
@@ -80,10 +76,12 @@ export default function App() {
                 <Route path="admin/teams" element={<TeamManagement />} />
                 <Route path="admin/teams/edit/:teamId" element={<AdminTeamEditor />} />
                 <Route path="admin/mvp" element={<AdminMVPLeaderboard />} />
-                <Route path="admin/playoffs" element={<PlayoffManager />} /> {/* ← NUEVA */}
+                <Route path="admin/playoffs" element={<PlayoffManager />} />
                 <Route path="admin/config" element={<TournamentConfig />} />
                 <Route path="admin/draw" element={<TournamentDraw />} />
                 <Route path="admin/matches" element={<AdminMatches />} />
+                <Route path="admin/media" element={<AdminMediaManager />} />
+                <Route path="admin/announcements" element={<AdminAnnouncements />} />
               </Route>
               
               {/* Redirección por defecto */}

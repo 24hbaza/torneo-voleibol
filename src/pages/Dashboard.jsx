@@ -1,192 +1,271 @@
-// src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store';
-import { Card, Badge } from '../design-system/components';
+import { useGuestMode } from '../hooks/useGuestMode';
+import { Badge, Button } from '../design-system/components';
 import styles from './Dashboard.module.css';
 
 export default function Dashboard() {
-  const { profile, user } = useAuthStore();
+  const navigate = useNavigate();
+  const { user, profile } = useAuthStore();
+  const { isGuest } = useGuestMode();
+  
+  const isGuestView = isGuest && !user;
+
   const [config, setConfig] = useState(null);
-  const [stats, setStats] = useState({ matches: 0, wins: 0, setsFor: 0, setsAgainst: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [media, setMedia] = useState({ rules: [], gallery: [], sponsors: [], announcements: [] });
+
+  useEffect(() => {
+    if (user && profile && !profile.team_name) {
+      navigate('/dashboard/inscripcion', { replace: true });
+    }
+  }, [user, profile, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!profile?.id) {
-        setLoading(false);
-        return;
-      }
-      
       try {
-        const {  cfg } = await supabase
-          .from('tournament_config')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-        setConfig(cfg);
+        if (isGuestView || user) {
+          
+          // ✅ 1. CONFIGURACIÓN - SINTAXIS CORRECTA: data: cfg
+          const { data: cfg, error: cfgError } = await supabase
+            .from('tournament_config')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .maybeSingle();
 
-        if (cfg?.draw_completed && profile.status === 'accepted') {
-          const {  matches } = await supabase
-            .from('matches')
-            .select('home_team_id, away_team_id, home_score, away_score, status')
-            .or(`home_team_id.eq.${profile.id},away_team_id.eq.${profile.id}`)
-            .eq('status', 'finished');
+          if (cfgError) console.warn('Config error:', cfgError);
+          setConfig(cfg || null);
 
-          let m = 0, w = 0, sf = 0, sa = 0;
-          matches?.forEach(match => {
-            m++;
-            const myScore = match.home_team_id === profile.id ? match.home_score : match.away_score;
-            const oppScore = match.home_team_id === profile.id ? match.away_score : match.home_score;
-            sf += myScore;
-            sa += oppScore;
-            if (myScore > oppScore) w++;
-          });
-          setStats({ matches: m, wins: w, setsFor: sf, setsAgainst: sa });
+          // ✅ 2. ANUNCIOS - SINTAXIS CORRECTA: data: newsData
+          const { data: newsData, error: newsError } = await supabase
+            .from('tournament_announcements')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false });
+
+          if (newsError) console.warn('News error:', newsError);
+          setMedia(prev => ({ ...prev, announcements: newsData || [] }));
+
+          // ✅ 3. MEDIA (Normativa, Galería, Patrocinadores) - SINTAXIS CORRECTA: data: mediaData
+          const { data: mediaData, error: mediaError } = await supabase
+            .from('tournament_media')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (mediaError) {
+            console.error('❌ Error cargando media:', mediaError);
+          } else {
+            console.log('📦 Datos raw de media:', mediaData);
+            if (mediaData && mediaData.length > 0) {
+              console.table(mediaData.map(m => ({ id: m.id, title: m.title, category: m.category })));
+            }
+
+            if (Array.isArray(mediaData)) {
+              setMedia(prev => ({
+                ...prev,
+                rules: mediaData.filter(m => m.category === 'rules'),
+                gallery: mediaData.filter(m => m.category === 'gallery'),
+                sponsors: mediaData.filter(m => m.category === 'sponsors')
+              }));
+            }
+          }
         }
       } catch (err) {
         console.error('Error loading dashboard:', err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [profile]);
-
-  if (!user || !profile) {
-    return <div className={styles.loading}>Cargando perfil...</div>;
-  }
+  }, [user, isGuestView]);
 
   if (loading) {
     return (
       <div className={styles.loading}>
         <div className={styles.spinner}></div>
-        <p>Preparando tu dashboard...</p>
+        <p>Cargando...</p>
       </div>
     );
   }
 
+  if (error) {
+    return <div className={styles.errorBox}>⚠️ {error}</div>;
+  }
+
   return (
-    <div className={styles.container}>
-      {/* HERO: Perfil del Equipo */}
-      <section className={styles.heroCard}>
+    <div className={`${styles.container} ${isGuestView ? styles.guestMode : ''}`}>
+      
+      {/* 📢 ANUNCIOS */}
+      {media.announcements.length > 0 && (
+        <div className={styles.announcementsSection}>
+          {media.announcements.map(ann => (
+            <div key={ann.id} className={`${styles.announcementCard} ${styles[ann.priority]}`}>
+              <div className={styles.announcementHeader}>
+                <h3>{ann.title}</h3>
+                <small>{new Date(ann.created_at).toLocaleDateString()}</small>
+              </div>
+              <p>{ann.message}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 🏠 HERO */}
+      <section className={styles.heroSection}>
         <div className={styles.heroContent}>
-          <div className={styles.badgeWrapper}>
-            {profile.badge_url ? (
+          <div className={styles.heroBadgeWrapper}>
+            {isGuestView ? (
+              <div className={styles.heroBadgePlaceholder}>👁️</div>
+            ) : profile?.badge_url ? (
               <img src={profile.badge_url} alt="Escudo" className={styles.heroBadge} />
             ) : (
               <div className={styles.heroBadgePlaceholder}>🏐</div>
             )}
-            <div className={styles.badgeRing}></div>
           </div>
           
-          <div className={styles.heroInfo}>
-            <h1 className={styles.heroTitle}>{profile.team_name || 'Tu Equipo'}</h1>
+          <div className={styles.heroText}>
+            <h1 className={styles.heroTitle}>
+              {isGuestView ? '24h Voleibol Baza' : profile?.team_name || 'Tu Equipo'}
+            </h1>
             <div className={styles.heroMeta}>
-              <Badge variant={profile.status === 'accepted' ? 'success' : 'pending'} size="lg">
-                {profile.status === 'accepted' ? '✅ Aceptado' : ' Pendiente'}
+              <Badge variant={isGuestView ? 'info' : (profile?.status === 'accepted' ? 'success' : 'pending')} size="sm">
+                {isGuestView ? 'Espectador' : (profile?.status === 'accepted' ? '✅ Inscrito' : '⏳ Pendiente')}
               </Badge>
-              <span className={styles.divider}>•</span>
-              <span className={styles.metaText}>Temporada 2026</span>
+              {!isGuestView && <span className={styles.heroSeason}>Temporada 2026</span>}
             </div>
             <p className={styles.heroDescription}>
-              {profile.status === 'accepted' 
-                ? '¡Listo para competir! Revisa tu calendario y estadísticas.'
-                : 'Tu inscripción está siendo revisada por la organización.'}
+              {isGuestView 
+                ? 'Consulta calendarios, resultados y noticias del torneo.'
+                : (profile?.status === 'accepted' 
+                  ? '¡Todo listo! Revisa tus partidos y la clasificación.'
+                  : 'Tu inscripción está siendo revisada.')}
             </p>
           </div>
         </div>
 
-        {/* Stats Rápidas en Hero */}
-        <div className={styles.heroStats}>
-          <div className={styles.heroStat}>
-            <span className={styles.heroStatNum}>{stats.matches}</span>
-            <span className={styles.heroStatLabel}>PJ</span>
-          </div>
-          <div className={styles.heroStat}>
-            {/* ✅ CORREGIDO: Interpolación correcta de clases CSS Modules */}
-            <span className={`${styles.heroStatNum} ${styles.wins}`}>{stats.wins}</span>
-            <span className={styles.heroStatLabel}>Victorias</span>
-          </div>
-          <div className={styles.heroStat}>
-            <span className={styles.heroStatNum}>{stats.setsFor}</span>
-            <span className={styles.heroStatLabel}>Sets +</span>
-          </div>
+        <div className={styles.quickActions}>
+          <Link to="/dashboard/partidos" className={styles.actionBtn}>
+            <span>📅</span> Partidos
+          </Link>
+          <Link to="/dashboard/clasificacion" className={styles.actionBtn}>
+            <span>🏆</span> Clasificación
+          </Link>
+          {!isGuestView && profile?.status === 'accepted' && (
+            <Link to="/arbitro" className={`${styles.actionBtn} ${styles.refereeBtn}`}>
+              <span>🟥</span> Árbitro
+            </Link>
+          )}
         </div>
       </section>
 
-      {/* SECCIONES PRINCIPALES */}
-      <div className={styles.sectionsGrid}>
-        
-        {/* Calendario */}
-        <Link to="/dashboard/partidos" className={`${styles.sectionCard} ${styles.sectionMatches}`}>
-          <div className={styles.sectionIcon}>📅</div>
-          <div className={styles.sectionInfo}>
-            <h3>Mis Partidos</h3>
-            <p>Calendario, horarios y marcadores en vivo</p>
+      {/* ✅ REORDENADO: NORMATIVA PRIMERO */}
+      <section className={styles.cleanSection}>
+        <h2 className={styles.sectionTitle}>📜 Normativa</h2>
+        {media.rules.length > 0 ? (
+          <div className={styles.rulesList}>
+            {media.rules.map((rule) => (
+              <a key={rule.id} href={rule.file_url} target="_blank" rel="noopener noreferrer" className={styles.ruleLink}>
+                <span>📄</span>
+                <span className={styles.ruleText}>{rule.title}</span>
+                <span className={styles.ruleArrow}>→</span>
+              </a>
+            ))}
           </div>
-          <div className={styles.sectionArrow}>→</div>
-        </Link>
+        ) : (
+          <p className={styles.emptyText}>Próximamente</p>
+        )}
+      </section>
 
-        {/* Clasificación */}
-        <Link to="/dashboard/clasificacion" className={`${styles.sectionCard} ${styles.sectionStandings}`}>
-          <div className={styles.sectionIcon}>🏆</div>
-          <div className={styles.sectionInfo}>
-            <h3>Clasificación</h3>
-            <p>Tablas de grupos y estadísticas</p>
+      {/* ✅ REORDENADO: GALERÍA DESPUÉS */}
+      <section className={styles.cleanSection}>
+        <h2 className={styles.sectionTitle}>📸 Galería</h2>
+        {media.gallery.length > 0 ? (
+          <div className={styles.galleryCleanGrid}>
+            {media.gallery.map((photo) => (
+              <a key={photo.id} href={photo.file_url} target="_blank" rel="noopener noreferrer" className={styles.galleryCleanItem}>
+                <img src={photo.file_url} alt={photo.title || 'Foto'} loading="lazy" />
+              </a>
+            ))}
           </div>
-          <div className={styles.sectionArrow}>→</div>
-        </Link>
-
-        {/* Acceso Árbitro (Solo si aceptado) */}
-        {profile.status === 'accepted' && (
-          <Link to="/arbitro" className={`${styles.sectionCard} ${styles.sectionReferee}`}>
-            <div className={styles.sectionIcon}>🟥</div>
-            <div className={styles.sectionInfo}>
-              <h3>Zona Árbitro</h3>
-              <p>Control de marcadores en vivo</p>
-            </div>
-            <div className={styles.sectionArrow}>→</div>
-          </Link>
+        ) : (
+          <p className={styles.emptyText}>Próximamente</p>
         )}
+      </section>
 
-        {/* Completar Inscripción (Si falta) */}
-        {!profile.team_name && (
-          <Link to="/dashboard/inscripcion" className={`${styles.sectionCard} ${styles.sectionInscription}`}>
-            <div className={styles.sectionIcon}>📝</div>
-            <div className={styles.sectionInfo}>
-              <h3>Completar Inscripción</h3>
-              <p>Sube documentos y datos del equipo</p>
-            </div>
-            <div className={styles.sectionArrow}>→</div>
-          </Link>
-        )}
-      </div>
-
-      {/* ESTADO DEL TORNEO */}
-      <Card title={config?.draw_completed ? " Estado del Torneo" : " Información"}>
-        <div className={styles.tournamentStatus}>
+      {/* ℹ️ INFO TORNEO */}
+      <section className={styles.statusSection}>
+        <div className={styles.statusCard}>
           {config?.draw_completed ? (
             <>
-              <div className={styles.statusIndicatorLive}></div>
+              <span className={styles.statusDotLive}></span>
               <div>
-                <h4>Torneo en Marcha</h4>
-                <p>La fase de grupos está activa. ¡A por la victoria!</p>
+                <strong>Torneo en marcha</strong>
+                <p>La fase de grupos está activa.</p>
               </div>
             </>
           ) : (
             <>
-              <div className={styles.statusIndicatorWaiting}></div>
+              <span className={styles.statusDotWaiting}></span>
               <div>
-                <h4>Esperando Sorteo</h4>
-                <p>La organización publicará el calendario oficial pronto.</p>
+                <strong>Próximo inicio</strong>
+                <p>El calendario se publicará pronto.</p>
               </div>
             </>
           )}
         </div>
-      </Card>
+      </section>
+
+      {/* 👁️ INFO INVITADOS */}
+      {isGuestView && (
+        <section className={styles.guestSection}>
+          <p>¿Quieres gestionar tu equipo y votar MVPs?</p>
+          <div className={styles.guestActions}>
+            <Link to="/register"><Button variant="primary" size="sm">Crear cuenta</Button></Link>
+            <Link to="/login"><Button variant="ghost" size="sm">Iniciar sesión</Button></Link>
+          </div>
+        </section>
+      )}
+
+      {/* ✅ REORDENADO: ORGANIZACIÓN AL FINAL */}
+      <section className={styles.cleanSection}>
+        <h2 className={styles.sectionTitle}>🏛️ Organización</h2>
+        <div className={styles.logosRow}>
+          <div className={styles.logoItem}>
+            <span className={styles.logoLabel}>Organizado por</span>
+            <img src="https://i.ibb.co/Z6pdvSSZ/images.png" alt="Organizador" className={styles.cleanLogoLarge} />
+          </div>
+          <div className={styles.logoDivider}></div>
+          <div className={styles.logoItem}>
+            <span className={styles.logoLabel}>En colaboración con</span>
+            <img src="https://i.ibb.co/BH3MqCVN/images-3.png" alt="Colaborador" className={styles.cleanLogoLarge} />
+          </div>
+        </div>
+      </section>
+
+      {/* ✅ REORDENADO: PATROCINADORES AL FINAL */}
+      <section className={styles.cleanSection}>
+        <h2 className={styles.sectionTitle}>🤝 Patrocinadores</h2>
+        <div className={styles.sponsorsCleanGrid}>
+          {media.sponsors.length > 0 ? (
+            media.sponsors.map((sponsor) => (
+              <a key={sponsor.id} href={sponsor.file_url} target="_blank" rel="noopener noreferrer" className={styles.sponsorCleanItem}>
+                <img src={sponsor.file_url} alt={sponsor.title} className={styles.sponsorCleanLogoLarge} />
+              </a>
+            ))
+          ) : (
+            <>
+              <img src="https://i.ibb.co/hxqQ41B8/images-4.jpg" alt="Sponsor" className={styles.sponsorCleanLogoLarge} />
+              <img src="https://i.ibb.co/M5MXBKTP/Whats-App-Image-2026-05-06-at-23-01-22.jpg" alt="Sponsor" className={styles.sponsorCleanLogoLarge} />
+              <img src="https://i.ibb.co/LzSxycBx/Captura-de-pantalla-2026-01-16-142558.png" alt="Sponsor" className={styles.sponsorCleanLogoLarge} />
+            </>
+          )}
+        </div>
+      </section>
+
     </div>
   );
 }

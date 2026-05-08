@@ -1,4 +1,3 @@
-// src/store/useAuthStore.js
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -7,14 +6,14 @@ export const useAuthStore = create(
     (set) => ({
       user: null,
       profile: null,
-      isLoading: true, // Empieza en true
+      isLoading: true,
       isAuthenticated: false,
 
       setAuth: ({ user, profile }) => set({ 
         user, 
         profile: profile || null,
         isLoading: false, 
-        isAuthenticated: !!user 
+        isAuthenticated: !!user // ✅ CORREGIDO: Depende del usuario, no del perfil
       }),
 
       clearAuth: () => set({ 

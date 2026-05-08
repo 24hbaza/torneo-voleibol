@@ -9,7 +9,7 @@ export default function BracketTree({ matches }) {
       if (!r[m.round]) r[m.round] = [];
       r[m.round].push(m);
     });
-    return Object.entries(r).sort(([a], [b]) => b - a); // Final primero (round 1)
+    return Object.entries(r).sort(([a], [b]) => b - a); // Final (round 1) primero
   }, [matches]);
 
   const getRoundName = (round) => {
@@ -30,10 +30,7 @@ export default function BracketTree({ matches }) {
               const isLive = match.status === 'live';
               
               return (
-                <div 
-                  key={match.id} 
-                  className={`${styles.matchBox} ${isFinished ? styles.finished : ''} ${isLive ? styles.live : ''}`}
-                >
+                <div key={match.id} className={`${styles.matchBox} ${isFinished ? styles.finished : ''} ${isLive ? styles.live : ''}`}>
                   <div className={`${styles.team} ${isHomeWinner ? styles.winner : ''}`}>
                     <span className={styles.seed}>🏠</span>
                     <span className={styles.name}>{match.home_team_name || match.home_team_id?.slice(0,4) || 'Por definir'}</span>

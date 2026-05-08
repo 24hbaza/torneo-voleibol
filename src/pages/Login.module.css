@@ -1,20 +1,129 @@
-/* src/pages/Login.module.css */
-.form { display: flex; flex-direction: column; gap: var(--space-md); }
-.errorBox {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--status-error);
-  color: var(--status-error);
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  text-align: center;
-  margin-bottom: var(--space-sm);
+/* Contenedor del formulario */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
 }
+
+/* Tarjetas Informativas (Arriba del login) */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.infoCard {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.infoCard:hover {
+  border-color: var(--volley-blue);
+  background: var(--bg-tertiary);
+}
+
+.infoIcon { font-size: 2rem; margin-bottom: 8px; }
+
+.infoCard h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: var(--text-primary);
+}
+
+.infoCard p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+/* Botón de la tarjeta */
+.infoBtn {
+  background: var(--volley-blue);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+
+.infoBtn:hover { background: var(--volley-blue-hover); }
+
+/* Enlace de registro */
+.infoLink {
+  color: var(--volley-blue);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+/* Separador */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  gap: 12px;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-default);
+}
+
+.dividerText {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* Botón secundario de invitado (abajo) */
+.guestBtn {
+  background: transparent;
+  border: 1px dashed var(--text-muted);
+  color: var(--text-secondary);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.guestBtn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+
+/* Footer */
 .footerLink {
   text-align: center;
-  margin-top: var(--space-lg);
-  font-size: var(--text-sm);
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
-.footerLink a { color: var(--volley-blue); font-weight: 500; }
-.footerLink a:hover { color: var(--volley-blue-hover); text-decoration: underline; }
+
+.footerLink a { color: var(--volley-blue); font-weight: 600; text-decoration: none; }
+
+/* Error Box */
+.errorBox {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--volley-red);
+  color: var(--volley-red);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .infoGrid { grid-template-columns: 1fr; }
+}

@@ -1,40 +1,37 @@
-// src/components/ProtectedRoute.jsx
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store';
+import { useGuestMode } from '../hooks/useGuestMode';
 
 export default function ProtectedRoute() {
-  const { isAuthenticated, profile, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isGuest } = useGuestMode();
   const location = useLocation();
 
-  // 1. Estado de carga inicial (mientras Supabase responde)
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',
-        background: 'var(--bg-primary)', color: 'var(--volley-gold)', fontSize: '1.2rem'
-      }}>
-        🏐 Verificando sesión...
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-primary)', color: 'var(--volley-gold)', fontFamily: 'var(--font-body)', fontSize: '1.1rem' }}>
+        🏐 Verificando acceso...
       </div>
     );
   }
 
-  // 2. No autenticado → Redirigir a Login
-  if (!isAuthenticated) {
+  const hasAccess = isAuthenticated || isGuest;
+
+  if (!hasAccess) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 3. Autenticado pero SIN registro completado
-  // Consideramos "incompleto" si no tiene team_name (campo clave del cuestionario)
-  const needsRegistration = !profile?.team_name;
-  
-  if (needsRegistration) {
-    // Si intenta acceder a cualquier ruta que NO sea la inscripción, forzar redirección
-    if (location.pathname !== '/dashboard/inscripcion') {
-      return <Navigate to="/dashboard/inscripcion" replace />;
+  if (isGuest) {
+    const allowedPaths = ['/dashboard', '/dashboard/partidos', '/dashboard/clasificacion'];
+    const isAllowed = allowedPaths.some(p => 
+      location.pathname === p || location.pathname.startsWith(p + '/')
+    );
+    
+    if (!isAllowed) {
+      return <Navigate to="/dashboard/partidos" replace />;
     }
-    // Si ya está en la página de inscripción, permitir acceso para que rellene el formulario
   }
 
-  // 4. Todo correcto → Renderizar las rutas hijas (DashboardLayout + subrutas)
+  // ✅ CLAVE: Solo renderiza las rutas hijas. La validación de inscripción se maneja en Dashboard.
   return <Outlet />;
 }

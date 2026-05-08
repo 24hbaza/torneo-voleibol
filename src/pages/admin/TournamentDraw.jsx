@@ -5,6 +5,7 @@ import { Button, Card } from '../../design-system/components';
 import { sendToTeam } from '../../lib/notifications';
 import styles from './TournamentDraw.module.css';
 
+// 🛡️ Utilidades
 const safeTime = (dateInput) => {
   try { return new Date(dateInput).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); }
   catch { return '00:00'; }
@@ -19,85 +20,209 @@ const shuffleArray = (array) => {
   return arr;
 };
 
-const scheduleMatches = (matchesToSchedule, config, groupsWithTeams, onLog) => {
-  const { num_courts, match_duration_minutes = 45, buffer_minutes = 0, start_datetime } = config;
+// 🧠 GENERADOR DE JORNADAS ROUND-ROBIN
+const generateRoundRobinMatches = (teams, isDouble = false) => {
+  let n = teams.length;
+  if (n % 2 !== 0) {
+    teams = [...teams, { id: 'bye', team_name: 'Descansa', isBye: true }];
+    n = teams.length;
+  }
+  const rounds = [];
+  const numRounds = n - 1;
+  const halfSize = n / 2;
+  
+  for (let round = 0; round < numRounds; round++) {
+    const roundMatches = [];
+    for (let i = 0; i < halfSize; i++) {
+      const home = teams[i];
+      const away = teams[n - 1 - i];
+      if (!home.isBye && !away.isBye) {
+        roundMatches.push({ home: home.id, away: away.id });
+      }
+    }
+    rounds.push(roundMatches);
+    teams = [teams[0], ...teams.slice(2), teams[1]];
+  }
+  if (isDouble) {
+    const returnRounds = rounds.map(round => 
+      round.map(match => ({ home: match.away, away: match.home }))
+    );
+    rounds.push(...returnRounds);
+  }
+  return rounds;
+};
+
+// 🧠 SCHEDULER REFACTORIZADO (MAXIMIZACIÓN DE PISTAS + SIN BLOQUEOS ARTIFICIALES)
+const scheduleMatches = (groupsWithTeams, config, onLog) => {
+  const { num_courts, match_duration_minutes = 45, buffer_minutes = 0, start_datetime, match_format } = config;
   const duration = (match_duration_minutes + buffer_minutes) * 60000;
   
   let currentTime = new Date(start_datetime).getTime();
-  let queue = [...matchesToSchedule];
   let scheduled = [];
-  let teamBusyUntil = {};
-  let safetyCounter = 0;
-  const MAX_ITER = 5000;
+  let teamRefereeCount = {};
+  let teamBusyUntil = {}; // SOLO para equipos que están JUGANDO
+  let remainingMatchesByTeam = {};
+  
+  // Inicializar contadores
+  groupsWithTeams.forEach(g => {
+    g.teams.forEach(t => {
+      if (!t.isBye) {
+        teamRefereeCount[t.id] = 0;
+        teamBusyUntil[t.id] = 0;
+        remainingMatchesByTeam[t.id] = 0;
+      }
+    });
+  });
+  
+  // Generar cola de partidos pendientes
+  let pendingMatches = [];
+  groupsWithTeams.forEach(group => {
+    const rounds = generateRoundRobinMatches(group.teams, match_format === 'double');
+    rounds.forEach((roundMatches, roundIndex) => {
+      roundMatches.forEach(match => {
+        pendingMatches.push({
+          group_id: group.id,
+          home_team_id: match.home,
+          away_team_id: match.away,
+          round: roundIndex + 1
+        });
+        remainingMatchesByTeam[match.home] = (remainingMatchesByTeam[match.home] || 0) + 1;
+        remainingMatchesByTeam[match.away] = (remainingMatchesByTeam[match.away] || 0) + 1;
+      });
+    });
+  });
+  
+  // 🔥 BUCLE PRINCIPAL OPTIMIZADO
+  while (pendingMatches.length > 0) {
+    // 9️⃣ Randomizar para evitar patrones repetitivos
+    pendingMatches = shuffleArray(pendingMatches);
 
-  while (queue.length > 0) {
-    safetyCounter++;
-    if (safetyCounter > MAX_ITER) throw new Error("Bloqueo global en planificación.");
+    let slotMatches = [];
+    let slotPlayingTeams = new Set(); // 1️⃣ Separado de árbitros
+    let slotReferees = new Set();     // 1️⃣ Separado de jugadores
+    let assignedInSlot = new Set();
 
-    let matchesThisSlot = [];
-    let usedTeamsThisSlot = new Set();
-    let anyPlaced = false;
+    // 7️⃣ Filtrar TODOS los partidos válidos (no greedy)
+    let validMatches = pendingMatches.filter(m => {
+      const homeFree = (teamBusyUntil[m.home_team_id] || 0) <= currentTime;
+      const awayFree = (teamBusyUntil[m.away_team_id] || 0) <= currentTime;
+      // 2️⃣ Validación solo contra equipos jugando
+      return homeFree && awayFree && 
+             !slotPlayingTeams.has(m.home_team_id) && 
+             !slotPlayingTeams.has(m.away_team_id);
+    });
 
+    // 🔟 Heurística: priorizar equipos con mayor tiempo inactivo
+    validMatches.sort((a, b) => {
+      const aIdle = Math.max(teamBusyUntil[a.home_team_id] || 0, teamBusyUntil[a.away_team_id] || 0);
+      const bIdle = Math.max(teamBusyUntil[b.home_team_id] || 0, teamBusyUntil[b.away_team_id] || 0);
+      return bIdle - aIdle; // Mayor inactividad primero
+    });
+
+    // 8️⃣ Llenar TODAS las pistas posibles con combinaciones compatibles
     for (let court = 1; court <= num_courts; court++) {
-      const matchIdx = queue.findIndex(m => {
-        const homeFree = (teamBusyUntil[m.home_team_id] || 0) <= currentTime;
-        const awayFree = (teamBusyUntil[m.away_team_id] || 0) <= currentTime;
-        return homeFree && awayFree && !usedTeamsThisSlot.has(m.home_team_id) && !usedTeamsThisSlot.has(m.away_team_id);
-      });
+      const match = validMatches.find(m => 
+        !assignedInSlot.has(m) &&
+        !slotPlayingTeams.has(m.home_team_id) && 
+        !slotPlayingTeams.has(m.away_team_id)
+      );
 
-      if (matchIdx === -1) continue;
-
-      const match = queue.splice(matchIdx, 1)[0];
-      const endTime = currentTime + duration;
-
-      const { _idx, ...cleanMatch } = match;
-      cleanMatch.court_number = court;
-      cleanMatch.match_date = new Date(currentTime).toISOString();
-      cleanMatch.verification_code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-      const allTeams = groupsWithTeams.flatMap(g => g.teams);
-      const possibleRefs = allTeams.filter(t => {
-        const notPlaying = t.id !== match.home_team_id && t.id !== match.away_team_id;
-        const notBusy = (teamBusyUntil[t.id] || 0) <= currentTime;
-        const notUsed = !usedTeamsThisSlot.has(t.id);
-        return notPlaying && notBusy && notUsed;
-      });
-
-      if (possibleRefs.length > 0) {
-        const randomRef = possibleRefs[Math.floor(Math.random() * possibleRefs.length)];
-        cleanMatch.referee_team_id = randomRef.id;
-        teamBusyUntil[randomRef.id] = endTime;
-        usedTeamsThisSlot.add(randomRef.id);
+      if (match) {
+        slotMatches.push({ ...match, court });
+        // 3️⃣ Reservar solo en slotPlayingTeams
+        slotPlayingTeams.add(match.home_team_id);
+        slotPlayingTeams.add(match.away_team_id);
+        assignedInSlot.add(match);
       } else {
-        const relaxedRefs = allTeams.filter(t => t.id !== match.home_team_id && t.id !== match.away_team_id);
-        if (relaxedRefs.length > 0) {
-          const randomRef = relaxedRefs[Math.floor(Math.random() * relaxedRefs.length)];
-          cleanMatch.referee_team_id = randomRef.id;
-        }
+        break; // No hay más combinaciones válidas para las pistas restantes
+      }
+    }
+
+    if (slotMatches.length === 0) {
+      const nextFree = Object.values(teamBusyUntil).filter(t => t > currentTime);
+      currentTime = nextFree.length > 0 ? Math.min(...nextFree) : currentTime + duration;
+      continue;
+    }
+
+    // Limpiar pendientes asignados
+    pendingMatches = pendingMatches.filter(m => !assignedInSlot.has(m));
+
+    // 4️⃣ & 5️⃣ Asignar árbitros con validación dual y reserva correcta
+    const endTime = currentTime + duration;
+    const allTeams = groupsWithTeams.flatMap(g => g.teams.filter(t => !t.isBye));
+
+    slotMatches.forEach(match => {
+      const { court, ...matchData } = match;
+      const cleanMatch = {
+        ...matchData,
+        court_number: court,
+        match_date: new Date(currentTime).toISOString(),
+        verification_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+        status: 'scheduled',
+        home_score: 0,
+        away_score: 0,
+        points_to_win: config.points_to_win || 25,
+        sets_to_win: config.sets_to_win || 2
+      };
+
+      const groupTeams = groupsWithTeams.find(g => g.id === match.group_id)?.teams || [];
+      
+      // 4️⃣ Validación: no juega Y no arbitra en este slot
+      const possibleRefs = groupTeams.filter(t => 
+        !t.isBye && 
+        t.id !== match.home_team_id && 
+        t.id !== match.away_team_id &&
+        (teamBusyUntil[t.id] || 0) <= currentTime && 
+        !slotPlayingTeams.has(t.id) && 
+        !slotReferees.has(t.id)
+      ).sort((a, b) => teamRefereeCount[a.id] - teamRefereeCount[b.id]); // 1️⃣1️⃣ Equidad
+      
+      let selectedRef = null;
+      if (possibleRefs.length > 0) {
+        selectedRef = possibleRefs[0];
+      } else {
+        const allPossibleRefs = allTeams.filter(t => 
+          t.id !== match.home_team_id && 
+          t.id !== match.away_team_id &&
+          (teamBusyUntil[t.id] || 0) <= currentTime && 
+          !slotPlayingTeams.has(t.id) && 
+          !slotReferees.has(t.id)
+        ).sort((a, b) => teamRefereeCount[a.id] - teamRefereeCount[b.id]);
+        
+        if (allPossibleRefs.length > 0) selectedRef = allPossibleRefs[0];
       }
 
+      if (selectedRef) {
+        cleanMatch.referee_team_id = selectedRef.id;
+        // 6️⃣ NO bloquear teamBusyUntil al arbitrar
+        slotReferees.add(selectedRef.id); // 5️⃣ Reserva correcta
+        teamRefereeCount[selectedRef.id]++;
+      }
+
+      // Actualizar disponibilidad SOLO por jugar
       teamBusyUntil[match.home_team_id] = endTime;
       teamBusyUntil[match.away_team_id] = endTime;
-      usedTeamsThisSlot.add(match.home_team_id);
-      usedTeamsThisSlot.add(match.away_team_id);
+      remainingMatchesByTeam[match.home_team_id]--;
+      remainingMatchesByTeam[match.away_team_id]--;
+      
+      scheduled.push(cleanMatch);
+      
+      if (scheduled.length <= 4) {
+        const refName = selectedRef ? selectedRef.team_name : 'Sin asignar';
+        onLog(`🏟️ P${court} | ${match.home_team_id.slice(0,4)} vs ${match.away_team_id.slice(0,4)} | 🟥 ${refName}`);
+      }
+    });
 
-      matchesThisSlot.push(cleanMatch);
-      anyPlaced = true;
-
-      if (scheduled.length < 5) onLog(`🏟️ Pista ${court} | ${match.home_team_id.slice(0,4)} vs ${match.away_team_id.slice(0,4)}`);
-    }
-
-    if (!anyPlaced) {
-      const futureTimes = Object.values(teamBusyUntil).filter(t => t > currentTime);
-      currentTime = futureTimes.length > 0 ? Math.min(...futureTimes) : currentTime + duration;
-    } else {
-      scheduled.push(...matchesThisSlot);
-      currentTime += duration;
-    }
+    currentTime += duration;
   }
+
+  const refStats = Object.entries(teamRefereeCount).sort((a, b) => a[1] - b[1]).map(([id, c]) => `${id.slice(0,4)}:${c}`);
+  console.log('📊 Arbitrajes:', refStats.join(', '));
+  
   return scheduled;
 };
 
+// 🖥️ Componente Principal
 export default function TournamentDraw() {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -108,14 +233,19 @@ export default function TournamentDraw() {
   useEffect(() => { fetchConfig(); }, []);
 
   const fetchConfig = async () => {
-    const { data, error } = await supabase.from('tournament_config').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
+    // ✅ REGLA SUPABASE: { data, error }
+    const { data, error } = await supabase
+      .from('tournament_config')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     if (error && error.code !== 'PGRST116') console.error('Fetch config error:', error);
     if (data) setConfig(data);
   };
 
   const addLog = useCallback((msg) => {
-    const timestamp = `[${safeTime(new Date())}]`;
-    setLogs(prev => [`${timestamp} ${msg}`, ...prev].slice(0, 100));
+    setLogs(prev => [`[${safeTime(new Date())}] ${msg}`, ...prev].slice(0, 100));
   }, []);
 
   const handleConfirm = useCallback(async () => {
@@ -131,26 +261,40 @@ export default function TournamentDraw() {
     addLog("🚀 Iniciando proceso de sorteo...");
 
     try {
-      if (!config?.start_datetime || !config?.num_groups || !config?.num_courts) throw new Error("Falta configuración obligatoria.");
+      if (!config?.start_datetime || !config?.num_groups || !config?.num_courts) {
+        throw new Error("Falta configuración obligatoria.");
+      }
 
       addLog("📋 Obteniendo equipos aceptados...");
-      const { data: teams, error: errTeams } = await supabase.from('profiles').select('id, team_name').eq('status', 'accepted').order('team_name');
+      
+      // ✅ CORRECCIÓN CRÍTICA: { data: teams, error: errTeams }
+      const { data: teams, error: errTeams } = await supabase
+        .from('profiles')
+        .select('id, team_name')
+        .eq('status', 'accepted')
+        .order('team_name');
+      
       if (errTeams) throw new Error('Error BD: ' + errTeams.message);
       if (!teams || teams.length < 2) throw new Error("Se necesitan al menos 2 equipos aceptados.");
       addLog(`✅ ${teams.length} equipos listos.`);
 
       const safeId = '00000000-0000-0000-0000-000000000000';
       addLog("🧹 Limpiando datos anteriores...");
-      const { error: e1 } = await supabase.from('matches').delete().neq('id', safeId);
-      if (e1) throw e1;
-      const { error: e2 } = await supabase.from('group_assignments').delete().neq('id', safeId);
-      if (e2) throw e2;
-      const { error: e3 } = await supabase.from('groups').delete().neq('id', safeId);
-      if (e3) throw e3;
+      const { error: e1 } = await supabase.from('matches').delete().neq('id', safeId); if (e1) throw e1;
+      const { error: e2 } = await supabase.from('group_assignments').delete().neq('id', safeId); if (e2) throw e2;
+      const { error: e3 } = await supabase.from('groups').delete().neq('id', safeId); if (e3) throw e3;
 
       addLog("📂 Creando grupos oficiales...");
-      const groupsPayload = Array.from({ length: config.num_groups }, (_, i) => ({ name: `Grupo ${String.fromCharCode(65 + i)}`, draw_order: i + 1 }));
-      const { data: createdGroups, error: errGrp } = await supabase.from('groups').insert(groupsPayload).select('id, name, draw_order');
+      const groupsPayload = Array.from({ length: config.num_groups }, (_, i) => ({ 
+        name: `Grupo ${String.fromCharCode(65 + i)}`, draw_order: i + 1 
+      }));
+      
+      // ✅ CORRECCIÓN CRÍTICA: { data: createdGroups, error: errGrp }
+      const { data: createdGroups, error: errGrp } = await supabase
+        .from('groups')
+        .insert(groupsPayload)
+        .select('id, name, draw_order');
+      
       if (errGrp) throw new Error('Error creando grupos: ' + errGrp.message);
       if (!createdGroups) throw new Error("No se recibieron IDs de grupos creados.");
       addLog(`✅ ${createdGroups.length} grupos creados.`);
@@ -170,36 +314,23 @@ export default function TournamentDraw() {
       if (errAssign) throw new Error('Error asignando equipos: ' + errAssign.message);
       addLog("✅ Distribución completada.");
 
-      addLog("⚔️ Generando cruces...");
-      let allMatchesToSchedule = [];
-      let matchCounter = 0;
-      groupsWithTeams.forEach(group => {
-        const t = group.teams;
-        for (let i = 0; i < t.length; i++) {
-          for (let j = i + 1; j < t.length; j++) {
-            const base = { _idx: matchCounter++, group_id: group.id, home_team_id: t[i].id, away_team_id: t[j].id, status: 'scheduled', home_score: 0, away_score: 0, points_to_win: config.points_to_win || 25, sets_to_win: config.sets_to_win || 2 };
-            allMatchesToSchedule.push(base);
-            if (config.match_format === 'double') {
-              allMatchesToSchedule.push({ ...base, _idx: matchCounter++, home_team_id: t[j].id, away_team_id: t[i].id });
-            }
-          }
-        }
-      });
-      addLog(`📅 ${allMatchesToSchedule.length} partidos generados.`);
-
-      addLog("🕒 Planificando horarios (Con árbitros globales)...");
-      const scheduledMatches = scheduleMatches(allMatchesToSchedule, config, groupsWithTeams, addLog);
+      addLog("⚔️ Generando horarios por slots optimizados...");
+      const finalScheduled = scheduleMatches(groupsWithTeams, config, addLog);
       
       addLog("💾 Guardando calendario...");
-      const { error: errInsert } = await supabase.from('matches').insert(scheduledMatches);
+      const { error: errInsert } = await supabase.from('matches').insert(finalScheduled);
       if (errInsert) throw new Error('Error guardando: ' + errInsert.message);
 
       const { error: errUpdate } = await supabase.from('tournament_config').update({ draw_completed: true }).neq('id', safeId);
       if (errUpdate) throw new Error('Error actualizando config: ' + errUpdate.message);
 
-      // 🔔 NOTIFICAR A TODOS LOS EQUIPOS
-      const { data: teamIds } = await supabase.from('group_assignments').select('team_id');
-      if (teamIds) {
+      // 🔔 Notificaciones
+      // ✅ CORRECCIÓN CRÍTICA: { data: teamIds, error: teamErr }
+      const { data: teamIds, error: teamErr } = await supabase
+        .from('group_assignments')
+        .select('team_id');
+      
+      if (!teamErr && teamIds) {
         const uniqueIds = [...new Set(teamIds.map(t => t.team_id))];
         await Promise.all(uniqueIds.map(id => 
           sendToTeam(id, 'match_scheduled', '📅 Calendario Publicado', 'Ya puedes ver tus partidos y horarios en "Mis Partidos".', '/dashboard/partidos')
@@ -263,7 +394,7 @@ export default function TournamentDraw() {
           <li>🏟️ Pistas disponibles: {config?.num_courts || 1}</li>
           <li>👥 Formato: {config?.match_format === 'double' ? 'Ida y Vuelta' : 'Solo Ida'}</li>
         </ul></Card>
-        <Card className={styles.controlCard}><h3>🚀 Ejecutar Algoritmo</h3><p>Árbitros globales + fallback relajado para 0 partidos sin arbitraje.</p>
+        <Card className={styles.controlCard}><h3>🚀 Ejecutar Algoritmo</h3><p>Scheduler optimizado: maximización de pistas, separación lógica jugador/árbitro y sin bloqueos artificiales.</p>
           <Button onClick={() => setConfirmDialog({ open: true, action: 'draw', message: '¿Generar nuevo calendario?' })} loading={loading} variant="primary" fullWidth disabled={status === 'running' || config?.draw_completed}>{config?.draw_completed ? '✅ Ya Sorteado' : '🎲 Generar'}</Button>
           {status === 'success' && <p className={styles.successMsg}>✅ Completado.</p>}
           {status === 'error' && <p className={styles.errorMsg}>❌ Error. Revisa logs.</p>}
