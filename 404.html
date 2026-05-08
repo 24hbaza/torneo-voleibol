@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirigiendo...</title>
+  <script>
+    const path = window.location.pathname;
+    const repo = '/24hbaza/'; // ⚠️ Mismo nombre que en vite.config.js
+    const redirect = repo + 'index.html' + '#!' + path.replace(repo, '/');
+    window.location.replace(redirect);
+  </script>
+</head>
+<body>
+  <p>Redirigiendo a la app...</p>
+</body>
+</html>
