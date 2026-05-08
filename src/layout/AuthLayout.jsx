@@ -8,7 +8,7 @@ export default function AuthLayout({ children, title, subtitle }) {
       <div className={styles.card}>
         <div className={styles.brand}>
           <span className={styles.logo}>🏐</span>
-          <h1>VoleyTournament</h1>
+          <h1>24h voleibol Baza</h1>
         </div>
         <div className={styles.content}>
           {title && <h2 className={styles.title}>{title}</h2>}
