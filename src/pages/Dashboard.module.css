@@ -196,12 +196,14 @@
 /* === SECCIONES LIMPIAS === */
 .cleanSection { padding: 8px 0; }
 
+/* ✅ Títulos centrados para Normativa, Galería, Organización y Patrocinadores */
 .sectionTitle {
   font-size: 1.1rem;
   font-weight: 600;
-  margin: 0 0 16px 4px;
+  margin: 0 0 16px; /* Quitamos el margen izquierdo de 4px */
   color: var(--text-primary);
   letter-spacing: -0.3px;
+  text-align: center; /* ✅ Centra el texto horizontalmente */
 }
 
 /* === NORMATIVA === */
