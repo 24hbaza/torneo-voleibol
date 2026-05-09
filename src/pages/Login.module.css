@@ -108,6 +108,7 @@
   text-align: center;
   font-size: 0.85rem;
   color: var(--text-secondary);
+  margin-top: 8px;
 }
 
 .footerLink a { color: var(--volley-blue); font-weight: 600; text-decoration: none; }
@@ -123,7 +124,23 @@
   text-align: center;
 }
 
-/* Responsive */
+/* === ✅ FIX MÓVIL: Evitar que se corte el contenido inferior === */
 @media (max-width: 640px) {
   .infoGrid { grid-template-columns: 1fr; }
+  
+  /* Forzar scroll si el contenido no cabe y asegurar espacio inferior */
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Si AuthLayout usa un contenedor principal, este fix asegura que se vea todo */
+  .form, .infoGrid, .footerLink {
+    padding-bottom: 24px;
+  }
+  
+  /* Asegurar que el último elemento tenga margen extra */
+  .footerLink {
+    margin-bottom: 40px;
+  }
 }

@@ -18,6 +18,32 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [media, setMedia] = useState({ rules: [], gallery: [], sponsors: [], announcements: [] });
 
+  // ✅ CUENTA ATRÁS: Cierre de inscripciones 18 Junio 18:00h
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const targetDate = new Date('2026-06-18T18:00:00').getTime();
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     if (user && profile && !profile.team_name) {
       navigate('/dashboard/inscripcion', { replace: true });
@@ -29,8 +55,8 @@ export default function Dashboard() {
       try {
         if (isGuestView || user) {
           
-          // ✅ 1. CONFIGURACIÓN - SINTAXIS CORRECTA: data: cfg
-          const { data: cfg, error: cfgError } = await supabase
+          // ✅ 1. CONFIGURACIÓN - SINTAXIS CORRECTA:  cfg
+          const {  cfg, error: cfgError } = await supabase
             .from('tournament_config')
             .select('*')
             .order('created_at', { ascending: false })
@@ -49,7 +75,7 @@ export default function Dashboard() {
           if (newsError) console.warn('News error:', newsError);
           setMedia(prev => ({ ...prev, announcements: newsData || [] }));
 
-          // ✅ 3. MEDIA (Normativa, Galería, Patrocinadores) - SINTAXIS CORRECTA: data: mediaData
+          // ✅ 3. MEDIA (NORMATIVA, GALERÍA, PATROCINADORES) - SINTAXIS CORRECTA: data: mediaData
           const { data: mediaData, error: mediaError } = await supabase
             .from('tournament_media')
             .select('*')
@@ -57,20 +83,13 @@ export default function Dashboard() {
 
           if (mediaError) {
             console.error('❌ Error cargando media:', mediaError);
-          } else {
-            console.log('📦 Datos raw de media:', mediaData);
-            if (mediaData && mediaData.length > 0) {
-              console.table(mediaData.map(m => ({ id: m.id, title: m.title, category: m.category })));
-            }
-
-            if (Array.isArray(mediaData)) {
-              setMedia(prev => ({
-                ...prev,
-                rules: mediaData.filter(m => m.category === 'rules'),
-                gallery: mediaData.filter(m => m.category === 'gallery'),
-                sponsors: mediaData.filter(m => m.category === 'sponsors')
-              }));
-            }
+          } else if (Array.isArray(mediaData)) {
+            setMedia(prev => ({
+              ...prev,
+              rules: mediaData.filter(m => m.category === 'rules'),
+              gallery: mediaData.filter(m => m.category === 'gallery'),
+              sponsors: mediaData.filter(m => m.category === 'sponsors')
+            }));
           }
         }
       } catch (err) {
@@ -92,14 +111,10 @@ export default function Dashboard() {
     );
   }
 
-  if (error) {
-    return <div className={styles.errorBox}>⚠️ {error}</div>;
-  }
+  if (error) return <div className={styles.errorBox}>⚠️ {error}</div>;
 
   return (
     <div className={`${styles.container} ${isGuestView ? styles.guestMode : ''}`}>
-      
-      {/* 📢 ANUNCIOS */}
       {media.announcements.length > 0 && (
         <div className={styles.announcementsSection}>
           {media.announcements.map(ann => (
@@ -114,7 +129,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* 🏠 HERO */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.heroBadgeWrapper}>
@@ -144,27 +158,30 @@ export default function Dashboard() {
                   ? '¡Todo listo! Revisa tus partidos y la clasificación.'
                   : 'Tu inscripción está siendo revisada.')}
             </p>
+
+            <div className={styles.countdownContainer}>
+              <div className={styles.countdownItem}><span className={styles.countdownValue}>{String(timeLeft.days).padStart(2, '0')}</span><span className={styles.countdownLabel}>Días</span></div>
+              <span className={styles.countdownSeparator}>:</span>
+              <div className={styles.countdownItem}><span className={styles.countdownValue}>{String(timeLeft.hours).padStart(2, '0')}</span><span className={styles.countdownLabel}>Horas</span></div>
+              <span className={styles.countdownSeparator}>:</span>
+              <div className={styles.countdownItem}><span className={styles.countdownValue}>{String(timeLeft.minutes).padStart(2, '0')}</span><span className={styles.countdownLabel}>Min</span></div>
+              <span className={styles.countdownSeparator}>:</span>
+              <div className={styles.countdownItem}><span className={styles.countdownValue}>{String(timeLeft.seconds).padStart(2, '0')}</span><span className={styles.countdownLabel}>Seg</span></div>
+            </div>
           </div>
         </div>
 
         <div className={styles.quickActions}>
-          <Link to="/dashboard/partidos" className={styles.actionBtn}>
-            <span>📅</span> Partidos
-          </Link>
-          <Link to="/dashboard/clasificacion" className={styles.actionBtn}>
-            <span>🏆</span> Clasificación
-          </Link>
+          <Link to="/dashboard/partidos" className={styles.actionBtn}><span>📅</span> Partidos</Link>
+          <Link to="/dashboard/clasificacion" className={styles.actionBtn}><span>🏆</span> Clasificación</Link>
           {!isGuestView && profile?.status === 'accepted' && (
-            <Link to="/arbitro" className={`${styles.actionBtn} ${styles.refereeBtn}`}>
-              <span>🟥</span> Árbitro
-            </Link>
+            <Link to="/arbitro" className={`${styles.actionBtn} ${styles.refereeBtn}`}><span>🟥</span> Árbitro</Link>
           )}
         </div>
       </section>
 
-      {/* ✅ REORDENADO: NORMATIVA PRIMERO */}
       <section className={styles.cleanSection}>
-        <h2 className={styles.sectionTitle}>📜 Normativa</h2>
+        <h2 className={styles.sectionTitle}>Normativa</h2>
         {media.rules.length > 0 ? (
           <div className={styles.rulesList}>
             {media.rules.map((rule) => (
@@ -175,14 +192,11 @@ export default function Dashboard() {
               </a>
             ))}
           </div>
-        ) : (
-          <p className={styles.emptyText}>Próximamente</p>
-        )}
+        ) : <p className={styles.emptyText}>Próximamente</p>}
       </section>
 
-      {/* ✅ REORDENADO: GALERÍA DESPUÉS */}
       <section className={styles.cleanSection}>
-        <h2 className={styles.sectionTitle}>📸 Galería</h2>
+        <h2 className={styles.sectionTitle}>Galería</h2>
         {media.gallery.length > 0 ? (
           <div className={styles.galleryCleanGrid}>
             {media.gallery.map((photo) => (
@@ -191,35 +205,19 @@ export default function Dashboard() {
               </a>
             ))}
           </div>
-        ) : (
-          <p className={styles.emptyText}>Próximamente</p>
-        )}
+        ) : <p className={styles.emptyText}>Próximamente</p>}
       </section>
 
-      {/* ℹ️ INFO TORNEO */}
       <section className={styles.statusSection}>
         <div className={styles.statusCard}>
           {config?.draw_completed ? (
-            <>
-              <span className={styles.statusDotLive}></span>
-              <div>
-                <strong>Torneo en marcha</strong>
-                <p>La fase de grupos está activa.</p>
-              </div>
-            </>
+            <><span className={styles.statusDotLive}></span><div><strong>Torneo en marcha</strong><p>La fase de grupos está activa.</p></div></>
           ) : (
-            <>
-              <span className={styles.statusDotWaiting}></span>
-              <div>
-                <strong>Próximo inicio</strong>
-                <p>El calendario se publicará pronto.</p>
-              </div>
-            </>
+            <><span className={styles.statusDotWaiting}></span><div><strong>Próximo inicio</strong><p>El calendario se publicará pronto.</p></div></>
           )}
         </div>
       </section>
 
-      {/* 👁️ INFO INVITADOS */}
       {isGuestView && (
         <section className={styles.guestSection}>
           <p>¿Quieres gestionar tu equipo y votar MVPs?</p>
@@ -230,9 +228,8 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* ✅ REORDENADO: ORGANIZACIÓN AL FINAL */}
       <section className={styles.cleanSection}>
-        <h2 className={styles.sectionTitle}>🏛️ Organización</h2>
+        <h2 className={styles.sectionTitle}>Organización</h2>
         <div className={styles.logosRow}>
           <div className={styles.logoItem}>
             <span className={styles.logoLabel}>Organizado por</span>
@@ -246,7 +243,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ✅ REORDENADO: PATROCINADORES AL FINAL */}
       <section className={styles.cleanSection}>
         <h2 className={styles.sectionTitle}>Patrocinadores</h2>
         <div className={styles.sponsorsCleanGrid}>
@@ -265,7 +261,6 @@ export default function Dashboard() {
           )}
         </div>
       </section>
-
     </div>
   );
 }
