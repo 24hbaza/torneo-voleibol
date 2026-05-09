@@ -1,4 +1,3 @@
-// src/pages/StandingsView.jsx
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useStandings } from '../features/standings/hooks/useStandings';
@@ -8,47 +7,56 @@ import styles from './StandingsView.module.css';
 
 export default function StandingsView() {
   const { groups, assignments, matches, loading, error } = useStandings();
-  const [advancingCount, setAdvancingCount] = useState(2); // Valor por defecto
+  const [advancingCount, setAdvancingCount] = useState(2);
 
-  // ✅ Obtener configuración de clasificación
   useEffect(() => {
     const fetchConfig = async () => {
-      const { data, error: cfgError } = await supabase
-        .from('tournament_config')
-        .select('teams_advancing')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      if (!cfgError && data?.teams_advancing) {
-        setAdvancingCount(data.teams_advancing);
+      try {
+        const { data, error: cfgError } = await supabase
+          .from('tournament_config')
+          .select('teams_advancing')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!cfgError && data?.teams_advancing) {
+          setAdvancingCount(data.teams_advancing);
+        }
+      } catch (err) {
+        console.warn('Config no encontrada, usando default');
       }
     };
     fetchConfig();
   }, []);
 
-  if (loading) return <div className={styles.loading}>Calculando clasificaciones...</div>;
-  if (error) return <div className={styles.error}>⚠️ Error cargando datos: {error}</div>;
-  if (!groups.length) return <div className={styles.empty}>📋 No hay grupos configurados aún.</div>;
+  if (loading) {
+    return (
+      <div className={styles.loading}>
+        <div className={styles.spinner} />
+        <p>Cargando clasificación...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className={styles.error}>⚠️ Error: {error}</div>;
+  }
+
+  if (!groups?.length) {
+    return <div className={styles.empty}>📋 No hay grupos configurados aún.</div>;
+  }
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>🏆 Clasificación Oficial</h1>
-        <p className={styles.subtitle}>
-          Top {advancingCount} por grupo clasifican a la siguiente fase
-        </p>
-      </header>
-
       <div className={styles.grid}>
         {groups.map(group => {
           const standings = calculateGroupStandings(group, assignments, matches);
           return (
-            <GroupStandings 
-              key={group.id} 
-              group={group} 
-              standings={standings} 
-              advancingCount={advancingCount} 
+            <GroupStandings
+              key={group.id}
+              group={group}
+              standings={standings}
+              advancingCount={advancingCount}
             />
           );
         })}

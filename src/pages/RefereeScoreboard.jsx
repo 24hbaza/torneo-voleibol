@@ -59,7 +59,7 @@ export default function RefereeScoreboard() {
   });
   
   const [showMVPModal, setShowMVPModal] = useState(false);
-  const [mvpVotes, setMvpVotes] = useState({ male: '', female: '' });
+  const [mvpVotes, setMvpVotes] = useState({ male: '', female: '', malePhoto: '', femalePhoto: '' });
   const [submittingMVP, setSubmittingMVP] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -69,7 +69,6 @@ export default function RefereeScoreboard() {
   useEffect(function() {
     const fetchMatchData = async function() {
       try {
-        // ✅ CORREGIDO: data: matchData (desestructuración con alias)
         const { data: matchData, error: matchError } = await supabase
           .from('matches')
           .select(`
@@ -118,6 +117,7 @@ export default function RefereeScoreboard() {
           current: matchData.current_set || 1 
         });
 
+        // Si el partido ya terminó pero no tiene MVPs votados, mostrar modal
         if (matchData.status === 'finished' && !matchData.mvp_voted) {
           setShowMVPModal(true);
         }
@@ -228,7 +228,6 @@ export default function RefereeScoreboard() {
     try {
       const field = team === 'home' ? 'live_points_home' : 'live_points_away';
       
-      // ✅ CAMBIO CLAVE: Si el partido está 'scheduled', lo ponemos 'live' al primer punto
       const updateData = { [field]: newPoints };
       if (match && match.status === 'scheduled') {
         updateData.status = 'live';
@@ -280,11 +279,15 @@ export default function RefereeScoreboard() {
       const setsToWin = match.sets_to_win || 3;
       const isMatchOver = newHomeWon >= setsToWin || newAwayWon >= setsToWin;
 
+      // ✅ CORREGIDO: Actualizar home_score y away_score cuando el partido termina
       const dbUpdate = {
         sets_details: JSON.stringify(newDetails),
         current_set: isMatchOver ? setsData.current : setsData.current + 1,
         live_points_home: isMatchOver ? homePts : 0,
         live_points_away: isMatchOver ? awayPts : 0,
+        // ✅ NUEVO: Guardar el resultado final del partido
+        home_score: isMatchOver ? newHomeWon : (match.home_score || 0),
+        away_score: isMatchOver ? newAwayWon : (match.away_score || 0),
         // ✅ CAMBIO CLAVE: Si el partido terminó, actualizamos status a 'finished'
         status: isMatchOver ? 'finished' : (match.status === 'scheduled' ? 'live' : match.status)
       };
@@ -329,7 +332,7 @@ export default function RefereeScoreboard() {
   };
 
   // ============================================================================
-  // 🏆 GUARDAR MVPs
+  // 🏆 GUARDAR MVPs - ACTUALIZA TODOS LOS CAMPOS EN LA BASE DE DATOS
   // ============================================================================
   const submitMVPs = async function() {
     if (!mvpVotes.male || !mvpVotes.female) {
@@ -338,17 +341,45 @@ export default function RefereeScoreboard() {
     }
     setSubmittingMVP(true);
     try {
-      const { error: mvpError } = await supabase
+      // ✅ Buscar las URLs de las fotos de los MVPs seleccionados
+      const allPlayers = [
+        ...(homeTeam.players || []), 
+        ...(awayTeam.players || [])
+      ];
+      
+      const maleMVP = allPlayers.find(p => p.name === mvpVotes.male);
+      const femaleMVP = allPlayers.find(p => p.name === mvpVotes.female);
+      
+      // ✅ CORREGIDO: Actualizar TODOS los campos de MVP en la base de datos
+      const { data: updateData, error: mvpError } = await supabase
         .from('matches')
         .update({ 
-          mvp_male_name: mvpVotes.male, 
-          mvp_female_name: mvpVotes.female, 
-          mvp_voted: true 
+          // Nombres de los MVPs
+          mvp_male_name: mvpVotes.male,
+          mvp_female_name: mvpVotes.female,
+          // URLs de las fotos
+          mvp_male_photo_url: maleMVP?.photo_url || null,
+          mvp_female_photo_url: femaleMVP?.photo_url || null,
+          // Flags de votación
+          mvp_male_voted: true,
+          mvp_female_voted: true,
+          mvp_voted: true,
+          // Asegurar que home_score y away_score estén actualizados
+          home_score: setsData.homeWon,
+          away_score: setsData.awayWon
         })
-        .eq('id', matchId);
+        .eq('id', matchId)
+        .select()
+        .single();
       
       if (mvpError) {
+        console.error('Error guardando MVPs:', mvpError);
         throw mvpError;
+      }
+
+      // ✅ Actualizar el estado local con los datos confirmados
+      if (updateData) {
+        setMatch(updateData);
       }
       
       await exitFullscreenMode();
@@ -357,7 +388,8 @@ export default function RefereeScoreboard() {
       setShowMVPModal(false);
       navigate('/dashboard/partidos');
     } catch (err) {
-      setError('Error guardando MVPs');
+      console.error('Error en submitMVPs:', err);
+      setError('Error guardando MVPs: ' + err.message);
     } finally {
       setSubmittingMVP(false);
     }
@@ -630,7 +662,7 @@ export default function RefereeScoreboard() {
                           } 
                           onClick={function() {
                             return setMvpVotes(function(v) {
-                              return { ...v, male: p.name };
+                              return { ...v, male: p.name, malePhoto: p.photo_url || '' };
                             });
                           }}
                         >
@@ -670,7 +702,7 @@ export default function RefereeScoreboard() {
                           } 
                           onClick={function() {
                             return setMvpVotes(function(v) {
-                              return { ...v, female: p.name };
+                              return { ...v, female: p.name, femalePhoto: p.photo_url || '' };
                             });
                           }}
                         >

@@ -338,3 +338,36 @@
   transition: background var(--transition-fast);
 }
 .editLink:hover { background: var(--volley-blue); color: white; }
+/* ============================================================================
+   ✅ ESTILOS PARA EQUIPOS ADMINISTRADORES
+   ============================================================================ */
+
+.adminBadge {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.adminCheckbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--volley-gold);
+}
+
+.adminCheckbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Badge ADMIN en modal */
+.modalTeamName .adminBadge {
+  margin-left: 10px;
+}
+
+/* Responsive para checkbox en móvil */
+@media (max-width: 768px) {
+  .adminCheckbox {
+    width: 16px;
+    height: 16px;
+  }
+}
