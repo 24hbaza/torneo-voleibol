@@ -55,8 +55,8 @@ export default function Dashboard() {
       try {
         if (isGuestView || user) {
           
-          // ✅ 1. CONFIGURACIÓN - SINTAXIS CORRECTA:  cfg
-          const {  cfg, error: cfgError } = await supabase
+          // ✅ 1. CONFIGURACIÓN - SINTAXIS EXPLÍCITA: data: cfg
+          const { data: cfg, error: cfgError } = await supabase
             .from('tournament_config')
             .select('*')
             .order('created_at', { ascending: false })
@@ -65,7 +65,7 @@ export default function Dashboard() {
           if (cfgError) console.warn('Config error:', cfgError);
           setConfig(cfg || null);
 
-          // ✅ 2. ANUNCIOS - SINTAXIS CORRECTA: data: newsData
+          // ✅ 2. ANUNCIOS - SINTAXIS EXPLÍCITA:  newsData
           const { data: newsData, error: newsError } = await supabase
             .from('tournament_announcements')
             .select('*')
@@ -75,7 +75,7 @@ export default function Dashboard() {
           if (newsError) console.warn('News error:', newsError);
           setMedia(prev => ({ ...prev, announcements: newsData || [] }));
 
-          // ✅ 3. MEDIA (NORMATIVA, GALERÍA, PATROCINADORES) - SINTAXIS CORRECTA: data: mediaData
+          // ✅ 3. MEDIA (NORMATIVA, GALERÍA, PATROCINADORES) - SINTAXIS EXPLÍCITA: data: mediaData
           const { data: mediaData, error: mediaError } = await supabase
             .from('tournament_media')
             .select('*')
@@ -84,6 +84,7 @@ export default function Dashboard() {
           if (mediaError) {
             console.error('❌ Error cargando media:', mediaError);
           } else if (Array.isArray(mediaData)) {
+            // Filtramos por categoría
             setMedia(prev => ({
               ...prev,
               rules: mediaData.filter(m => m.category === 'rules'),
@@ -115,6 +116,8 @@ export default function Dashboard() {
 
   return (
     <div className={`${styles.container} ${isGuestView ? styles.guestMode : ''}`}>
+      
+      {/* 📢 ANUNCIOS */}
       {media.announcements.length > 0 && (
         <div className={styles.announcementsSection}>
           {media.announcements.map(ann => (
@@ -129,6 +132,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* 🏠 HERO */}
       <section className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.heroBadgeWrapper}>
@@ -159,6 +163,12 @@ export default function Dashboard() {
                   : 'Tu inscripción está siendo revisada.')}
             </p>
 
+            {/* ✅ AVISO DE FECHA LÍMITE DE INSCRIPCIÓN */}
+            <p className={styles.deadlineText}>
+              ⏳ Inscripciones hasta el <strong>18 de junio a las 18:00h</strong>
+            </p>
+
+            {/* ✅ CUENTA ATRÁS */}
             <div className={styles.countdownContainer}>
               <div className={styles.countdownItem}><span className={styles.countdownValue}>{String(timeLeft.days).padStart(2, '0')}</span><span className={styles.countdownLabel}>Días</span></div>
               <span className={styles.countdownSeparator}>:</span>
@@ -180,6 +190,7 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {/* ✅ NORMATIVA */}
       <section className={styles.cleanSection}>
         <h2 className={styles.sectionTitle}>Normativa</h2>
         {media.rules.length > 0 ? (
@@ -195,6 +206,7 @@ export default function Dashboard() {
         ) : <p className={styles.emptyText}>Próximamente</p>}
       </section>
 
+      {/* ✅ GALERÍA */}
       <section className={styles.cleanSection}>
         <h2 className={styles.sectionTitle}>Galería</h2>
         {media.gallery.length > 0 ? (
@@ -208,6 +220,7 @@ export default function Dashboard() {
         ) : <p className={styles.emptyText}>Próximamente</p>}
       </section>
 
+      {/* ℹ️ ESTADO DEL TORNEO */}
       <section className={styles.statusSection}>
         <div className={styles.statusCard}>
           {config?.draw_completed ? (
@@ -218,6 +231,7 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {/* 👁️ INFO INVITADOS */}
       {isGuestView && (
         <section className={styles.guestSection}>
           <p>¿Quieres gestionar tu equipo y votar MVPs?</p>
@@ -228,6 +242,7 @@ export default function Dashboard() {
         </section>
       )}
 
+      {/* ✅ ORGANIZACIÓN */}
       <section className={styles.cleanSection}>
         <h2 className={styles.sectionTitle}>Organización</h2>
         <div className={styles.logosRow}>
@@ -243,6 +258,7 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {/* ✅ PATROCINADORES */}
       <section className={styles.cleanSection}>
         <h2 className={styles.sectionTitle}>Patrocinadores</h2>
         <div className={styles.sponsorsCleanGrid}>

@@ -161,3 +161,25 @@
   .guestActions { flex-direction: column; }
   .guestActions a { width: 100%; max-width: 240px; }
 }
+/* ✅ TEXTO DE FECHA LÍMITE (encima del countdown) */
+.deadlineText {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 16px auto 12px;
+  text-align: center;
+  max-width: 380px;
+  line-height: 1.4;
+}
+
+.deadlineText strong {
+  color: var(--volley-gold);
+  font-weight: 700;
+}
+
+/* Responsive para móvil */
+@media (max-width: 640px) {
+  .deadlineText {
+    font-size: 0.85rem;
+    margin: 12px auto 10px;
+  }
+}
