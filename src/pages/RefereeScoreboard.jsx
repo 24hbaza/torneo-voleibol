@@ -5,6 +5,9 @@ import { useAuthStore } from '../store';
 import { Card, Button } from '../design-system/components';
 import styles from './RefereeScoreboard.module.css';
 
+// ============================================================================
+// ✅ FUNCIÓN SEGURA PARA PARSEAR FECHAS
+// ============================================================================
 const parseSafeDate = function(dateValue) {
   if (!dateValue) {
     return null;
@@ -17,6 +20,25 @@ const parseSafeDate = function(dateValue) {
   return d;
 };
 
+// ============================================================================
+// ✅ FUNCIÓN PARA SALIR DE PANTALLA COMPLETA
+// ============================================================================
+const exitFullscreenMode = async function() {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
+  } catch (err) {
+    console.warn('Error al salir de fullscreen:', err);
+  }
+};
+
+// ============================================================================
+// ✅ COMPONENTE PRINCIPAL
+// ============================================================================
 export default function RefereeScoreboard() {
   const { matchId } = useParams();
   const navigate = useNavigate();
@@ -41,16 +63,19 @@ export default function RefereeScoreboard() {
   const [submittingMVP, setSubmittingMVP] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // ============================================================================
+  // 🔄 CARGA DE DATOS + REALTIME
+  // ============================================================================
   useEffect(function() {
     const fetchMatchData = async function() {
       try {
-        // ✅ SINTAXIS CORRECTA: data: matchData (renombra 'data' a 'matchData')
+        // ✅ CORREGIDO: data: matchData (desestructuración con alias)
         const { data: matchData, error: matchError } = await supabase
           .from('matches')
           .select(`
             *,
-            home_team:profiles!home_team_id(team_name, badge_url, players),
-            away_team:profiles!away_team_id(team_name, badge_url, players)
+            home_team:profiles!matches_home_team_id_fkey(team_name, badge_url, players),
+            away_team:profiles!matches_away_team_id_fkey(team_name, badge_url, players)
           `)
           .eq('id', matchId)
           .maybeSingle();
@@ -105,8 +130,32 @@ export default function RefereeScoreboard() {
     };
     
     fetchMatchData();
+
+    // ✅ REALTIME: Escucha cambios en puntos, sets Y status
+    const channel = supabase
+      .channel('match-' + matchId + '-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'matches', filter: 'id=eq.' + matchId },
+        function(payload) {
+          setMatch(function(prev) {
+            if (!prev) {
+              return prev;
+            }
+            return { ...prev, ...payload.new };
+          });
+        }
+      )
+      .subscribe();
+
+    return function() {
+      supabase.removeChannel(channel);
+    };
   }, [matchId]);
 
+  // ============================================================================
+  // 📺 PANTALLA COMPLETA / HORIZONTAL
+  // ============================================================================
   const toggleFullscreen = async function() {
     if (!document.fullscreenElement) {
       try {
@@ -135,6 +184,9 @@ export default function RefereeScoreboard() {
     }
   };
 
+  // ============================================================================
+  // 📅 FORMATO DE FECHA Y HORA
+  // ============================================================================
   const getCourt = function() {
     if (match && match.court_number) {
       return 'Pista ' + match.court_number;
@@ -165,6 +217,9 @@ export default function RefereeScoreboard() {
     });
   };
 
+  // ============================================================================
+  // ⚡ ACTUALIZAR PUNTOS (Y CAMBIAR STATUS A 'live' SI ES EL PRIMER PUNTO)
+  // ============================================================================
   const updatePoints = async function(team, newPoints) {
     if (updating || newPoints < 0) {
       return;
@@ -172,19 +227,27 @@ export default function RefereeScoreboard() {
     setUpdating(true);
     try {
       const field = team === 'home' ? 'live_points_home' : 'live_points_away';
+      
+      // ✅ CAMBIO CLAVE: Si el partido está 'scheduled', lo ponemos 'live' al primer punto
+      const updateData = { [field]: newPoints };
+      if (match && match.status === 'scheduled') {
+        updateData.status = 'live';
+      }
+      
       const { error: updateError } = await supabase
         .from('matches')
-        .update({ [field]: newPoints })
+        .update(updateData)
         .eq('id', matchId);
       
       if (updateError) {
         throw updateError;
       }
+      
       setMatch(function(prev) {
         if (!prev) {
           return null;
         }
-        return { ...prev, [field]: newPoints };
+        return { ...prev, [field]: newPoints, status: updateData.status || prev.status };
       });
     } catch (err) {
       setError('Error al actualizar puntos');
@@ -193,6 +256,9 @@ export default function RefereeScoreboard() {
     }
   };
 
+  // ============================================================================
+  // 🏁 FINALIZAR SET (Y MARCAR COMO 'finished' SI ES EL ÚLTIMO)
+  // ============================================================================
   const finishSet = async function() {
     if (updating) {
       return;
@@ -219,7 +285,8 @@ export default function RefereeScoreboard() {
         current_set: isMatchOver ? setsData.current : setsData.current + 1,
         live_points_home: isMatchOver ? homePts : 0,
         live_points_away: isMatchOver ? awayPts : 0,
-        status: isMatchOver ? 'finished' : match.status
+        // ✅ CAMBIO CLAVE: Si el partido terminó, actualizamos status a 'finished'
+        status: isMatchOver ? 'finished' : (match.status === 'scheduled' ? 'live' : match.status)
       };
 
       const { error: setUpdateError } = await supabase
@@ -248,7 +315,10 @@ export default function RefereeScoreboard() {
         return { ...prev, ...dbUpdate };
       });
       
+      // Si el partido terminó, salimos de fullscreen y mostramos MVPs
       if (isMatchOver) {
+        await exitFullscreenMode();
+        setIsFullscreen(false);
         setShowMVPModal(true);
       }
     } catch (err) {
@@ -258,6 +328,9 @@ export default function RefereeScoreboard() {
     }
   };
 
+  // ============================================================================
+  // 🏆 GUARDAR MVPs
+  // ============================================================================
   const submitMVPs = async function() {
     if (!mvpVotes.male || !mvpVotes.female) {
       setError('Selecciona ambos MVPs');
@@ -277,6 +350,10 @@ export default function RefereeScoreboard() {
       if (mvpError) {
         throw mvpError;
       }
+      
+      await exitFullscreenMode();
+      setIsFullscreen(false);
+      
       setShowMVPModal(false);
       navigate('/dashboard/partidos');
     } catch (err) {
@@ -286,6 +363,9 @@ export default function RefereeScoreboard() {
     }
   };
 
+  // ============================================================================
+  // 🔙 VOLVER AL DASHBOARD
+  // ============================================================================
   const handleBack = function() {
     if (match && match.status === 'finished' && !match.mvp_voted) {
       alert('⚠️ Vota los MVPs antes de salir.');
@@ -295,6 +375,9 @@ export default function RefereeScoreboard() {
     navigate('/dashboard/partidos');
   };
 
+  // ============================================================================
+  // 🖼️ ESTADOS DE CARGA Y ERROR
+  // ============================================================================
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -326,6 +409,9 @@ export default function RefereeScoreboard() {
     );
   }
 
+  // ============================================================================
+  // 👥 PREPARAR JUGADORES PARA MVP
+  // ============================================================================
   const allPlayers = [
     ...(homeTeam.players || []).map(function(p) {
       return { ...p, team: homeTeam.team_name };
@@ -359,6 +445,9 @@ export default function RefereeScoreboard() {
     return isFemale(p.gender);
   });
 
+  // ============================================================================
+  // 🎨 RENDERIZADO DE LA INTERFAZ
+  // ============================================================================
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -380,6 +469,7 @@ export default function RefereeScoreboard() {
       </header>
 
       <Card className={styles.scoreboardCard}>
+        {/* Sets globales */}
         <div className={styles.globalSets}>
           <span className={styles.teamSets}>
             {homeTeam.team_name}: <strong>{setsData.homeWon}</strong>
@@ -390,7 +480,9 @@ export default function RefereeScoreboard() {
           </span>
         </div>
 
+        {/* Layout lado a lado */}
         <div className={styles.scoreMain}>
+          {/* Equipo Local */}
           <div className={styles.teamSide + ' ' + styles.teamLeft}>
             <div className={styles.badgeWrapper}>
               {homeTeam.badge_url ? (
@@ -428,11 +520,13 @@ export default function RefereeScoreboard() {
             </div>
           </div>
 
+          {/* Centro: Set actual + VS */}
           <div className={styles.centerInfo}>
             <div className={styles.currentSetBadge}>SET {setsData.current}</div>
             <div className={styles.vsBig}>VS</div>
           </div>
 
+          {/* Equipo Visitante */}
           <div className={styles.teamSide + ' ' + styles.teamRight}>
             <div className={styles.badgeWrapper}>
               {awayTeam.badge_url ? (
@@ -471,6 +565,7 @@ export default function RefereeScoreboard() {
           </div>
         </div>
 
+        {/* Botón Finalizar Set */}
         <div className={styles.finishSection}>
           <Button 
             variant="primary" 
@@ -493,6 +588,7 @@ export default function RefereeScoreboard() {
         </div>
       </Card>
 
+      {/* Info del partido */}
       <Card className={styles.infoCard}>
         <div className={styles.infoGrid}>
           <div className={styles.infoItem}>
@@ -510,6 +606,7 @@ export default function RefereeScoreboard() {
         </div>
       </Card>
 
+      {/* Modal MVP */}
       {showMVPModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalCard}>
