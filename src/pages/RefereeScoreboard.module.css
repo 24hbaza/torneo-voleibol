@@ -1,236 +1,570 @@
-/* === BASE === */
+/* ============================================================================
+   VARIABLES Y BASE
+   ============================================================================ */
+:root {
+  --volley-primary: #3b82f6;
+  --volley-primary-hover: #2563eb;
+  --volley-gold: #f59e0b;
+  --volley-gold-hover: #d97706;
+  --volley-red: #ef4444;
+  --volley-green: #22c55e;
+  --volley-orange: #f97316;
+  
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --border-default: rgba(148, 163, 184, 0.2);
+  --border-highlight: rgba(245, 158, 11, 0.4);
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.4);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+}
+
+/* ============================================================================
+   CONTENEDOR PRINCIPAL
+   ============================================================================ */
 .container {
-  max-width: 800px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   padding: 16px;
   padding-bottom: 100px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* === HEADER === */
-.header { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
-.backBtn { background: none; border: none; color: var(--volley-blue); font-weight: 600; padding: 8px; border-radius: var(--radius-md); cursor: pointer; }
-.pageTitle { font-size: 1.2rem; font-weight: 700; margin: 0; }
-.matchCode { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-muted); }
-.matchCode code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-
-/* === SCOREBOARD === */
-.scoreboardCard { background: var(--surface); border: var(--border-default); border-radius: var(--radius-xl); padding: 16px; box-shadow: var(--shadow-lg); }
-
-.globalSets {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border-default);
-  flex-wrap: wrap;
-}
-.teamSets { font-size: 0.9rem; color: var(--text-secondary); }
-.teamSets strong { color: var(--volley-gold); font-size: 1.1rem; }
-.vsSets { color: var(--text-muted); font-weight: 700; }
-.setsTarget { font-size: 0.75rem; color: var(--text-muted); background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; }
-
-.currentSetInfo {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--volley-blue);
-  font-weight: 600;
-  margin: 8px 0 12px;
-  background: rgba(59, 130, 246, 0.1);
-  padding: 4px;
-  border-radius: var(--radius-sm);
-}
-
-.teamScoreRow {
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-default);
-  gap: 12px;
+  padding: 12px 8px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  position: sticky;
+  top: 8px;
+  z-index: 100;
 }
-.teamScoreRow:last-of-type { border-bottom: none; }
 
-.teamInfo { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-.badgeContainer { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border-radius: 50%; border: 2px solid var(--border-default); flex-shrink: 0; }
-.teamBadge { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
-.badgePlaceholder { font-size: 1.2rem; }
-.teamDetails { display: flex; flex-direction: column; min-width: 0; }
-.teamName { font-size: 0.95rem; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.teamLabel { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+.backBtn {
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.backBtn:hover {
+  background: var(--surface-hover);
+  border-color: var(--volley-primary);
+  transform: translateX(-2px);
+}
 
-/* Controles Puntos */
-.scoreControl { display: flex; align-items: center; gap: 6px; background: var(--bg-tertiary); padding: 4px; border-radius: var(--radius-lg); flex-shrink: 0; }
-.scoreBtnMinus, .scoreBtnPlus { width: 32px; height: 32px; border-radius: 50%; border: none; font-size: 1.2rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.scoreBtnMinus { background: var(--volley-red); color: white; }
-.scoreBtnPlus { background: var(--volley-green); color: white; }
-.scoreBtnMinus:disabled, .scoreBtnPlus:disabled { opacity: 0.5; cursor: not-allowed; }
-.scoreValueLarge { font-size: 1.5rem; font-weight: 800; min-width: 36px; text-align: center; }
+.pageTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
 
-.divider { display: flex; justify-content: center; padding: 4px 0; }
-.vsBadge { background: var(--volley-blue); color: white; padding: 2px 10px; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 700; }
+.matchCode {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+}
+.matchCode code {
+  font-weight: 700;
+  color: var(--volley-gold);
+}
 
-/* === NUEVO: Botón Finalizar Set === */
-.finishSetContainer {
+/* ============================================================================
+   SCORECARD PRINCIPAL - DISEÑO MODERNO
+   ============================================================================ */
+.scoreboardCard {
+  background: linear-gradient(145deg, var(--surface), var(--bg-secondary));
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.scoreboardCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--volley-primary), var(--volley-gold), var(--volley-primary));
+  opacity: 0.8;
+}
+
+/* Sets globales */
+.globalSets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 0 20px;
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: 16px;
+}
+
+.teamSets {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.teamSets strong {
+  color: var(--volley-gold);
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.vsSets {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  background: var(--bg-tertiary);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.setsTarget {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+  font-style: italic;
+}
+
+/* Badge del set actual */
+.currentSetBadge {
+  text-align: center;
+  background: linear-gradient(135deg, var(--volley-primary), var(--volley-primary-hover));
+  color: white;
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 auto 24px;
+  display: inline-block;
+  box-shadow: var(--shadow-glow);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.7); }
+}
+
+/* ============================================================================
+   FILAS DE EQUIPOS
+   ============================================================================ */
+.teamRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  gap: 12px;
+  transition: background 0.2s;
+}
+
+.teamRow:hover {
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: var(--radius-lg);
+}
+
+.teamHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.badgeWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--surface));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--border-highlight);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.teamBadge {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.badgePlaceholder {
+  font-size: 1.8rem;
+  color: var(--volley-gold);
+}
+
+.teamInfo {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 0 12px;
-  border-top: 1px solid var(--border-default);
-  margin-top: 8px;
+  min-width: 0;
 }
-.finishSetBtn {
-  width: 100%;
-  max-width: 280px;
+
+.teamName {
+  font-size: 1.2rem;
   font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teamLabel {
+  font-size: 0.75rem;
+  color: var(--volley-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* Controles de puntuación - DISEÑO DESTACADO */
+.scoreControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(145deg, var(--bg-tertiary), var(--surface));
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-highlight);
+  box-shadow: var(--shadow-md);
+}
+
+.scoreBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--volley-primary), var(--volley-primary-hover));
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  flex-shrink: 0;
+}
+.scoreBtn:hover {
+  background: linear-gradient(135deg, var(--volley-primary-hover), var(--volley-primary));
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+.scoreBtn:active {
+  transform: scale(0.95);
+}
+.scoreBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.scoreDisplay {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--volley-gold);
+  min-width: 56px;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  text-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-highlight);
+}
+
+.divider {
+  text-align: center;
+  padding: 4px 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   SECCIÓN FINALIZAR SET
+   ============================================================================ */
+.finishSection {
+  text-align: center;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-default);
+  margin-top: 12px;
+}
+
+.finishBtn {
+  width: 100%;
+  max-width: 320px;
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--volley-green), #16a34a);
+  border: none;
+  border-radius: var(--radius-pill);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.finishBtn:hover {
+  background: linear-gradient(135deg, #16a34a, var(--volley-green));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(34, 197, 94, 0.6);
+}
+.finishBtn:active {
+  transform: translateY(0);
+}
+.finishBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: var(--bg-tertiary);
+}
+
 .warningText {
-  color: var(--volley-gold);
-  font-size: 0.75rem;
+  display: block;
+  margin-top: 12px;
+  color: var(--volley-orange);
+  font-size: 0.9rem;
   font-weight: 600;
+  animation: shake 0.5s ease-in-out infinite alternate;
 }
 
-/* Acciones Partido */
-.matchActions { display: flex; gap: 8px; justify-content: center; padding-top: 12px; border-top: 1px solid var(--border-default); margin-top: 8px; flex-wrap: wrap; }
-
-/* Info Partido */
-.matchInfo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: var(--surface); border: var(--border-default); border-radius: var(--radius-lg); padding: 12px; }
-.infoItem { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
-.infoLabel { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
-.infoValue { font-size: 0.85rem; font-weight: 600; }
-
-/* Modal MVP */
-.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
-.modalCard { background: var(--surface); border: var(--border-default); border-radius: var(--radius-xl); padding: 20px; max-width: 450px; width: 100%; }
-.modalTitle { font-size: 1.1rem; font-weight: 700; margin: 0 0 6px 0; text-align: center; }
-.modalSubtitle { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin: 0 0 16px 0; }
-.mvpGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.mvpColumn { display: flex; flex-direction: column; gap: 8px; }
-.mvpLabel { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem; }
-.mvpBadge { width: 28px; height: 28px; object-fit: contain; border-radius: 50%; background: var(--bg-tertiary); padding: 2px; }
-.mvpInput { width: 100%; padding: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.9rem; }
-.modalActions { display: flex; gap: 10px; justify-content: flex-end; }
-
-/* Estados */
-.loading, .empty, .errorBox { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
-.spinner { width: 36px; height: 36px; border: 3px solid var(--surface); border-top-color: var(--volley-gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.errorBox { background: rgba(239,68,68,0.1); border: 1px solid var(--volley-red); color: var(--volley-red); border-radius: var(--radius-md); }
-
-/* === 📱 RESPONSIVE MÓVIL VERTICAL === */
-@media (max-width: 640px) {
-  .container { padding: 12px; padding-bottom: 80px; }
-  .scoreboardCard { padding: 12px; }
-  .teamScoreRow { flex-direction: column; align-items: stretch; gap: 10px; padding: 16px 0; }
-  .teamInfo { width: 100%; }
-  .scoreControl { width: 100%; justify-content: center; }
-  .matchInfo { grid-template-columns: 1fr; }
-  .mvpGrid { grid-template-columns: 1fr; }
-  .matchActions { flex-direction: column; }
-  .matchActions button { width: 100%; }
+@keyframes shake {
+  from { transform: translateX(-2px); }
+  to { transform: translateX(2px); }
 }
 
-/* === 📱 MÓVIL HORIZONTAL (LANDSCAPE) === */
-@media (max-height: 500px) and (orientation: landscape) {
-  .container { padding: 8px; padding-bottom: 60px; gap: 12px; }
-  .header { padding: 2px 0; }
-  .pageTitle { font-size: 1rem; }
-  .scoreboardCard { padding: 10px; }
-  .globalSets { padding: 6px 0; font-size: 0.8rem; }
-  .currentSetInfo { margin: 4px 0 8px; font-size: 0.75rem; }
-  .teamScoreRow { flex-direction: row; padding: 8px 0; gap: 8px; }
-  .badgeContainer { width: 40px; height: 40px; }
-  .teamName { font-size: 0.85rem; }
-  .scoreValueLarge { font-size: 1.3rem; min-width: 30px; }
-  .scoreBtnMinus, .scoreBtnPlus { width: 28px; height: 28px; font-size: 1rem; }
-  .finishSetContainer { padding: 10px 0 8px; }
-  .finishSetBtn { max-width: 220px; padding: 8px 16px; font-size: 0.85rem; }
-  .matchActions { padding-top: 8px; gap: 6px; }
-  .matchActions button { padding: 6px 12px; font-size: 0.8rem; }
-  .matchInfo { padding: 8px; gap: 8px; }
-  .infoLabel { font-size: 0.65rem; }
-  .infoValue { font-size: 0.8rem; }
-  .modalCard { padding: 16px; }
-  .modalTitle { font-size: 1rem; }
-  .mvpGrid { gap: 12px; }
-}
-/* === ESTILOS PARA EL MODAL DE VOTACIÓN DE MVP (FOTOS) === */
-.modalMvpWide {
-  max-width: 800px; /* Más ancho para ver dos listas de jugadores */
-  width: 95%;
+/* ============================================================================
+   INFO CARD
+   ============================================================================ */
+.infoCard {
+  background: linear-gradient(145deg, var(--surface), var(--bg-secondary));
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-md);
 }
 
-.mvpSelectionGrid {
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  text-align: center;
+}
+
+.infoItem {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  overflow-y: auto;
-  max-height: 60vh; /* Scroll si hay muchos jugadores */
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 4px;
+}
+
+.infoLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+}
+
+.infoValue {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* ============================================================================
+   MODAL MVP - DISEÑO PREMIUM
+   ============================================================================ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalCard {
+  background: linear-gradient(145deg, var(--surface), var(--bg-secondary));
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  border: 1px solid var(--border-highlight);
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalTitle {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--volley-gold);
+  margin: 0 0 8px 0;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.modalSubtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0 0 24px 0;
+  font-weight: 500;
+}
+
+.mvpGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .mvpColumn {
-  flex: 1;
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
-  padding: 12px;
+  padding: 14px;
   border: 1px solid var(--border-default);
 }
 
-.mvpColumnHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
+.mvpHeader {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--volley-gold);
+  text-align: center;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border-default);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.mvpBadgeSmall {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  border-radius: 50%;
-  background: var(--surface);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .playersList {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.playersList::-webkit-scrollbar {
+  width: 4px;
+}
+.playersList::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+}
+.playersList::-webkit-scrollbar-thumb {
+  background: var(--volley-primary);
+  border-radius: 2px;
 }
 
 .playerCard {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 8px;
+  gap: 10px;
+  padding: 10px;
   background: var(--surface);
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
-  color: var(--text-secondary);
 }
-
 .playerCard:hover {
+  border-color: var(--volley-primary);
   background: var(--surface-hover);
-  border-color: var(--volley-blue);
+  transform: translateX(4px);
 }
-
 .playerCard.selected {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: var(--volley-blue);
-  color: var(--text-primary);
-  box-shadow: 0 0 0 2px var(--volley-blue);
+  border-color: var(--volley-gold);
+  background: rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 0 2px var(--volley-gold);
+  transform: translateX(4px);
 }
 
 .playerAvatar {
@@ -244,31 +578,349 @@
   justify-content: center;
   font-size: 1.2rem;
   flex-shrink: 0;
+  border: 2px solid var(--border-highlight);
 }
-
 .playerAvatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+.playerInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+}
 .playerName {
   font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.playerTeam {
+  font-size: 0.75rem;
+  color: var(--text-muted);
   font-weight: 500;
-  line-height: 1.2;
 }
 
 .emptyPlayers {
   text-align: center;
   color: var(--text-muted);
   padding: 20px;
-  font-style: italic;
   font-size: 0.85rem;
+  font-style: italic;
 }
 
-/* Responsive para el modal MVP */
-@media (max-width: 640px) {
-  .mvpSelectionGrid {
-    flex-direction: column;
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-default);
+}
+
+/* ============================================================================
+   ESTADOS DE CARGA Y ERROR
+   ============================================================================ */
+.loading, .errorBox, .empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--bg-tertiary);
+  border-top-color: var(--volley-gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorBox {
+  background: rgba(239, 68, 68, 0.15);
+  border-left: 4px solid var(--volley-red);
+  color: var(--volley-red);
+  font-weight: 500;
+}
+
+/* ============================================================================
+   📱 MÓVIL LANDSCAPE - MODO MARCADOR PROFESIONAL
+   ============================================================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+  .container {
+    padding: 8px;
+    padding-bottom: 16px;
+    gap: 12px;
   }
+  
+  .header {
+    padding: 8px 12px;
+    top: 4px;
+  }
+  
+  .pageTitle {
+    font-size: 1.1rem;
+  }
+  
+  .matchCode {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+  
+  /* === SCORECARD ENORME EN LANDSCAPE === */
+  .scoreboardCard {
+    padding: 16px;
+    border-radius: var(--radius-lg);
+  }
+  
+  .globalSets {
+    padding: 8px 0 16px;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .teamSets {
+    font-size: 1.3rem;
+  }
+  .teamSets strong {
+    font-size: 2rem;
+  }
+  
+  .vsSets {
+    font-size: 1.1rem;
+    padding: 6px 16px;
+  }
+  
+  .currentSetBadge {
+    font-size: 1.2rem;
+    padding: 10px 24px;
+    margin: 0 auto 20px;
+  }
+  
+  /* === EQUIPOS CON NÚMEROS GIGANTES === */
+  .teamRow {
+    padding: 8px 0;
+    gap: 16px;
+  }
+  
+  .badgeWrapper {
+    width: 72px;
+    height: 72px;
+    border-width: 4px;
+  }
+  
+  .teamName {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+  
+  .teamLabel {
+    font-size: 0.8rem;
+  }
+  
+  /* === PUNTUACIÓN ENORME - ESTILO MARCADOR === */
+  .scoreControls {
+    padding: 8px;
+    border-width: 3px;
+    gap: 14px;
+  }
+  
+  .scoreBtn {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+    border-width: 3px;
+  }
+  
+  .scoreDisplay {
+    font-size: 4rem; /* 🔥 NÚMERO GIGANTE */
+    font-weight: 900;
+    min-width: 80px;
+    padding: 8px 20px;
+    border-width: 2px;
+    text-shadow: 0 4px 16px rgba(245, 158, 11, 0.6);
+    background: rgba(245, 158, 11, 0.2);
+  }
+  
+  .divider {
+    font-size: 0.8rem;
+    padding: 2px 0;
+  }
+  
+  /* === BOTÓN FINALIZAR MÁS GRANDE === */
+  .finishSection {
+    padding-top: 16px;
+    margin-top: 8px;
+  }
+  
+  .finishBtn {
+    padding: 14px 20px;
+    font-size: 1rem;
+    max-width: 100%;
+  }
+  
+  .warningText {
+    font-size: 0.85rem;
+    margin-top: 8px;
+  }
+  
+  /* === INFO CARD COMPACTA === */
+  .infoCard {
+    padding: 12px 16px;
+  }
+  
+  .infoGrid {
+    gap: 8px;
+  }
+  
+  .infoLabel {
+    font-size: 0.65rem;
+  }
+  
+  .infoValue {
+    font-size: 0.95rem;
+  }
+  
+  /* === MODAL MVP OPTIMIZADO === */
+  .modalCard {
+    padding: 16px;
+    max-width: 95vw;
+  }
+  
+  .modalTitle {
+    font-size: 1.2rem;
+  }
+  
+  .modalSubtitle {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+  
+  .mvpGrid {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .mvpColumn {
+    padding: 10px;
+  }
+  
+  .playerCard {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .playerAvatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .playerName {
+    font-size: 0.85rem;
+  }
+  
+  .playerTeam {
+    font-size: 0.7rem;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE GENERAL
+   ============================================================================ */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+    padding-bottom: 90px;
+  }
+  
+  .header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .pageTitle {
+    font-size: 1.1rem;
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .globalSets {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .teamSets, .vsSets {
+    font-size: 1rem;
+  }
+  .teamSets strong {
+    font-size: 1.3rem;
+  }
+  
+  .teamRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  
+  .teamHeader {
+    width: 100%;
+  }
+  
+  .scoreControls {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .scoreDisplay {
+    font-size: 2.5rem;
+  }
+  
+  .infoGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .mvpGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .finishBtn {
+    width: 100%;
+  }
+}
+
+/* ============================================================================
+   UTILIDADES
+   ============================================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Smooth scroll para listas */
+.playersList {
+  scroll-behavior: smooth;
+}
+
+/* Efecto hover sutil en todo */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mejor legibilidad en texto pequeño */
+small, .infoLabel, .teamLabel, .setsTarget {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
