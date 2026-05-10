@@ -385,6 +385,9 @@ body {
   font-weight: 600;
 }
 
+/* ============================================================================
+   🏆 MODAL MVP - ESTILOS CORREGIDOS PARA MÓVIL
+   ============================================================================ */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -398,6 +401,8 @@ body {
   justify-content: center;
   padding: 16px;
   z-index: 1000;
+  /* ✅ Permite scroll si el contenido es muy alto */
+  overflow-y: auto;
 }
 
 .modalCard {
@@ -408,6 +413,10 @@ body {
   width: 100%;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
+  /* ✅ Asegura que el modal no se salga de pantalla */
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .modalTitle {
@@ -416,6 +425,7 @@ body {
   color: var(--volley-gold);
   text-align: center;
   margin-bottom: 6px;
+  flex-shrink: 0;
 }
 
 .modalSubtitle {
@@ -423,6 +433,7 @@ body {
   color: var(--text-secondary);
   text-align: center;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .mvpGrid {
@@ -430,6 +441,9 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 16px;
+  /* ✅ Permite scroll interno si hay muchos jugadores */
+  flex: 1;
+  min-height: 0;
 }
 
 .mvpColumn {
@@ -437,6 +451,9 @@ body {
   border-radius: 10px;
   padding: 10px;
   border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .mvpHeader {
@@ -447,14 +464,18 @@ body {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .playersList {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 180px;
+  /* ✅ Scroll interno controlado */
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-right: 4px;
 }
 
 .playersList::-webkit-scrollbar {
@@ -482,6 +503,7 @@ body {
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
   text-align: left;
+  min-width: 0;
 }
 
 .playerCard:hover {
@@ -517,6 +539,7 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
 }
 
 .playerName {
@@ -531,6 +554,9 @@ body {
 .playerTeam {
   font-size: 0.7rem;
   color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .emptyPlayers {
@@ -547,33 +573,98 @@ body {
   gap: 10px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
-.loading, .errorBox, .empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-secondary);
-  background: var(--bg-card);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-}
+/* ============================================================================
+   📱 MEDIA QUERIES PARA MÓVIL - CORRECCIONES CLAVE
+   ============================================================================ */
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--bg-surface);
-  border-top-color: var(--volley-gold);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+/* Móvil en vertical - Modal MVP */
+@media (max-width: 600px) and (orientation: portrait) {
+  .modalCard {
+    padding: 16px;
+    margin: 8px;
+    max-height: 95vh;
+  }
+  
+  .modalTitle {
+    font-size: 1.1rem;
+  }
+  
+  .modalSubtitle {
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+  
+  /* ✅ CAMBIO PRINCIPAL: Columnas apiladas en vertical */
+  .mvpGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  
+  .mvpColumn {
+    min-height: 200px;
+  }
+  
+  .playersList {
+    max-height: 150px;
+  }
+  
+  .playerCard {
+    padding: 10px;
+  }
+  
+  .playerAvatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .playerName {
+    font-size: 0.9rem;
+  }
+  
+  .playerTeam {
+    font-size: 0.75rem;
+  }
+  
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  
+  .modalActions button {
+    width: 100%;
   }
 }
 
+/* Móvil muy pequeño */
+@media (max-width: 360px) {
+  .modalCard {
+    padding: 12px;
+    margin: 4px;
+  }
+  
+  .playerAvatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+  
+  .playerName {
+    font-size: 0.8rem;
+  }
+  
+  .playerTeam {
+    font-size: 0.65rem;
+  }
+}
+
+/* ============================================================================
+   🌄 MODO LANDSCAPE / FULLSCREEN (EXISTENTE - SIN CAMBIOS)
+   ============================================================================ */
 @media (orientation: landscape), (display-mode: fullscreen) {
   .container {
     padding: 8px;
@@ -696,6 +787,7 @@ body {
   }
 }
 
+/* Móvil en vertical - Ajustes del marcador principal */
 @media (max-width: 480px) and (orientation: portrait) {
   .scoreMain {
     grid-template-columns: 1fr;
@@ -717,5 +809,33 @@ body {
   
   .scoreDisplay {
     font-size: clamp(3rem, 15vw, 4.5rem);
+  }
+}
+
+/* ============================================================================
+   🔄 UTILITIES
+   ============================================================================ */
+.loading, .errorBox, .empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bg-surface);
+  border-top-color: var(--volley-gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
