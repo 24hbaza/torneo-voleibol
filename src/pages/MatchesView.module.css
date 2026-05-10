@@ -76,7 +76,8 @@ body {
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 24px 20px 120px;
+  /* 🔥 AUMENTADO A 160px PARA QUE LA BARRA INFERIOR NO TAPE EL CONTENIDO */
+  padding: 24px 20px 160px; 
   position: relative;
   overflow: hidden;
 }
@@ -739,7 +740,7 @@ body {
 }
 
 /* ============================================================================
-   📊 PANEL DE SETS (Expandible)
+    PANEL DE SETS (Expandible)
    ============================================================================ */
 .setsDrawer {
   margin: 0 18px 14px;
@@ -940,7 +941,7 @@ body {
    ============================================================================ */
 @media (max-width: 768px) {
   .container {
-    padding: 16px 10px 110px;
+    padding: 16px 10px 150px; /* 🔥 150px para asegurar que la barra inferior no tape */
   }
   
   .header {
@@ -1065,7 +1066,7 @@ body {
 
 @media (max-width: 380px) {
   .container {
-    padding: 12px 8px 100px;
+    padding: 12px 8px 140px;
   }
   
   .teamName {
