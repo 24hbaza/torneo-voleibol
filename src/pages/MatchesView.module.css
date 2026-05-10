@@ -57,6 +57,11 @@
   padding: 0;
 }
 
+html, body {
+  overflow-x: hidden; /* 🛑 Evita scroll horizontal accidental */
+  width: 100%;
+}
+
 body {
   font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
   background: 
@@ -66,16 +71,19 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  min-width: 320px; /* Ancho mínimo para evitar rotura en móviles muy pequeños */
 }
 
 /* ============================================================================
    📦 CONTENEDOR PRINCIPAL
    ============================================================================ */
 .container {
+  width: 100%;
   max-width: 960px;
   margin: 0 auto;
   padding: 28px 20px 110px;
   position: relative;
+  overflow: hidden; /* Mantiene el contenido contenido */
 }
 
 /* Header con efecto glow */
@@ -84,6 +92,7 @@ body {
   margin-bottom: 36px;
   padding: 12px 0;
   position: relative;
+  width: 100%;
 }
 
 .headerGlow {
@@ -134,6 +143,7 @@ body {
   -webkit-backdrop-filter: blur(12px);
   overflow-x: auto;
   scrollbar-width: none;
+  width: 100%;
 }
 .tabsGlass::-webkit-scrollbar { display: none; }
 
@@ -153,6 +163,7 @@ body {
   gap: 7px;
   position: relative;
   overflow: hidden;
+  white-space: nowrap; /* Evita que el texto se rompa */
 }
 
 .tabGlass::before {
@@ -263,26 +274,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  
-  /* 🔹 Scroll habilitado */
-  overflow-y: auto;
-  max-height: calc(100vh - 220px); /* Ajusta según la altura de header + tabs */
-  
-  /* 🔹 Suavizado opcional */
-  scroll-behavior: smooth;
-  padding-bottom: 20px;
-}
-
-/* 🔹 Ocultar scrollbar pero mantener funcionalidad (opcional) */
-.matchesList::-webkit-scrollbar {
-  width: 6px;
-}
-.matchesList::-webkit-scrollbar-track {
-  background: transparent;
-}
-.matchesList::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
+  width: 100%;
 }
 
 /* ============================================================================
@@ -301,6 +293,7 @@ body {
               border-color var(--transition-smooth);
   position: relative;
   overflow: hidden;
+  width: 100%; /* Asegura que ocupe el ancho disponible */
 }
 
 .cardPremium::before {
@@ -912,94 +905,101 @@ body {
 .cardPremium:nth-child(5) { animation-delay: 0.25s; }
 
 /* ============================================================================
-   📱 RESPONSIVE - Mobile First Optimizado
+   📱 RESPONSIVE - Móvil Optimizado (Solución al Zoom)
    ============================================================================ */
 @media (max-width: 768px) {
+  /* 1. Reducir padding global para dar aire */
   .container {
-    padding: 20px 16px 100px;
+    padding: 20px 12px 100px;
   }
   
-  .header { margin-bottom: 28px; }
-  .title { font-size: 1.8rem; }
-  .subtitle { font-size: 1rem; }
+  .header { margin-bottom: 24px; }
+  .title { font-size: 1.6rem; }
   
+  /* 2. Pestañas: Permitir scroll horizontal si no caben */
   .tabsGlass {
-    gap: 8px;
+    gap: 6px;
     padding: 4px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
   
   .tabGlass {
-    padding: 10px 18px;
-    font-size: 0.85rem;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    white-space: nowrap;
   }
+
+  /* 3. Lista y Tarjetas: Compactar espaciado */
+  .matchesList { gap: 12px; }
   
+  .cardPremium {
+    border-radius: 16px;
+  }
+
   .cardHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px 10px;
+    gap: 10px;
+    padding: 12px 14px 10px;
   }
-  
-  /* ⏰ Horario más prominente en móvil */
+
+  /* El badge de hora ocupa todo el ancho */
   .timeBadge {
     width: 100%;
     justify-content: center;
-    padding: 12px 20px;
+    padding: 10px 16px;
   }
   
-  .timeValue { font-size: 1.8rem; }
-  .timeDay { font-size: 1.4rem; }
-  
-  /* Info bar en columna para móvil */
+  .timeValue { font-size: 1.4rem; }
+  .timeDay { font-size: 1.1rem; }
+
+  /* Info Bar: Apilar para evitar que se vea apretado */
   .matchInfoBar {
     flex-direction: column;
-    gap: 10px;
-    padding: 12px 16px;
-  }
-  
-  .infoDivider {
-    width: 80%;
-    height: 1px;
-  }
-  
-  .infoPill {
-    width: 100%;
-    justify-content: center;
+    gap: 8px;
     padding: 10px 14px;
   }
-  
-  .infoValueReferee { max-width: 200px; }
-  
-  /* Marcador adaptado */
-  .scoreboard {
-    grid-template-columns: 1fr auto 1fr;
-    gap: 12px;
-    padding: 20px 16px;
+
+  .infoPill {
+    width: 100%;
+    justify-content: center; /* Centrar texto en pastillas */
+    padding: 8px 12px;
   }
   
+  .infoDivider { display: none; }
+
+  /* 4. Marcador: Reducir elementos para que quepan */
+  .scoreboard {
+    padding: 16px 10px;
+    gap: 8px;
+  }
+  
+  /* Reducir tamaño de logos */
   .teamBadge {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
   }
   
   .teamName {
-    font-size: 0.9rem;
-    max-width: 110px;
+    font-size: 0.8rem;
+    max-width: 90px; /* Limitar ancho del nombre */
   }
   
-  .setsValue { font-size: 1.5rem; }
-  .pointsValue { font-size: 1.1rem; }
+  /* Números más pequeños */
+  .setsDisplay {
+    padding: 4px 12px;
+    min-width: 44px;
+  }
   
-  .vsBadge { font-size: 0.65rem; padding: 3px 10px; }
+  .setsValue { font-size: 1.3rem; }
+  .pointsValue { font-size: 1rem; }
   
-  /* Sets drawer */
-  .setsDrawer { margin: 0 16px 14px; }
-  .setRow { padding: 9px 12px; font-size: 0.9rem; }
-  .setScore { font-size: 1rem; padding: 3px 12px; }
-  
-  /* Footer acciones en columna */
-  .cardFooter { padding: 14px 16px 18px; }
+  .vsBadge { font-size: 0.6rem; padding: 2px 8px; }
+
+  /* 5. Footer: Botones anchos para dedo */
+  .cardFooter { padding: 12px 14px 16px; }
   
   .footerActions {
     flex-direction: column;
@@ -1011,9 +1011,16 @@ body {
   .btnSpectator {
     width: 100%;
     justify-content: center;
-    padding: 13px 20px;
-    font-size: 0.95rem;
+    padding: 12px 16px;
+    font-size: 0.9rem;
   }
+}
+
+/* Ajuste extra para móviles muy pequeños (iPhone SE, etc) */
+@media (max-width: 380px) {
+  .container { padding: 12px 8px 90px; }
+  .teamName { max-width: 70px; }
+  .timeValue { font-size: 1.2rem; }
 }
 
 /* ============================================================================

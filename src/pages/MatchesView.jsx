@@ -6,7 +6,7 @@ import { Card } from '../design-system/components';
 import styles from './MatchesView.module.css';
 
 // ============================================================================
-// ✅ FUNCIONES AUXILIARES (Lógica intacta)
+// ✅ FUNCIONES AUXILIARES
 // ============================================================================
 
 const parseSafeDate = (dateValue) => {
@@ -46,15 +46,25 @@ const formatTimeBadge = (dateValue) => {
 
 export default function MatchesView() {
   const { user } = useAuthStore();
+  
+  // 🔹 CORRECCIÓN 1: Inicialización perezosa para evitar el flash de "Mis Partidos"
+  // Lee localStorage ANTES del primer renderizado.
+  const getInitialTab = () => {
+    const savedTab = localStorage.getItem('matches_active_tab');
+    if (savedTab && ['my', 'live', 'finished', 'all'].includes(savedTab)) {
+      return savedTab;
+    }
+    return 'my';
+  };
+
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('my');
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   
-  // 🔹 REFS para manejar scroll y montaje inicial
-  const containerRef = useRef(null);
   const isInitialMount = useRef(true);
 
+  // 🔹 Carga de datos y suscripción a tiempo real
   useEffect(() => {
     const fetchMatches = async () => {
       try {
@@ -80,12 +90,6 @@ export default function MatchesView() {
 
     fetchMatches();
 
-    // 🔹 Restaurar pestaña y scroll desde localStorage al montar
-    const savedTab = localStorage.getItem('matches_active_tab');
-    if (savedTab && ['my', 'live', 'finished', 'all'].includes(savedTab)) {
-      setActiveTab(savedTab);
-    }
-
     const channel = supabase
       .channel('matches-realtime')
       .on('postgres_changes',
@@ -101,7 +105,7 @@ export default function MatchesView() {
     return () => supabase.removeChannel(channel);
   }, []);
 
-  // 🔹 Guardar pestaña activa en localStorage cuando cambie
+  // 🔹 Guardar pestaña activa cuando cambia
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -110,43 +114,29 @@ export default function MatchesView() {
     localStorage.setItem('matches_active_tab', activeTab);
   }, [activeTab]);
 
-  // 🔹 Manejar scroll por pestaña: guardar al cambiar de tab, restaurar al entrar
+  // 🔹 Gestión de Scroll de Ventana (Persistencia al recargar)
   useEffect(() => {
-    if (!containerRef.current) return;
-    
-    // Guardar posición de la pestaña anterior
-    const prevTab = localStorage.getItem('matches_active_tab');
-    if (prevTab && prevTab !== activeTab) {
-      localStorage.setItem(`matches_scroll_position_${prevTab}`, containerRef.current.scrollTop.toString());
-    }
-    
-    // Restaurar posición de la nueva pestaña
-    const savedScroll = localStorage.getItem(`matches_scroll_position_${activeTab}`);
+    if (!isInitialMount.current) return; // Solo ejecutar en el primer montaje
+
+    const savedScroll = localStorage.getItem('matches_scroll_position_global');
     if (savedScroll) {
-      // Pequeño timeout para asegurar que el contenido está renderizado
-      setTimeout(() => {
-        if (containerRef.current) {
-          containerRef.current.scrollTop = parseInt(savedScroll, 10);
-        }
-      }, 0);
-    } else {
-      // Si no hay scroll guardado, ir al top
-      containerRef.current.scrollTop = 0;
+      // Restaurar posición guardada
+      window.scrollTo(0, parseInt(savedScroll, 10));
     }
-  }, [activeTab]);
+    
+    // Limpiar después de usar
+    isInitialMount.current = false;
+  }, []);
 
-  // 🔹 Escuchar eventos de scroll y guardar posición en tiempo real
+  // Guardar scroll en tiempo real
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
     const handleScroll = () => {
-      localStorage.setItem(`matches_scroll_position_${activeTab}`, container.scrollTop.toString());
+      localStorage.setItem('matches_scroll_position_global', window.scrollY.toString());
     };
 
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [activeTab]);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Filtrado por pestañas
   const myMatches = matches.filter(m => 
@@ -163,7 +153,7 @@ export default function MatchesView() {
   }[activeTab] || matches;
 
   // ============================================================================
-  // 🖼️ RENDERIZADO
+  // ️ RENDERIZADO
   // ============================================================================
 
   if (loading) {
@@ -196,7 +186,7 @@ export default function MatchesView() {
         <p className={styles.subtitle}>Calendario, resultados y marcadores en tiempo real</p>
       </header>
 
-      {/* Navegación por pestañas con efecto glass */}
+      {/* Navegación por pestañas */}
       <nav className={styles.tabsGlass} role="tablist">
         {[
           { id: 'my', label: 'Mis partidos' },
@@ -219,12 +209,8 @@ export default function MatchesView() {
         ))}
       </nav>
 
-      {/* 🔹 Lista de partidos con ref para manejar scroll */}
-      <div 
-        className={styles.matchesList} 
-        role="tabpanel"
-        ref={containerRef}
-      >
+      {/* Lista de partidos */}
+      <div className={styles.matchesList} role="tabpanel">
         {currentMatches.length === 0 ? (
           <div className={`${styles.state} ${styles.stateEmpty}`}>
             <span className={styles.stateIcon}>📅</span>
@@ -246,14 +232,13 @@ export default function MatchesView() {
 }
 
 // ============================================================================
-// ✅ TARJETA DE PARTIDO - Diseño Premium con énfasis en horario/pista/árbitro
+// ✅ TARJETA DE PARTIDO
 // ============================================================================
 
 function MatchCard({ match, userId }) {
   const isReferee = userId && match.referee_team_id === userId;
   const isPlayer = userId && (match.home_team_id === userId || match.away_team_id === userId);
   
-  // Configuración de estados con colores neón
   const statusConfig = {
     live: { label: '● EN VIVO', variant: 'live', gradient: 'from-rose-500 to-orange-500' },
     finished: { label: '✓ FINALIZADO', variant: 'finished', gradient: 'from-emerald-500 to-teal-500' },
@@ -261,7 +246,6 @@ function MatchCard({ match, userId }) {
   };
   const status = statusConfig[match.status] || statusConfig.scheduled;
 
-  // Calcular sets ganados
   let setsHome = 0, setsAway = 0, setsDetails = [];
   try {
     if (match.sets_details) {
@@ -278,7 +262,6 @@ function MatchCard({ match, userId }) {
     }
   } catch {}
 
-  // Datos de equipos
   const homeTeam = {
     name: match.home_team?.team_name || 'Equipo Local',
     badge: match.home_team?.badge_url
@@ -292,21 +275,17 @@ function MatchCard({ match, userId }) {
     team: match.referee?.team_name
   };
 
-  // Formateo de fecha para badge visual
   const timeBadge = formatTimeBadge(match.match_date);
 
   return (
     <Card className={`${styles.cardPremium} ${styles[`card--${status.variant}`]}`}>
-      {/* Efecto de borde brillante */}
       <div className={styles.cardGlow} aria-hidden="true" />
       
-      {/* HEADER: Badge de estado + HORARIO DESTACADO */}
       <div className={styles.cardHeader}>
         <span className={`${styles.statusBadge} ${styles[`status--${status.variant}`]}`}>
           {status.label}
         </span>
         
-        {/* ⏰ HORARIO - Elemento más destacado */}
         <div className={styles.timeBadge}>
           <div className={styles.timeBadgeMain}>
             <span className={styles.timeValue}>{timeBadge.time}</span>
@@ -318,10 +297,9 @@ function MatchCard({ match, userId }) {
         </div>
       </div>
 
-      {/* 🏟️ INFO CRÍTICA: Pista + Árbitro (destacados) */}
       <div className={styles.matchInfoBar}>
         <div className={styles.infoPill}>
-          <span className={styles.infoIcon}>🏟️</span>
+          <span className={styles.infoIcon}>️</span>
           <span className={styles.infoLabel}>Pista</span>
           <span className={styles.infoValue}>
             {match.court_number ? `#${match.court_number}` : 'TBD'}
@@ -339,7 +317,6 @@ function MatchCard({ match, userId }) {
         </div>
       </div>
 
-      {/* 🏆 MARCADOR PRINCIPAL */}
       <div className={styles.scoreboard}>
         <TeamDisplay 
           team={homeTeam} 
@@ -368,7 +345,6 @@ function MatchCard({ match, userId }) {
         />
       </div>
 
-      {/* 📊 Detalle de sets (solo finalizados) */}
       {match.status === 'finished' && setsDetails.length > 0 && (
         <div className={styles.setsDrawer}>
           <button className={styles.setsToggle}>
@@ -397,7 +373,6 @@ function MatchCard({ match, userId }) {
         </div>
       )}
 
-      {/* 🦶 FOOTER: Acciones */}
       <div className={styles.cardFooter}>
         <div className={styles.footerActions}>
           {isReferee && (
@@ -408,7 +383,7 @@ function MatchCard({ match, userId }) {
           )}
           {!isReferee && isPlayer && (
             <button className={styles.btnViewScore}>
-              <span className={styles.btnIcon}>👁️</span>
+              <span className={styles.btnIcon}>️</span>
               Ver marcador
             </button>
           )}
@@ -422,7 +397,7 @@ function MatchCard({ match, userId }) {
 }
 
 // ============================================================================
-// ✅ Subcomponente: Display de Equipo (Reutilizable)
+// ✅ Subcomponente: Display de Equipo
 // ============================================================================
 
 function TeamDisplay({ team, sets, points, isWinner, side }) {
