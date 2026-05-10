@@ -58,8 +58,10 @@
 }
 
 html, body {
-  overflow-x: hidden; /* 🛑 Evita scroll horizontal accidental */
+  /* 🔒 CRUCIAL: Evita el scroll horizontal y cortes en móvil */
+  overflow-x: hidden;
   width: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -71,7 +73,7 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  min-width: 320px; /* Ancho mínimo para evitar rotura en móviles muy pequeños */
+  min-width: 320px;
 }
 
 /* ============================================================================
@@ -129,7 +131,7 @@ body {
 }
 
 /* ============================================================================
-   🧭 PESTAÑAS GLASSMORPHISM
+    PESTAÑAS GLASSMORPHISM
    ============================================================================ */
 .tabsGlass {
   display: flex;
@@ -278,7 +280,7 @@ body {
 }
 
 /* ============================================================================
-   🎴 TARJETA PREMIUM - Glassmorphism + Neón
+    TARJETA PREMIUM - Glassmorphism + Neón
    ============================================================================ */
 .cardPremium {
   padding: 0;
@@ -905,12 +907,12 @@ body {
 .cardPremium:nth-child(5) { animation-delay: 0.25s; }
 
 /* ============================================================================
-   📱 RESPONSIVE - Móvil Optimizado (Solución al Zoom)
+   📱 RESPONSIVE - Móvil Optimizado (SOLUCIÓN DEFINITIVA DE CORTES)
    ============================================================================ */
 @media (max-width: 768px) {
-  /* 1. Reducir padding global para dar aire */
+  /* 1. Reducir padding global para dar aire en pantallas pequeñas */
   .container {
-    padding: 20px 12px 100px;
+    padding: 20px 12px 100px; /* Menos padding lateral */
   }
   
   .header { margin-bottom: 24px; }
@@ -922,72 +924,71 @@ body {
     padding: 4px;
     margin-bottom: 16px;
     overflow-x: auto;
-    flex-wrap: nowrap;
+    flex-wrap: nowrap; /* Evita que bajen de línea y rompan el layout */
   }
   
   .tabGlass {
-    padding: 8px 14px;
+    padding: 8px 14px; /* Botones más pequeños */
     font-size: 0.8rem;
-    white-space: nowrap;
+    white-space: nowrap; /* Texto en una línea */
   }
 
-  /* 3. Lista y Tarjetas: Compactar espaciado */
-  .matchesList { gap: 12px; }
+  /* 3. Lista de Partidos: Menos espacio entre tarjetas */
+  .matchesList {
+    gap: 12px; /* De 20px a 12px */
+  }
   
-  .cardPremium {
-    border-radius: 16px;
-  }
-
+  /* 4. Tarjeta: Ajustes críticos */
   .cardHeader {
-    flex-direction: column;
+    flex-direction: column; /* Apilar estado y hora */
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
     padding: 12px 14px 10px;
   }
-
-  /* El badge de hora ocupa todo el ancho */
+  
+  /* El badge de hora ocupa todo el ancho en móvil para que se vea grande y claro */
   .timeBadge {
     width: 100%;
-    justify-content: center;
-    padding: 10px 16px;
+    justify-content: space-between;
+    padding: 8px 12px;
   }
   
   .timeValue { font-size: 1.4rem; }
   .timeDay { font-size: 1.1rem; }
-
-  /* Info Bar: Apilar para evitar que se vea apretado */
+  
+  /* Barra de Info (Pista/Árbitro): Apilada o compacta para evitar cortes */
   .matchInfoBar {
-    flex-direction: column;
+    flex-direction: column; /* Apilar uno debajo del otro */
     gap: 8px;
     padding: 10px 14px;
   }
-
+  
   .infoPill {
     width: 100%;
     justify-content: center; /* Centrar texto en pastillas */
     padding: 8px 12px;
   }
   
-  .infoDivider { display: none; }
-
-  /* 4. Marcador: Reducir elementos para que quepan */
+  .infoDivider { display: none; } /* Ocultar divisor vertical */
+  
+  /* 5. Marcador: La parte más delicada */
   .scoreboard {
-    padding: 16px 10px;
-    gap: 8px;
+    padding: 16px 10px; /* Menos padding lateral */
+    gap: 8px; /* Menos espacio entre columnas */
   }
   
-  /* Reducir tamaño de logos */
+  /* Reducir tamaño de badges de equipo para que quepan los nombres */
   .teamBadge {
     width: 48px;
     height: 48px;
   }
   
   .teamName {
-    font-size: 0.8rem;
-    max-width: 90px; /* Limitar ancho del nombre */
+    font-size: 0.85rem;
+    max-width: 90px; /* Limitar ancho nombre para evitar desborde */
   }
   
-  /* Números más pequeños */
+  /* Ajustar números de sets y puntos */
   .setsDisplay {
     padding: 4px 12px;
     min-width: 44px;
@@ -996,20 +997,23 @@ body {
   .setsValue { font-size: 1.3rem; }
   .pointsValue { font-size: 1rem; }
   
-  .vsBadge { font-size: 0.6rem; padding: 2px 8px; }
-
-  /* 5. Footer: Botones anchos para dedo */
+  .vsBadge { 
+    font-size: 0.6rem; 
+    padding: 2px 8px; 
+  }
+  
+  /* 6. Footer Botones: Ocupan todo el ancho */
   .cardFooter { padding: 12px 14px 16px; }
   
   .footerActions {
-    flex-direction: column;
+    flex-direction: column; /* Botones uno debajo del otro */
     width: 100%;
   }
   
   .btnArbitrar,
   .btnViewScore,
   .btnSpectator {
-    width: 100%;
+    width: 100%; /* Botón ancho completo */
     justify-content: center;
     padding: 12px 16px;
     font-size: 0.9rem;
@@ -1018,9 +1022,9 @@ body {
 
 /* Ajuste extra para móviles muy pequeños (iPhone SE, etc) */
 @media (max-width: 380px) {
-  .container { padding: 12px 8px 90px; }
   .teamName { max-width: 70px; }
   .timeValue { font-size: 1.2rem; }
+  .container { padding: 12px 8px 90px; }
 }
 
 /* ============================================================================
