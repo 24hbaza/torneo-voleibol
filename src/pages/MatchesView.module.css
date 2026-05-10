@@ -2,19 +2,17 @@
    🎨 VARIABLES PREMIUM - Tema Oscuro con Acentos Neón
    ============================================================================ */
 :root {
-  /* Colores base */
   --bg-app: #0a0e17;
   --bg-card: #111827;
   --bg-glass: rgba(30, 41, 59, 0.7);
   --bg-glass-hover: rgba(55, 65, 81, 0.85);
+  --bg-surface: #1e293b;
   
-  /* Texto */
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --text-glow: 0 0 20px rgba(255, 255, 255, 0.1);
   
-  /* Acentos neón */
   --neon-blue: #3b82f6;
   --neon-blue-glow: 0 0 10px #3b82f6, 0 0 25px rgba(59, 130, 246, 0.5);
   --neon-purple: #8b5cf6;
@@ -30,21 +28,16 @@
   --neon-rose: #f43f5e;
   --neon-rose-glow: 0 0 10px #f43f5e, 0 0 25px rgba(244, 63, 94, 0.5);
   
-  /* Bordes */
   --border-glass: rgba(255, 255, 255, 0.1);
   --border-glow: rgba(59, 130, 246, 0.4);
-  
-  /* Sombras */
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.2);
   
-  /* Radios */
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-full: 9999px;
   
-  /* Transiciones */
   --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -58,10 +51,11 @@
 }
 
 html, body {
-  /* 🔒 CRUCIAL: Evita el scroll horizontal y cortes en móvil */
   overflow-x: hidden;
   width: 100%;
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -72,7 +66,6 @@ body {
     var(--bg-app);
   color: var(--text-primary);
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
   min-width: 320px;
 }
 
@@ -83,16 +76,16 @@ body {
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 28px 20px 110px;
+  padding: 24px 20px 120px;
   position: relative;
-  overflow: hidden; /* Mantiene el contenido contenido */
+  overflow: hidden;
 }
 
 /* Header con efecto glow */
 .header {
   text-align: center;
-  margin-bottom: 36px;
-  padding: 12px 0;
+  margin-bottom: 28px;
+  padding: 10px 0;
   position: relative;
   width: 100%;
 }
@@ -111,11 +104,11 @@ body {
 }
 
 .title {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-size: clamp(1.5rem, 5vw, 2.4rem);
   font-weight: 900;
-  letter-spacing: -0.03em;
-  margin-bottom: 10px;
-  background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 50%, var(--neon-purple) 100%);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--neon-cyan) 50%, var(--neon-purple) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -123,11 +116,13 @@ body {
 }
 
 .subtitle {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  max-width: 520px;
+  max-width: 90%;
   margin: 0 auto;
   opacity: 0.9;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* ============================================================================
@@ -135,8 +130,8 @@ body {
    ============================================================================ */
 .tabsGlass {
   display: flex;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 8px;
+  margin-bottom: 24px;
   padding: 6px;
   background: var(--bg-glass);
   border: 1px solid var(--border-glass);
@@ -146,13 +141,17 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   width: 100%;
+  flex-shrink: 0;
 }
-.tabsGlass::-webkit-scrollbar { display: none; }
+
+.tabsGlass::-webkit-scrollbar {
+  display: none;
+}
 
 .tabGlass {
   flex-shrink: 0;
-  padding: 11px 22px;
-  font-size: 0.9rem;
+  padding: 10px 20px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
   background: transparent;
@@ -162,17 +161,17 @@ body {
   transition: all var(--transition-smooth);
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   position: relative;
   overflow: hidden;
-  white-space: nowrap; /* Evita que el texto se rompa */
+  white-space: nowrap;
 }
 
 .tabGlass::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
   opacity: 0;
   transition: opacity var(--transition-smooth);
   border-radius: inherit;
@@ -183,14 +182,16 @@ body {
   background: var(--bg-glass-hover);
 }
 
-.tabGlass:hover::before { opacity: 1; }
+.tabGlass:hover::before {
+  opacity: 1;
+}
 
 .tabGlassActive,
 .tabGlass[aria-selected="true"] {
   color: var(--text-primary);
   background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
   box-shadow: var(--neon-blue-glow);
-  text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .tabGlassActive::before,
@@ -200,12 +201,12 @@ body {
 
 .tabBadgePill {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #ffffff;
   font-size: 0.7rem;
   font-weight: 800;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-full);
-  min-width: 22px;
+  min-width: 18px;
   text-align: center;
   line-height: 1;
   backdrop-filter: blur(4px);
@@ -216,7 +217,7 @@ body {
    ============================================================================ */
 .state {
   text-align: center;
-  padding: 64px 28px;
+  padding: 60px 24px;
   background: var(--bg-glass);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
@@ -228,7 +229,9 @@ body {
   gap: 20px;
 }
 
-.stateEmpty { color: var(--text-secondary); }
+.stateEmpty {
+  color: var(--text-secondary);
+}
 
 .stateError {
   color: var(--neon-rose);
@@ -238,15 +241,15 @@ body {
 }
 
 .stateIcon {
-  font-size: 3rem;
+  font-size: 2.8rem;
   line-height: 1;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid rgba(255,255,255,0.1);
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
   border-top-color: var(--neon-cyan);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -254,7 +257,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .emptyLink {
@@ -275,7 +280,7 @@ body {
 .matchesList {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   width: 100%;
 }
 
@@ -290,19 +295,17 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow-glass);
-  transition: transform var(--transition-smooth), 
-              box-shadow var(--transition-smooth),
-              border-color var(--transition-smooth);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
   position: relative;
   overflow: hidden;
-  width: 100%; /* Asegura que ocupe el ancho disponible */
+  width: 100%;
 }
 
 .cardPremium::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent 50%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 50%);
   pointer-events: none;
 }
 
@@ -312,17 +315,10 @@ body {
   box-shadow: var(--shadow-glass), var(--shadow-glow);
 }
 
-/* Borde brillante dinámico */
 .cardGlow {
   position: absolute;
   inset: -1px;
-  background: linear-gradient(90deg, 
-    transparent, 
-    var(--neon-blue), 
-    var(--neon-purple), 
-    var(--neon-cyan), 
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-purple), var(--neon-cyan), transparent);
   border-radius: inherit;
   opacity: 0;
   transition: opacity var(--transition-smooth);
@@ -335,14 +331,25 @@ body {
 }
 
 @keyframes glowRotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* Variantes por estado */
-.card--live { border-top: 3px solid var(--neon-rose); }
-.card--finished { border-top: 3px solid var(--neon-green); }
-.card--scheduled { border-top: 3px solid var(--text-muted); }
+.card--live {
+  border-top: 3px solid var(--neon-rose);
+}
+
+.card--finished {
+  border-top: 3px solid var(--neon-green);
+}
+
+.card--scheduled {
+  border-top: 3px solid var(--text-muted);
+}
 
 /* ============================================================================
    ⏰ HEADER: Estado + HORARIO DESTACADO
@@ -351,7 +358,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px 12px;
+  padding: 14px 18px 10px;
   border-bottom: 1px solid var(--border-glass);
   position: relative;
 }
@@ -359,13 +366,13 @@ body {
 .statusBadge {
   font-size: 0.65rem;
   font-weight: 800;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .status--live {
@@ -388,20 +395,23 @@ body {
 }
 
 @keyframes pulseStatus {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(244, 63, 94, 0);
+  }
 }
 
-/* 🕐 BADGE DE HORARIO - Elemento estrella */
 .timeBadge {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
+  gap: 10px;
+  padding: 6px 12px;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
   border: 1px solid rgba(59, 130, 246, 0.4);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 }
 
 .timeBadgeMain {
@@ -410,55 +420,55 @@ body {
 }
 
 .timeValue {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--text-primary);
   font-family: 'Montserrat', system-ui, sans-serif;
-  letter-spacing: -1px;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .timeBadgeDate {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-left: 12px;
-  border-left: 1px solid rgba(255,255,255,0.2);
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .timeDay {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--neon-cyan);
   line-height: 1;
 }
 
 .timeMonth {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 /* ============================================================================
-   🏟️ BARRA DE INFO: Pista + Árbitro (DESTACADOS)
+   🏟️ BARRA DE INFO: Pista + Árbitro
    ============================================================================ */
 .matchInfoBar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 14px 20px;
-  background: rgba(30, 41, 59, 0.6);
+  gap: 14px;
+  padding: 12px 18px;
+  background: rgba(30, 41, 59, 0.5);
   border-bottom: 1px solid var(--border-glass);
 }
 
 .infoPill {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 14px;
   background: var(--bg-card);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-full);
@@ -467,11 +477,11 @@ body {
 
 .infoPill:hover {
   border-color: var(--neon-blue);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2);
 }
 
 .infoIcon {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .infoLabel {
@@ -479,20 +489,20 @@ body {
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .infoValue {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .infoValueReferee {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--neon-purple);
-  max-width: 140px;
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -500,7 +510,7 @@ body {
 
 .infoDivider {
   width: 1px;
-  height: 28px;
+  height: 24px;
   background: linear-gradient(to bottom, transparent, var(--border-glass), transparent);
 }
 
@@ -511,8 +521,8 @@ body {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 20px;
-  padding: 24px 20px;
+  gap: 16px;
+  padding: 20px 16px;
   position: relative;
 }
 
@@ -531,7 +541,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 4px;
 }
 
@@ -540,8 +550,8 @@ body {
 }
 
 .teamBadge {
-  width: 64px;
-  height: 64px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(135deg, var(--bg-card), var(--bg-surface));
@@ -550,23 +560,23 @@ body {
   align-items: center;
   justify-content: center;
   transition: all var(--transition-smooth);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
 }
 
 .cardPremium:hover .teamBadge {
   border-color: var(--neon-blue);
-  box-shadow: 0 6px 28px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.3);
 }
 
 .teamBadge img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 8px;
+  padding: 6px;
 }
 
 .badgePlaceholder {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   opacity: 0.6;
 }
 
@@ -574,22 +584,26 @@ body {
   position: absolute;
   top: -6px;
   right: -6px;
-  font-size: 1.2rem;
-  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.6));
+  font-size: 1.1rem;
+  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.6));
   animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
 .teamName {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
   text-align: center;
-  max-width: 150px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -599,30 +613,34 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .setsDisplay {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6px 20px;
+  padding: 5px 18px;
   background: var(--bg-card);
   border: 2px solid var(--border-glass);
   border-radius: var(--radius-sm);
-  min-width: 64px;
+  min-width: 60px;
   transition: all var(--transition-smooth);
 }
 
 .setsDisplayWin {
   border-color: var(--neon-orange);
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 0 18px rgba(249, 115, 22, 0.4);
   animation: winnerPulse 2s ease-in-out infinite alternate;
 }
 
 @keyframes winnerPulse {
-  from { box-shadow: 0 0 15px rgba(249, 115, 22, 0.3); }
-  to { box-shadow: 0 0 30px rgba(249, 115, 22, 0.6); }
+  from {
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.3);
+  }
+  to {
+    box-shadow: 0 0 24px rgba(249, 115, 22, 0.6);
+  }
 }
 
 .setsLabel {
@@ -630,11 +648,11 @@ body {
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .setsValue {
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   font-weight: 900;
   color: var(--text-primary);
   font-family: 'Montserrat', system-ui, sans-serif;
@@ -642,44 +660,43 @@ body {
 }
 
 .pointsDisplay {
-  padding: 4px 16px;
+  padding: 4px 14px;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
   border: 1px solid rgba(59, 130, 246, 0.4);
   border-radius: var(--radius-sm);
 }
 
 .pointsValue {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--neon-cyan);
   font-family: 'Montserrat', system-ui, sans-serif;
 }
 
-/* Centro del marcador */
 .scoreCenter {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 0 12px;
+  gap: 10px;
+  padding: 0 10px;
 }
 
 .vsBadge {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 900;
   color: var(--text-muted);
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  padding: 4px 12px;
-  background: rgba(255,255,255,0.05);
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-full);
 }
 
 .livePulse {
   position: relative;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 .pulseDot {
@@ -692,7 +709,7 @@ body {
 
 .pulseRing {
   position: absolute;
-  inset: -6px;
+  inset: -5px;
   border: 2px solid var(--neon-rose);
   border-radius: 50%;
   animation: pulseRing 2s infinite;
@@ -700,20 +717,32 @@ body {
 }
 
 @keyframes pulseDot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.7; }
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
 }
 
 @keyframes pulseRing {
-  0% { transform: scale(0.8); opacity: 0.8; }
-  100% { transform: scale(2); opacity: 0; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
 }
 
 /* ============================================================================
    📊 PANEL DE SETS (Expandible)
    ============================================================================ */
 .setsDrawer {
-  margin: 0 20px 16px;
+  margin: 0 18px 14px;
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--border-glass);
@@ -721,7 +750,7 @@ body {
 
 .setsToggle {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: rgba(30, 41, 59, 0.6);
   border: none;
   color: var(--text-secondary);
@@ -730,7 +759,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
   transition: all var(--transition-smooth);
 }
@@ -749,17 +778,17 @@ body {
 }
 
 .setsContent {
-  padding: 0 16px 16px;
+  padding: 0 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .setRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
+  padding: 8px 12px;
   background: var(--bg-card);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-sm);
@@ -779,17 +808,17 @@ body {
 .setScores {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .setScore {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   font-family: 'Montserrat', system-ui, sans-serif;
-  padding: 4px 14px;
+  padding: 3px 12px;
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
-  min-width: 36px;
+  min-width: 34px;
   text-align: center;
   transition: all var(--transition-smooth);
 }
@@ -810,13 +839,13 @@ body {
    🦶 FOOTER: Acciones
    ============================================================================ */
 .cardFooter {
-  padding: 16px 20px 20px;
+  padding: 14px 18px 18px;
   border-top: 1px solid var(--border-glass);
 }
 
 .footerActions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-end;
   flex-wrap: wrap;
 }
@@ -824,34 +853,34 @@ body {
 .btnArbitrar {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 22px;
+  gap: 6px;
+  padding: 10px 20px;
   background: linear-gradient(135deg, var(--neon-green), #059669);
-  color: white;
-  font-size: 0.9rem;
+  color: #ffffff;
+  font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
   border-radius: var(--radius-full);
   transition: all var(--transition-smooth);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.3);
   border: none;
   cursor: pointer;
 }
 
 .btnArbitrar:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.6);
+  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.5);
   filter: brightness(1.05);
 }
 
 .btnViewScore {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 22px;
+  gap: 6px;
+  padding: 10px 20px;
   background: var(--bg-surface);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-full);
@@ -868,27 +897,27 @@ body {
 .btnSpectator {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 22px;
+  gap: 6px;
+  padding: 10px 20px;
   background: rgba(100, 116, 139, 0.2);
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   border: 1px dashed var(--border-glass);
   border-radius: var(--radius-full);
 }
 
 .btnIcon {
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 /* ============================================================================
-   ✨ ANIMACIONES GLOBALES
+    ANIMACIONES GLOBALES
    ============================================================================ */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -897,134 +926,165 @@ body {
 }
 
 .cardPremium {
-  animation: fadeInUp 0.4s ease-out forwards;
+  animation: fadeInUp 0.35s ease-out forwards;
 }
 
-.cardPremium:nth-child(1) { animation-delay: 0.05s; }
-.cardPremium:nth-child(2) { animation-delay: 0.1s; }
-.cardPremium:nth-child(3) { animation-delay: 0.15s; }
-.cardPremium:nth-child(4) { animation-delay: 0.2s; }
-.cardPremium:nth-child(5) { animation-delay: 0.25s; }
+.cardPremium:nth-child(1) { animation-delay: 0.04s; }
+.cardPremium:nth-child(2) { animation-delay: 0.08s; }
+.cardPremium:nth-child(3) { animation-delay: 0.12s; }
+.cardPremium:nth-child(4) { animation-delay: 0.16s; }
+.cardPremium:nth-child(5) { animation-delay: 0.20s; }
 
 /* ============================================================================
-   📱 RESPONSIVE - Móvil Optimizado (SOLUCIÓN DEFINITIVA DE CORTES)
+   📱 RESPONSIVE - Móvil Optimizado (SOLUCIÓN DEFINITIVA)
    ============================================================================ */
 @media (max-width: 768px) {
-  /* 1. Reducir padding global para dar aire en pantallas pequeñas */
   .container {
-    padding: 20px 12px 100px; /* Menos padding lateral */
+    padding: 16px 10px 110px;
   }
   
-  .header { margin-bottom: 24px; }
-  .title { font-size: 1.6rem; }
+  .header {
+    margin-bottom: 20px;
+  }
   
-  /* 2. Pestañas: Permitir scroll horizontal si no caben */
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
   .tabsGlass {
-    gap: 6px;
+    gap: 4px;
     padding: 4px;
     margin-bottom: 16px;
     overflow-x: auto;
-    flex-wrap: nowrap; /* Evita que bajen de línea y rompan el layout */
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
   }
   
   .tabGlass {
-    padding: 8px 14px; /* Botones más pequeños */
-    font-size: 0.8rem;
-    white-space: nowrap; /* Texto en una línea */
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
   }
 
-  /* 3. Lista de Partidos: Menos espacio entre tarjetas */
   .matchesList {
-    gap: 12px; /* De 20px a 12px */
+    gap: 14px;
   }
   
-  /* 4. Tarjeta: Ajustes críticos */
   .cardHeader {
-    flex-direction: column; /* Apilar estado y hora */
+    flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-    padding: 12px 14px 10px;
+    padding: 12px 14px 8px;
   }
-  
-  /* El badge de hora ocupa todo el ancho en móvil para que se vea grande y claro */
+
   .timeBadge {
     width: 100%;
     justify-content: space-between;
     padding: 8px 12px;
   }
   
-  .timeValue { font-size: 1.4rem; }
-  .timeDay { font-size: 1.1rem; }
+  .timeValue {
+    font-size: 1.3rem;
+  }
   
-  /* Barra de Info (Pista/Árbitro): Apilada o compacta para evitar cortes */
+  .timeDay {
+    font-size: 1rem;
+  }
+
   .matchInfoBar {
-    flex-direction: column; /* Apilar uno debajo del otro */
+    flex-direction: column;
     gap: 8px;
     padding: 10px 14px;
   }
-  
+
   .infoPill {
     width: 100%;
-    justify-content: center; /* Centrar texto en pastillas */
+    justify-content: center;
     padding: 8px 12px;
   }
   
-  .infoDivider { display: none; } /* Ocultar divisor vertical */
-  
-  /* 5. Marcador: La parte más delicada */
+  .infoDivider {
+    display: none;
+  }
+
   .scoreboard {
-    padding: 16px 10px; /* Menos padding lateral */
-    gap: 8px; /* Menos espacio entre columnas */
+    padding: 16px 8px;
+    gap: 10px;
   }
   
-  /* Reducir tamaño de badges de equipo para que quepan los nombres */
   .teamBadge {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
   }
   
   .teamName {
-    font-size: 0.85rem;
-    max-width: 90px; /* Limitar ancho nombre para evitar desborde */
+    font-size: 0.8rem;
+    max-width: 85px;
   }
   
-  /* Ajustar números de sets y puntos */
   .setsDisplay {
-    padding: 4px 12px;
-    min-width: 44px;
+    padding: 4px 10px;
+    min-width: 42px;
   }
   
-  .setsValue { font-size: 1.3rem; }
-  .pointsValue { font-size: 1rem; }
-  
-  .vsBadge { 
-    font-size: 0.6rem; 
-    padding: 2px 8px; 
+  .setsValue {
+    font-size: 1.3rem;
   }
   
-  /* 6. Footer Botones: Ocupan todo el ancho */
-  .cardFooter { padding: 12px 14px 16px; }
+  .pointsValue {
+    font-size: 1rem;
+  }
+  
+  .vsBadge {
+    font-size: 0.58rem;
+    padding: 2px 8px;
+  }
+
+  .cardFooter {
+    padding: 12px 14px 16px;
+  }
   
   .footerActions {
-    flex-direction: column; /* Botones uno debajo del otro */
+    flex-direction: column;
     width: 100%;
   }
   
   .btnArbitrar,
   .btnViewScore,
   .btnSpectator {
-    width: 100%; /* Botón ancho completo */
+    width: 100%;
     justify-content: center;
-    padding: 12px 16px;
-    font-size: 0.9rem;
+    padding: 11px 16px;
+    font-size: 0.85rem;
   }
 }
 
-/* Ajuste extra para móviles muy pequeños (iPhone SE, etc) */
 @media (max-width: 380px) {
-  .teamName { max-width: 70px; }
-  .timeValue { font-size: 1.2rem; }
-  .container { padding: 12px 8px 90px; }
+  .container {
+    padding: 12px 8px 100px;
+  }
+  
+  .teamName {
+    max-width: 70px;
+    font-size: 0.72rem;
+  }
+  
+  .timeValue {
+    font-size: 1.15rem;
+  }
+  
+  .timeDay {
+    font-size: 0.9rem;
+  }
+  
+  .teamBadge {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 /* ============================================================================
@@ -1048,7 +1108,7 @@ body {
 }
 
 /* ============================================================================
-   🌙 DARK MODE OPTIMIZADO
+    DARK MODE OPTIMIZADO
    ============================================================================ */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -1073,18 +1133,17 @@ body {
   border: 0;
 }
 
-/* Efecto de brillo al cargar */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .cardPremium.loading {
-  background: linear-gradient(90deg, 
-    var(--bg-glass) 0%, 
-    rgba(255,255,255,0.05) 50%, 
-    var(--bg-glass) 100%
-  );
+  background: linear-gradient(90deg, var(--bg-glass) 0%, rgba(255, 255, 255, 0.05) 50%, var(--bg-glass) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
