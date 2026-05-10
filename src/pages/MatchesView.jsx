@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store';
@@ -50,6 +50,10 @@ export default function MatchesView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('my');
+  
+  // 🔹 REFS para manejar scroll y montaje inicial
+  const containerRef = useRef(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -76,6 +80,12 @@ export default function MatchesView() {
 
     fetchMatches();
 
+    // 🔹 Restaurar pestaña y scroll desde localStorage al montar
+    const savedTab = localStorage.getItem('matches_active_tab');
+    if (savedTab && ['my', 'live', 'finished', 'all'].includes(savedTab)) {
+      setActiveTab(savedTab);
+    }
+
     const channel = supabase
       .channel('matches-realtime')
       .on('postgres_changes',
@@ -90,6 +100,53 @@ export default function MatchesView() {
 
     return () => supabase.removeChannel(channel);
   }, []);
+
+  // 🔹 Guardar pestaña activa en localStorage cuando cambie
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    localStorage.setItem('matches_active_tab', activeTab);
+  }, [activeTab]);
+
+  // 🔹 Manejar scroll por pestaña: guardar al cambiar de tab, restaurar al entrar
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // Guardar posición de la pestaña anterior
+    const prevTab = localStorage.getItem('matches_active_tab');
+    if (prevTab && prevTab !== activeTab) {
+      localStorage.setItem(`matches_scroll_position_${prevTab}`, containerRef.current.scrollTop.toString());
+    }
+    
+    // Restaurar posición de la nueva pestaña
+    const savedScroll = localStorage.getItem(`matches_scroll_position_${activeTab}`);
+    if (savedScroll) {
+      // Pequeño timeout para asegurar que el contenido está renderizado
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = parseInt(savedScroll, 10);
+        }
+      }, 0);
+    } else {
+      // Si no hay scroll guardado, ir al top
+      containerRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
+
+  // 🔹 Escuchar eventos de scroll y guardar posición en tiempo real
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      localStorage.setItem(`matches_scroll_position_${activeTab}`, container.scrollTop.toString());
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [activeTab]);
 
   // Filtrado por pestañas
   const myMatches = matches.filter(m => 
@@ -162,8 +219,12 @@ export default function MatchesView() {
         ))}
       </nav>
 
-      {/* Lista de partidos */}
-      <div className={styles.matchesList} role="tabpanel">
+      {/* 🔹 Lista de partidos con ref para manejar scroll */}
+      <div 
+        className={styles.matchesList} 
+        role="tabpanel"
+        ref={containerRef}
+      >
         {currentMatches.length === 0 ? (
           <div className={`${styles.state} ${styles.stateEmpty}`}>
             <span className={styles.stateIcon}>📅</span>

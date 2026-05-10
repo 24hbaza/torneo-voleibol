@@ -263,6 +263,26 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  
+  /* 🔹 Scroll habilitado */
+  overflow-y: auto;
+  max-height: calc(100vh - 220px); /* Ajusta según la altura de header + tabs */
+  
+  /* 🔹 Suavizado opcional */
+  scroll-behavior: smooth;
+  padding-bottom: 20px;
+}
+
+/* 🔹 Ocultar scrollbar pero mantener funcionalidad (opcional) */
+.matchesList::-webkit-scrollbar {
+  width: 6px;
+}
+.matchesList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.matchesList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
 }
 
 /* ============================================================================
