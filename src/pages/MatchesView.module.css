@@ -1,48 +1,47 @@
 /* ============================================================================
-   🎨 VARIABLES PREMIUM - Tema Oscuro con Acentos Neón
+   🎨 VARIABLES - Tema oscuro limpio, sin saturación
    ============================================================================ */
 :root {
-  --bg-app: #0a0e17;
-  --bg-card: #111827;
-  --bg-glass: rgba(30, 41, 59, 0.7);
-  --bg-glass-hover: rgba(55, 65, 81, 0.85);
-  --bg-surface: #1e293b;
+  /* Fondos */
+  --bg-app: #0f1420;
+  --bg-card: #1a2235;
+  --bg-card-hover: #1e2940;
+  --bg-surface: #253049;
   
+  /* Texto */
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --text-glow: 0 0 20px rgba(255, 255, 255, 0.1);
   
-  --neon-blue: #3b82f6;
-  --neon-blue-glow: 0 0 10px #3b82f6, 0 0 25px rgba(59, 130, 246, 0.5);
-  --neon-purple: #8b5cf6;
-  --neon-purple-glow: 0 0 10px #8b5cf6, 0 0 25px rgba(139, 92, 246, 0.5);
-  --neon-pink: #ec4899;
-  --neon-pink-glow: 0 0 10px #ec4899, 0 0 25px rgba(236, 72, 153, 0.5);
-  --neon-cyan: #06b6d4;
-  --neon-cyan-glow: 0 0 10px #06b6d4, 0 0 25px rgba(6, 182, 212, 0.5);
-  --neon-green: #22c55e;
-  --neon-green-glow: 0 0 10px #22c55e, 0 0 25px rgba(34, 197, 94, 0.5);
-  --neon-orange: #f97316;
-  --neon-orange-glow: 0 0 10px #f97316, 0 0 25px rgba(249, 115, 22, 0.5);
-  --neon-rose: #f43f5e;
-  --neon-rose-glow: 0 0 10px #f43f5e, 0 0 25px rgba(244, 63, 94, 0.5);
+  /* Acentos de estado */
+  --status-live: #ef4444;
+  --status-finished: #22c55e;
+  --status-scheduled: #64748b;
   
-  --border-glass: rgba(255, 255, 255, 0.1);
-  --border-glow: rgba(59, 130, 246, 0.4);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.2);
+  /* Acento para partidos que arbitras */
+  --referee-accent: #a78bfa;
+  --referee-bg: rgba(167, 139, 250, 0.12);
   
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  /* Bordes */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(59, 130, 246, 0.5);
+  
+  /* Sombras sutiles */
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+  
+  /* Radios */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
   
-  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transiciones suaves */
+  --transition: 200ms ease;
 }
 
 /* ============================================================================
-   🔄 BASE & RESET
+   🔄 BASE
    ============================================================================ */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -50,167 +49,103 @@
   padding: 0;
 }
 
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 body {
-  font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
-  background: 
-    radial-gradient(ellipse at top, rgba(59, 130, 246, 0.08), transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.06), transparent 50%),
-    var(--bg-app);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg-app);
   color: var(--text-primary);
   line-height: 1.5;
-  min-width: 320px;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ============================================================================
-   📦 CONTENEDOR PRINCIPAL
+   📦 CONTENEDOR
    ============================================================================ */
 .container {
   width: 100%;
-  max-width: 960px;
+  max-width: 1000px;
   margin: 0 auto;
-  /* 🔥 AUMENTADO A 160px PARA QUE LA BARRA INFERIOR NO TAPE EL CONTENIDO */
-  padding: 24px 20px 160px; 
-  position: relative;
-  overflow: hidden;
+  padding: 24px 20px 140px;
 }
 
-/* Header con efecto glow */
+/* Header limpio */
 .header {
   text-align: center;
   margin-bottom: 28px;
-  padding: 10px 0;
-  position: relative;
-  width: 100%;
-}
-
-.headerGlow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  height: 120px;
-  background: radial-gradient(ellipse, rgba(59, 130, 246, 0.25), transparent 70%);
-  filter: blur(40px);
-  z-index: -1;
-  pointer-events: none;
+  padding: 8px 0;
 }
 
 .title {
-  font-size: clamp(1.5rem, 5vw, 2.4rem);
-  font-weight: 900;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
   letter-spacing: -0.02em;
-  margin-bottom: 8px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--neon-cyan) 50%, var(--neon-purple) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 20px rgba(6, 182, 212, 0.3);
 }
 
 .subtitle {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
   max-width: 90%;
   margin: 0 auto;
-  opacity: 0.9;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
 }
 
 /* ============================================================================
-    PESTAÑAS GLASSMORPHISM
+   📑 PESTAÑAS - Limpio y funcional
    ============================================================================ */
-.tabsGlass {
+.tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding: 6px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-glass);
+  gap: 6px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   overflow-x: auto;
   scrollbar-width: none;
-  width: 100%;
-  flex-shrink: 0;
 }
 
-.tabsGlass::-webkit-scrollbar {
+.tabs::-webkit-scrollbar {
   display: none;
 }
 
-.tabGlass {
+.tab {
   flex-shrink: 0;
-  padding: 10px 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
   color: var(--text-secondary);
   background: transparent;
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-smooth);
+  transition: all var(--transition);
   display: flex;
   align-items: center;
   gap: 6px;
-  position: relative;
-  overflow: hidden;
   white-space: nowrap;
 }
 
-.tabGlass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-smooth);
-  border-radius: inherit;
-}
-
-.tabGlass:hover {
+.tab:hover {
   color: var(--text-primary);
-  background: var(--bg-glass-hover);
+  background: var(--bg-surface);
 }
 
-.tabGlass:hover::before {
-  opacity: 1;
-}
-
-.tabGlassActive,
-.tabGlass[aria-selected="true"] {
+.tabActive {
   color: var(--text-primary);
-  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-  box-shadow: var(--neon-blue-glow);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  background: var(--bg-surface);
+  font-weight: 600;
 }
 
-.tabGlassActive::before,
-.tabGlass[aria-selected="true"]::before {
-  opacity: 0.3;
-}
-
-.tabBadgePill {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+.tabCount {
+  background: var(--status-live);
+  color: white;
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 600;
   padding: 2px 7px;
   border-radius: var(--radius-full);
-  min-width: 18px;
+  min-width: 20px;
   text-align: center;
-  line-height: 1;
-  backdrop-filter: blur(4px);
+  line-height: 1.3;
 }
 
 /* ============================================================================
@@ -218,16 +153,14 @@ body {
    ============================================================================ */
 .state {
   text-align: center;
-  padding: 60px 24px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-glass);
+  padding: 50px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .stateEmpty {
@@ -235,44 +168,37 @@ body {
 }
 
 .stateError {
-  color: var(--neon-rose);
-  border-color: rgba(244, 63, 94, 0.4);
-  background: rgba(244, 63, 94, 0.08);
-  box-shadow: 0 0 30px rgba(244, 63, 94, 0.15);
+  color: var(--status-live);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
 }
 
 .stateIcon {
-  font-size: 2.8rem;
-  line-height: 1;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  font-size: 2.5rem;
 }
 
 .spinner {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--neon-cyan);
+  border-top-color: var(--text-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  box-shadow: var(--neon-cyan-glow);
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 .emptyLink {
-  color: var(--neon-blue);
+  color: #3b82f6;
   text-decoration: none;
-  font-weight: 600;
-  transition: all var(--transition-smooth);
+  font-weight: 500;
+  transition: color var(--transition);
 }
 
 .emptyLink:hover {
-  color: var(--neon-cyan);
-  text-shadow: var(--neon-blue-glow);
+  color: #60a5fa;
 }
 
 /* ============================================================================
@@ -281,505 +207,382 @@ body {
 .matchesList {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  width: 100%;
+  gap: 16px;
 }
 
 /* ============================================================================
-    TARJETA PREMIUM - Glassmorphism + Neón
+   🎴 TARJETA DE PARTIDO - Diseño limpio y jerárquico
    ============================================================================ */
-.cardPremium {
+.card {
   padding: 0;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--shadow-glass);
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   position: relative;
   overflow: hidden;
-  width: 100%;
 }
 
-.cardPremium::before {
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.cardHighlight {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.cardHighlight::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 50%);
-  pointer-events: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #fbbf24, transparent);
 }
 
-.cardPremium:hover {
-  transform: translateY(-4px);
-  border-color: var(--border-glow);
-  box-shadow: var(--shadow-glass), var(--shadow-glow);
+/* ✅ HIGHLIGHT PARA PARTIDOS QUE ARBITRAS */
+.cardReferee {
+  border-left: 4px solid var(--referee-accent);
+  background: linear-gradient(to right, var(--referee-bg), var(--bg-card));
 }
 
-.cardGlow {
+.cardReferee:hover {
+  border-left-color: var(--referee-accent);
+  box-shadow: 0 8px 30px rgba(167, 139, 250, 0.25), var(--shadow-card-hover);
+}
+
+/* Badge de Árbitro - Visible pero elegante */
+.refereeBadge {
   position: absolute;
-  inset: -1px;
-  background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-purple), var(--neon-cyan), transparent);
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity var(--transition-smooth);
-  z-index: -1;
-  animation: glowRotate 4s linear infinite;
-}
-
-.cardPremium:hover .cardGlow {
-  opacity: 0.5;
-}
-
-@keyframes glowRotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.card--live {
-  border-top: 3px solid var(--neon-rose);
-}
-
-.card--finished {
-  border-top: 3px solid var(--neon-green);
-}
-
-.card--scheduled {
-  border-top: 3px solid var(--text-muted);
-}
-
-/* ============================================================================
-   ⏰ HEADER: Estado + HORARIO DESTACADO
-   ============================================================================ */
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 18px 10px;
-  border-bottom: 1px solid var(--border-glass);
-  position: relative;
-}
-
-.statusBadge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  display: flex;
+  top: 14px;
+  right: 16px;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 4px 10px;
+  background: var(--referee-bg);
+  border: 1px solid var(--referee-accent);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--referee-accent);
+  z-index: 2;
 }
 
-.status--live {
-  background: rgba(244, 63, 94, 0.2);
-  color: #fda4af;
-  border: 1px solid rgba(244, 63, 94, 0.4);
-  animation: pulseStatus 2s infinite;
-}
-
-.status--finished {
-  background: rgba(34, 197, 94, 0.2);
-  color: #86efac;
-  border: 1px solid rgba(34, 197, 94, 0.4);
-}
-
-.status--scheduled {
-  background: rgba(100, 116, 139, 0.2);
-  color: #94a3b8;
-  border: 1px solid rgba(100, 116, 139, 0.4);
-}
-
-@keyframes pulseStatus {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(244, 63, 94, 0);
-  }
-}
-
-.timeBadge {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
-}
-
-.timeBadgeMain {
-  display: flex;
-  align-items: baseline;
-}
-
-.timeValue {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--text-primary);
-  font-family: 'Montserrat', system-ui, sans-serif;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.timeBadgeDate {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-left: 10px;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.timeDay {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--neon-cyan);
+.refereeBadgeIcon {
+  font-size: 0.85rem;
   line-height: 1;
 }
 
-.timeMonth {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-/* ============================================================================
-   🏟️ BARRA DE INFO: Pista + Árbitro
-   ============================================================================ */
-.matchInfoBar {
-  display: flex;
+/* Badge de Fase - Visible pero elegante */
+.phaseBadge {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 12px 18px;
-  background: rgba(30, 41, 59, 0.5);
-  border-bottom: 1px solid var(--border-glass);
-}
-
-.infoPill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
+  gap: 5px;
+  padding: 5px 12px;
+  margin: 14px 16px 0;
   border-radius: var(--radius-full);
-  transition: all var(--transition-smooth);
-}
-
-.infoPill:hover {
-  border-color: var(--neon-blue);
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2);
-}
-
-.infoIcon {
-  font-size: 1rem;
-}
-
-.infoLabel {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-.infoValue {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.infoValueReferee {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--neon-purple);
-  max-width: 130px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid;
+}
+
+.phaseIcon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.phaseText {
   white-space: nowrap;
 }
 
-.infoDivider {
-  width: 1px;
-  height: 24px;
-  background: linear-gradient(to bottom, transparent, var(--border-glass), transparent);
+/* Header de tarjeta: Estado + Fecha + Pista */
+.cardHeader {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Estado - Muy visible */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+  position: relative;
+}
+
+.statusPulse {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Fecha y Hora - Grande y legible */
+.dateTime {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Montserrat', system-ui, sans-serif;
+  line-height: 1;
+}
+
+.date {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* Badge de Pista */
+.courtBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.courtIcon {
+  font-size: 0.9rem;
+}
+
+.courtText {
+  color: var(--text-primary);
 }
 
 /* ============================================================================
-   🏆 MARCADOR PRINCIPAL
+   🏆 MARCADOR - Equipos MÁS GRANDES, marcador claro
    ============================================================================ */
 .scoreboard {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 16px;
-  padding: 20px 16px;
-  position: relative;
-}
-
-.scoreboard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent, var(--border-glass), transparent);
+  gap: 20px;
+  padding: 24px 28px;
 }
 
 .team {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 4px;
+  gap: 16px;
 }
 
-.teamBadgeWrapper {
+.teamBadgeContainer {
   position: relative;
 }
 
+/* ✅ Badge de equipo - AÚN MÁS GRANDE (88px) */
 .teamBadge {
-  width: 58px;
-  height: 58px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--bg-card), var(--bg-surface));
-  border: 3px solid var(--border-glass);
+  background: var(--bg-surface);
+  border: 3px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-smooth);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+  transition: border-color var(--transition);
 }
 
-.cardPremium:hover .teamBadge {
-  border-color: var(--neon-blue);
-  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.3);
+.card:hover .teamBadge {
+  border-color: var(--border-focus);
 }
 
 .teamBadge img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 6px;
+  padding: 10px;
 }
 
 .badgePlaceholder {
-  font-size: 1.6rem;
-  opacity: 0.6;
+  font-size: 2.2rem;
+  opacity: 0.5;
 }
 
-.winnerCrown {
+/* Badge de ganador */
+.winnerBadge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  font-size: 1.1rem;
-  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.6));
-  animation: float 3s ease-in-out infinite;
+  top: -4px;
+  right: -4px;
+  font-size: 1.3rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
+/* ✅ Nombre de equipo - MÁS GRANDE (1.15rem) */
 .teamName {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--text-primary);
   text-align: center;
-  max-width: 140px;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.3;
 }
 
-.scoreGroup {
+/* Contenedor de puntuación */
+.scoreContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-.setsDisplay {
+.setsScore {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px 18px;
-  background: var(--bg-card);
-  border: 2px solid var(--border-glass);
+  padding: 6px 20px;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  min-width: 60px;
-  transition: all var(--transition-smooth);
+  min-width: 68px;
+  transition: border-color var(--transition);
 }
 
-.setsDisplayWin {
-  border-color: var(--neon-orange);
-  box-shadow: 0 0 18px rgba(249, 115, 22, 0.4);
-  animation: winnerPulse 2s ease-in-out infinite alternate;
-}
-
-@keyframes winnerPulse {
-  from {
-    box-shadow: 0 0 12px rgba(249, 115, 22, 0.3);
-  }
-  to {
-    box-shadow: 0 0 24px rgba(249, 115, 22, 0.6);
-  }
+.setsScoreWinner {
+  border-color: var(--status-finished);
 }
 
 .setsLabel {
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-size: 0.65rem;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
 
-.setsValue {
-  font-size: 1.7rem;
-  font-weight: 900;
+.setsNumber {
+  font-size: 2rem;
+  font-weight: 800;
   color: var(--text-primary);
   font-family: 'Montserrat', system-ui, sans-serif;
   line-height: 1;
 }
 
-.pointsDisplay {
-  padding: 4px 14px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
-  border: 1px solid rgba(59, 130, 246, 0.4);
+.pointsScore {
+  padding: 4px 16px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: var(--radius-sm);
 }
 
-.pointsValue {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--neon-cyan);
+.pointsNumber {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #60a5fa;
   font-family: 'Montserrat', system-ui, sans-serif;
 }
 
-.scoreCenter {
+/* Separador central */
+.scoreSeparator {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 0 10px;
+  gap: 12px;
+  padding: 0 8px;
 }
 
-.vsBadge {
-  font-size: 0.65rem;
-  font-weight: 900;
+.vsText {
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 2px;
   text-transform: uppercase;
-  padding: 3px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-full);
 }
 
-.livePulse {
-  position: relative;
+.liveIndicator {
   width: 10px;
   height: 10px;
-}
-
-.pulseDot {
-  position: absolute;
-  inset: 0;
-  background: var(--neon-rose);
+  background: var(--status-live);
   border-radius: 50%;
-  animation: pulseDot 2s infinite;
-}
-
-.pulseRing {
-  position: absolute;
-  inset: -5px;
-  border: 2px solid var(--neon-rose);
-  border-radius: 50%;
-  animation: pulseRing 2s infinite;
-  opacity: 0.6;
-}
-
-@keyframes pulseDot {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.7;
-  }
-}
-
-@keyframes pulseRing {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1.8);
-    opacity: 0;
-  }
+  animation: pulse 2s infinite;
 }
 
 /* ============================================================================
-    PANEL DE SETS (Expandible)
+   📊 DETALLES DE SETS - Expandible y limpio
    ============================================================================ */
-.setsDrawer {
-  margin: 0 18px 14px;
+.setsDetails {
+  margin: 0 16px 12px;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid var(--border-glass);
+  background: var(--bg-surface);
 }
 
-.setsToggle {
-  width: 100%;
+.setsSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px 14px;
-  background: rgba(30, 41, 59, 0.6);
+  background: transparent;
   border: none;
   color: var(--text-secondary);
   font-size: 0.85rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-smooth);
+  width: 100%;
+  transition: color var(--transition);
 }
 
-.setsToggle:hover {
+.setsSummary:hover {
   color: var(--text-primary);
-  background: rgba(55, 65, 81, 0.8);
 }
 
-.setsToggleIcon {
-  transition: transform var(--transition-smooth);
+.setsSummary::-webkit-details-marker {
+  display: none;
 }
 
-.setsToggle[aria-expanded="true"] .setsToggleIcon {
+.setsArrow {
+  transition: transform var(--transition);
+  font-size: 0.8rem;
+}
+
+.setsDetails[open] .setsArrow {
   transform: rotate(180deg);
 }
 
-.setsContent {
-  padding: 0 14px 14px;
+.setsList {
+  padding: 0 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -791,360 +594,397 @@ body {
   align-items: center;
   padding: 8px 12px;
   background: var(--bg-card);
-  border: 1px solid var(--border-glass);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  transition: border-color var(--transition-smooth);
 }
 
-.setRow:hover {
-  border-color: var(--neon-purple);
-}
-
-.setLabel {
-  font-size: 0.8rem;
-  font-weight: 600;
+.setNumber {
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
 .setScores {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .setScore {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   font-family: 'Montserrat', system-ui, sans-serif;
-  padding: 3px 12px;
+  padding: 3px 14px;
   border-radius: var(--radius-sm);
-  background: var(--bg-surface);
-  min-width: 34px;
+  background: var(--bg-card);
+  min-width: 36px;
   text-align: center;
-  transition: all var(--transition-smooth);
 }
 
-.setScoreWin {
-  color: var(--neon-orange);
-  background: rgba(249, 115, 22, 0.15);
-  border: 1px solid rgba(249, 115, 22, 0.4);
-  font-weight: 800;
-}
-
-.setDash {
-  color: var(--text-muted);
+.setScoreWinner {
+  color: var(--status-finished);
   font-weight: 700;
+}
+
+.setDivider {
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 /* ============================================================================
-   🦶 FOOTER: Acciones
+   👤 INFO ÁRBITRO - Discreta pero accesible
    ============================================================================ */
-.cardFooter {
-  padding: 14px 18px 18px;
-  border-top: 1px solid var(--border-glass);
+.refereeInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px 14px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
-.footerActions {
+.refereeLabel {
+  font-weight: 500;
+}
+
+.refereeName {
+  color: var(--text-secondary);
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   🔘 ACCIONES - Claras y contextuales
+   ============================================================================ */
+.cardActions {
+  padding: 12px 16px 18px;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.btnArbitrar {
+.btnPrimary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, var(--neon-green), #059669);
-  color: #ffffff;
+  padding: 10px 18px;
+  background: var(--status-finished);
+  color: white;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
   border-radius: var(--radius-full);
-  transition: all var(--transition-smooth);
-  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.3);
+  transition: all var(--transition);
   border: none;
   cursor: pointer;
 }
 
-.btnArbitrar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.5);
-  filter: brightness(1.05);
+.btnPrimary:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
 }
 
-.btnViewScore {
+.btnSecondary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 20px;
+  padding: 10px 18px;
   background: var(--bg-surface);
   color: var(--text-primary);
   font-size: 0.85rem;
-  font-weight: 600;
-  border: 1px solid var(--border-glass);
+  font-weight: 500;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
-  transition: all var(--transition-smooth);
+  transition: all var(--transition);
   cursor: pointer;
 }
 
-.btnViewScore:hover {
-  background: var(--bg-glass-hover);
-  border-color: var(--neon-blue);
-  transform: translateY(-1px);
+.btnSecondary:hover {
+  border-color: var(--border-focus);
+  background: var(--bg-card-hover);
 }
 
 .btnSpectator {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 20px;
-  background: rgba(100, 116, 139, 0.2);
+  padding: 10px 18px;
+  background: transparent;
   color: var(--text-secondary);
   font-size: 0.85rem;
-  font-weight: 600;
-  border: 1px dashed var(--border-glass);
+  font-weight: 500;
+  border: 1px dashed var(--border-subtle);
   border-radius: var(--radius-full);
 }
 
-.btnIcon {
-  font-size: 0.95rem;
-}
-
 /* ============================================================================
-    ANIMACIONES GLOBALES
-   ============================================================================ */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.cardPremium {
-  animation: fadeInUp 0.35s ease-out forwards;
-}
-
-.cardPremium:nth-child(1) { animation-delay: 0.04s; }
-.cardPremium:nth-child(2) { animation-delay: 0.08s; }
-.cardPremium:nth-child(3) { animation-delay: 0.12s; }
-.cardPremium:nth-child(4) { animation-delay: 0.16s; }
-.cardPremium:nth-child(5) { animation-delay: 0.20s; }
-
-/* ============================================================================
-   📱 RESPONSIVE - Móvil Optimizado (SOLUCIÓN DEFINITIVA)
+   📱 RESPONSIVE - Mobile optimizado (ajustes precisos)
    ============================================================================ */
 @media (max-width: 768px) {
   .container {
-    padding: 16px 10px 150px; /* 🔥 150px para asegurar que la barra inferior no tape */
-  }
-  
-  .header {
-    margin-bottom: 20px;
+    padding: 16px 12px 130px;
   }
   
   .title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
   
   .subtitle {
     font-size: 0.9rem;
   }
   
-  .tabsGlass {
+  .tabs {
     gap: 4px;
-    padding: 4px;
+    padding: 3px;
     margin-bottom: 16px;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
   }
   
-  .tabGlass {
-    padding: 8px 12px;
-    font-size: 0.78rem;
-    white-space: nowrap;
-  }
-
-  .matchesList {
-    gap: 14px;
+  .tab {
+    padding: 9px 14px;
+    font-size: 0.85rem;
   }
   
+  /* Header de tarjeta en móvil */
   .cardHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 12px 14px 8px;
-  }
-
-  .timeBadge {
-    width: 100%;
-    justify-content: space-between;
-    padding: 8px 12px;
-  }
-  
-  .timeValue {
-    font-size: 1.3rem;
-  }
-  
-  .timeDay {
-    font-size: 1rem;
-  }
-
-  .matchInfoBar {
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 14px;
-  }
-
-  .infoPill {
-    width: 100%;
-    justify-content: center;
-    padding: 8px 12px;
-  }
-  
-  .infoDivider {
-    display: none;
-  }
-
-  .scoreboard {
-    padding: 16px 8px;
+    grid-template-columns: 1fr;
+    grid-template-areas: "phase" "status" "datetime" "court";
     gap: 10px;
+    padding: 12px 14px 14px;
   }
   
-  .teamBadge {
-    width: 44px;
-    height: 44px;
+  .phaseBadge {
+    grid-area: phase;
+    margin: 0;
+    justify-self: start;
   }
   
-  .teamName {
-    font-size: 0.8rem;
-    max-width: 85px;
+  .statusBadge {
+    grid-area: status;
+    justify-self: start;
   }
   
-  .setsDisplay {
-    padding: 4px 10px;
-    min-width: 42px;
+  .dateTime {
+    grid-area: datetime;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 8px;
   }
   
-  .setsValue {
+  .time {
     font-size: 1.3rem;
   }
   
-  .pointsValue {
+  .date {
+    font-size: 0.8rem;
+  }
+  
+  .courtBadge {
+    grid-area: court;
+    justify-self: start;
+    width: fit-content;
+  }
+  
+  /* ✅ Badge de árbitro en móvil */
+  .refereeBadge {
+    top: 12px;
+    right: 14px;
+    padding: 3px 8px;
+    font-size: 0.65rem;
+  }
+  
+  .refereeBadgeIcon {
+    font-size: 0.8rem;
+  }
+  
+  /* Marcador en móvil - Equipos grandes pero adaptados */
+  .scoreboard {
+    padding: 18px 14px;
+    gap: 12px;
+  }
+  
+  /* ✅ Escudos grandes en móvil (72px) */
+  .teamBadge {
+    width: 72px;
+    height: 72px;
+  }
+  
+  .teamBadge img {
+    padding: 8px;
+  }
+  
+  .badgePlaceholder {
+    font-size: 1.8rem;
+  }
+  
+  /* ✅ Nombres de equipo legibles en móvil */
+  .teamName {
+    font-size: 1rem;
+    max-width: 140px;
+  }
+  
+  .setsNumber {
+    font-size: 1.6rem;
+  }
+  
+  .pointsNumber {
     font-size: 1rem;
   }
   
-  .vsBadge {
-    font-size: 0.58rem;
-    padding: 2px 8px;
-  }
-
-  .cardFooter {
-    padding: 12px 14px 16px;
+  /* Sets details en móvil */
+  .setsDetails {
+    margin: 0 12px 10px;
   }
   
-  .footerActions {
+  .setRow {
+    padding: 7px 10px;
+  }
+  
+  .setScore {
+    padding: 3px 12px;
+    font-size: 0.95rem;
+  }
+  
+  /* Acciones en móvil */
+  .cardActions {
+    padding: 10px 12px 16px;
     flex-direction: column;
-    width: 100%;
   }
   
-  .btnArbitrar,
-  .btnViewScore,
+  .btnPrimary,
+  .btnSecondary,
   .btnSpectator {
     width: 100%;
     justify-content: center;
     padding: 11px 16px;
-    font-size: 0.85rem;
   }
 }
 
-@media (max-width: 380px) {
+/* ✅ Mobile muy pequeño (320px - 400px) - Ajustes finos */
+@media (max-width: 400px) {
   .container {
-    padding: 12px 8px 140px;
+    padding: 12px 10px 120px;
   }
   
+  .scoreboard {
+    padding: 16px 10px;
+    gap: 10px;
+  }
+  
+  /* Escudos ajustados pero aún visibles */
+  .teamBadge {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .teamBadge img {
+    padding: 6px;
+  }
+  
+  .badgePlaceholder {
+    font-size: 1.6rem;
+  }
+  
+  /* Nombres de equipo compactos pero legibles */
   .teamName {
-    max-width: 70px;
-    font-size: 0.72rem;
+    font-size: 0.95rem;
+    max-width: 110px;
+    line-height: 1.25;
   }
   
-  .timeValue {
-    font-size: 1.15rem;
+  .time {
+    font-size: 1.2rem;
   }
   
-  .timeDay {
+  .date {
+    font-size: 0.75rem;
+  }
+  
+  .phaseText {
+    display: none; /* Solo icono en pantallas muy pequeñas */
+  }
+  
+  .phaseBadge {
+    padding: 5px 10px;
+  }
+  
+  .courtText {
+    display: none; /* Solo icono de pista */
+  }
+  
+  .courtBadge {
+    padding: 6px 10px;
+  }
+  
+  .setsNumber {
+    font-size: 1.4rem;
+  }
+  
+  .pointsNumber {
+    font-size: 0.95rem;
+  }
+  
+  .refereeName {
+    max-width: 140px;
+  }
+}
+
+/* ✅ Ajuste específico para iPhone SE / pantallas < 360px */
+@media (max-width: 360px) {
+  .teamName {
     font-size: 0.9rem;
+    max-width: 100px;
   }
   
   .teamBadge {
-    width: 38px;
-    height: 38px;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .dateTime {
+    gap: 4px;
+  }
+  
+  .time {
+    font-size: 1.1rem;
+  }
+  
+  .statusBadge {
+    padding: 4px 10px;
+    font-size: 0.65rem;
   }
 }
 
 /* ============================================================================
-   ♿ ACCESIBILIDAD & PREFERENCIAS
+   ♿ ACCESIBILIDAD
    ============================================================================ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 
-.tabGlass:focus-visible,
-.btnArbitrar:focus-visible,
-.btnViewScore:focus-visible {
-  outline: 2px solid var(--neon-cyan);
+.tab:focus-visible,
+.btnPrimary:focus-visible,
+.btnSecondary:focus-visible,
+.setsSummary:focus-visible {
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.3);
 }
 
 /* ============================================================================
-    DARK MODE OPTIMIZADO
+   🌙 DARK MODE (refuerzo)
    ============================================================================ */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-app: #0a0e17;
-    --bg-card: #111827;
-    --bg-glass: rgba(30, 41, 59, 0.7);
+    --bg-app: #0f1420;
+    --bg-card: #1a2235;
   }
-}
-
-/* ============================================================================
-   🎯 UTILIDADES ADICIONALES
-   ============================================================================ */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.cardPremium.loading {
-  background: linear-gradient(90deg, var(--bg-glass) 0%, rgba(255, 255, 255, 0.05) 50%, var(--bg-glass) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
 }

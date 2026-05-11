@@ -108,6 +108,8 @@ export function calculateGroupStandings(group, assignments = [], matches = []) {
 
   const groupAssignments = assignments.filter(a => a?.group_id === group.id);
 
+  console.log(`📋 Equipos asignados al grupo: ${groupAssignments.length}`);
+
   // Inicializar equipos
   const teams = {};
   groupAssignments.forEach(a => {
@@ -125,6 +127,12 @@ export function calculateGroupStandings(group, assignments = [], matches = []) {
     };
   });
 
+  // Si no hay equipos asignados, retornar array vacío
+  if (Object.keys(teams).length === 0) {
+    console.log(`⚠️ No hay equipos asignados al grupo ${group.name}`);
+    return [];
+  }
+
   // Procesar partidos
   let partidosProcesados = 0;
   let partidosIgnorados = 0;
@@ -137,7 +145,7 @@ export function calculateGroupStandings(group, assignments = [], matches = []) {
     const away = teams[awayId];
 
     if (!home || !away) {
-      console.warn(`⚠️ Partido ${idx + 1}: Equipos no encontrados`);
+      console.warn(`⚠️ Partido ${idx + 1}: Equipos no encontrados (${homeId} vs ${awayId})`);
       partidosIgnorados++;
       return;
     }
@@ -212,7 +220,7 @@ export function calculateGroupStandings(group, assignments = [], matches = []) {
     }
   });
 
-  console.log(`\n📊 RESUMEN: ${partidosProcesados} partidos procesados`);
+  console.log(`\n📊 RESUMEN ${group.name}: ${partidosProcesados} partidos procesados, ${partidosIgnorados} ignorados`);
 
   const standings = Object.values(teams);
   return sortWithTiebreakers(standings, groupMatches);

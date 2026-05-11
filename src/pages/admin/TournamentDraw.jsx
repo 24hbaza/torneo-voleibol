@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Button, Card } from '../../design-system/components';
 import { sendToTeam } from '../../lib/notifications';
+import { generateKnockoutPhases } from '../../lib/tournament/knockoutGenerator';
+import { getQualifiedTeams } from '../../lib/tournament/standingsCalculator';
 import styles from './TournamentDraw.module.css';
 
 // ============================================================================
@@ -386,7 +388,8 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
         home_score: 0,
         away_score: 0,
         points_to_win: config.points_to_win || 25,
-        sets_to_win: config.sets_to_win || 2
+        sets_to_win: config.sets_to_win || 2,
+        phase: 'group' // Fase de grupos inicial
       });
 
       // 🔥 Actualizar estados SOLO por jugar (no por arbitrar)
@@ -556,10 +559,152 @@ export default function TournamentDraw() {
       addLog('⚔️ Generando horarios por slots optimizados...');
       var finalScheduled = scheduleMatches(groupsWithTeams, config, addLog);
       
-      addLog('💾 Guardando calendario...');
+      addLog('💾 Guardando calendario de fase de grupos...');
       var { error: errInsert } = await supabase.from('matches').insert(finalScheduled);
       if (errInsert) {
         throw new Error('Error guardando: ' + errInsert.message);
+      }
+
+      // ========================================================================
+      // 🔥 NUEVO: GENERAR FASE ELIMINATORIA (Grupos Z/W + Semifinales + Final)
+      // ========================================================================
+      
+      // Verificar si hay configuración para fase eliminatoria
+      // Asumimos que si teams_advancing existe y es > 0, generamos eliminatoria
+      var teamsAdvancing = config.teams_advancing || 2; // Por defecto 2 por grupo
+      var totalQualified = createdGroups.length * teamsAdvancing;
+      
+      if (totalQualified === 8) {
+        addLog('🔄 Generando fase eliminatoria con ' + totalQualified + ' equipos...');
+        
+        // NOTA: En un entorno real, aquí esperaríamos a que terminen los grupos
+        // Para este ejemplo, generamos la estructura pero con status 'pending'
+        // que se activará cuando los grupos terminen
+        
+        // Crear estructura de grupos Z y W (placeholders)
+        var groupZ = {
+          id: 'group_z_knockout',
+          name: 'Grupo Z (Fase Eliminatoria)',
+          teams: [] // Se llenará cuando terminen los grupos
+        };
+        
+        var groupW = {
+          id: 'group_w_knockout',
+          name: 'Grupo W (Fase Eliminatoria)',
+          teams: [] // Se llenará cuando terminen los grupos
+        };
+        
+        // Generar partidos de semifinales y final (placeholders)
+        var knockoutMatches = [
+          // Semifinal 1: 1º Z vs 2º W
+          {
+            group_id: null,
+            group_name: 'Fase Final',
+            home_team_id: 'winner_group_z_1st',
+            away_team_id: 'winner_group_w_2nd',
+            home_team_name: '1º Clasificado Grupo Z',
+            away_team_name: '2º Clasificado Grupo W',
+            round: 1,
+            phase: 'knockout_final',
+            match_type: 'semifinal_1',
+            status: 'pending',
+            match_date: null,
+            court_number: null,
+            referee_team_id: null,
+            home_score: null,
+            away_score: null,
+            winner_team_id: null,
+            verification_code: null,
+            sets_details: [],
+            points_to_win: config.points_to_win || 25,
+            sets_to_win: config.sets_to_win || 2
+          },
+          // Semifinal 2: 2º Z vs 1º W
+          {
+            group_id: null,
+            group_name: 'Fase Final',
+            home_team_id: 'winner_group_z_2nd',
+            away_team_id: 'winner_group_w_1st',
+            home_team_name: '2º Clasificado Grupo Z',
+            away_team_name: '1º Clasificado Grupo W',
+            round: 1,
+            phase: 'knockout_final',
+            match_type: 'semifinal_2',
+            status: 'pending',
+            match_date: null,
+            court_number: null,
+            referee_team_id: null,
+            home_score: null,
+            away_score: null,
+            winner_team_id: null,
+            verification_code: null,
+            sets_details: [],
+            points_to_win: config.points_to_win || 25,
+            sets_to_win: config.sets_to_win || 2
+          },
+          // Final
+          {
+            group_id: null,
+            group_name: 'Fase Final',
+            home_team_id: 'winner_sf1',
+            away_team_id: 'winner_sf2',
+            home_team_name: 'Ganador Semifinal 1',
+            away_team_name: 'Ganador Semifinal 2',
+            round: 2,
+            phase: 'knockout_final',
+            match_type: 'final',
+            status: 'pending',
+            match_date: null,
+            court_number: null,
+            referee_team_id: null,
+            home_score: null,
+            away_score: null,
+            winner_team_id: null,
+            verification_code: null,
+            sets_details: [],
+            points_to_win: config.points_to_win || 25,
+            sets_to_win: config.sets_to_win || 2
+          },
+          // 3er y 4to puesto
+          {
+            group_id: null,
+            group_name: 'Fase Final',
+            home_team_id: 'loser_sf1',
+            away_team_id: 'loser_sf2',
+            home_team_name: 'Perdedor Semifinal 1',
+            away_team_name: 'Perdedor Semifinal 2',
+            round: 2,
+            phase: 'knockout_final',
+            match_type: 'third_place',
+            status: 'pending',
+            match_date: null,
+            court_number: null,
+            referee_team_id: null,
+            home_score: null,
+            away_score: null,
+            winner_team_id: null,
+            verification_code: null,
+            sets_details: [],
+            points_to_win: config.points_to_win || 25,
+            sets_to_win: config.sets_to_win || 2
+          }
+        ];
+        
+        // Guardar partidos de fase final (pendientes)
+        if (knockoutMatches.length > 0) {
+          var { error: errKnockout } = await supabase
+            .from('matches')
+            .insert(knockoutMatches);
+          
+          if (errKnockout) {
+            console.warn('⚠️ Error guardando fase final:', errKnockout);
+            addLog('⚠️ Fase final generada pero no guardada completamente');
+          } else {
+            addLog('✅ Fase eliminatoria (semifinales + final) creada');
+          }
+        }
+      } else {
+        addLog('ℹ️ No se generan 8 equipos clasificados. Total: ' + totalQualified);
       }
 
       var { error: errUpdate } = await supabase
@@ -698,6 +843,7 @@ export default function TournamentDraw() {
             <li>⏱️ Duración: {config?.match_duration_minutes || 45} min + {config?.buffer_minutes || 0} min</li>
             <li>🏟️ Pistas disponibles: {config?.num_courts || 1}</li>
             <li>👥 Formato: {config?.match_format === 'double' ? 'Ida y Vuelta' : 'Solo Ida'}</li>
+            <li>🎟️ Equipos que avanzan: {config?.teams_advancing || 2} por grupo</li>
           </ul>
         </Card>
         
