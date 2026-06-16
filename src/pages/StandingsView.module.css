@@ -1,46 +1,115 @@
+/* src/pages/StandingsView.module.css */
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: clamp(1rem, 5vw, 2.5rem) clamp(0.5rem, 4vw, 2rem);
-  min-height: 100vh;
-  /* CAMBIO CLAVE: Eliminamos el fondo blanco/gris. Ahora es transparente */
-  background: transparent; 
+  padding: var(--space-xl) var(--space-md);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-  gap: clamp(1rem, 3vw, 2rem);
-  align-items: start;
-}
-
-.loading, .empty, .error {
+.loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding: 4rem 1.5rem;
-  text-align: center;
-  /* Fondo oscuro translúcido para mensajes de estado */
-  background: rgba(30, 41, 59, 0.6); 
-  backdrop-filter: blur(8px);
-  border-radius: 16px;
-  border: 1px solid #334155;
-  color: #f8fafc;
-  margin-top: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+  min-height: 60vh;
+  gap: var(--space-md);
 }
 
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #334155;
-  border-top-color: #3b82f6;
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border-default);
+  border-top-color: var(--volley-blue);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-.error { color: #fca5a5; border-color: #7f1d1d; background: rgba(127, 29, 29, 0.6); }
+.error {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--volley-red);
+  font-size: var(--text-lg);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--volley-red);
+  border-radius: var(--radius-md);
+  margin: var(--space-xl) auto;
+  max-width: 600px;
+}
+
+.empty {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-lg);
+}
+
+/* ✅ NUEVO: Estado vacío cuando no hay calendario */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.emptyIcon {
+  font-size: 6rem;
+  margin-bottom: var(--space-lg);
+  opacity: 0.5;
+}
+
+.emptyState h2 {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.emptyState > p {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-xl) 0;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.emptyInfo {
+  background: var(--surface-elevated);
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-top: var(--space-lg);
+  max-width: 500px;
+  width: 100%;
+}
+
+.emptyInfo p {
+  margin: var(--space-sm) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+}
+
+.emptyInfo p:first-child {
+  margin-top: 0;
+}
+
+.emptyInfo p:last-child {
+  margin-bottom: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

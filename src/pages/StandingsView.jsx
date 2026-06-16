@@ -6,27 +6,12 @@ import { calculateGroupStandings } from '../features/standings/utils/calculateSt
 import GroupStandings from '../features/standings/components/GroupStandings';
 import styles from './StandingsView.module.css';
 
-// 🔥 FUNCIÓN UTILIDAD PARA DETECTAR GRUPOS A OCULTAR
-const shouldHideGroup = (groupName) => {
-  if (!groupName) return false;
-  const name = groupName.trim().toUpperCase();
-  
-  // Ocultar si es exactamente Z o W
-  if (['Z', 'W'].includes(name)) return true;
-  
-  // Ocultar si termina en " Z" o " W" (ej: "Grupo Z", "Fase W", "Playoffs Z")
-  if (/\s[Z|W]$/.test(name)) return true;
-  
-  // Ocultar si contiene " Z " o " W " en medio (ej: "Grupo Z Final")
-  if (/\s[Z|W]\s/.test(name)) return true;
-  
-  return false;
-};
-
 export default function StandingsView() {
   const { groups, assignments, matches, loading, error } = useStandings();
   const [advancingCount, setAdvancingCount] = useState(2);
   const [calculatedData, setCalculatedData] = useState([]);
+  const [calendarGenerated, setCalendarGenerated] = useState(false);
+  const [checkingCalendar, setCheckingCalendar] = useState(true);
 
   // Obtener configuración de equipos que avanzan
   useEffect(() => {
@@ -47,6 +32,45 @@ export default function StandingsView() {
       }
     };
     fetchConfig();
+  }, []);
+
+  // ✅ Verificar si el calendario ya fue generado
+  useEffect(() => {
+    const checkCalendarStatus = async () => {
+      setCheckingCalendar(true);
+      try {
+        // Verificar si hay partidos de fase de grupos creados
+        const { data: groupMatches } = await supabase
+          .from('matches')
+          .select('id')
+          .eq('phase', 'group')
+          .limit(1);
+        
+        // Verificar si draw_completed es true en la configuración
+        const { data: config } = await supabase
+          .from('tournament_config')
+          .select('draw_completed')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        // El calendario se considera generado si:
+        // 1. Hay partidos de fase de grupos, O
+        // 2. draw_completed es true
+        const hasMatches = groupMatches && groupMatches.length > 0;
+        const drawIsCompleted = config?.draw_completed === true;
+        
+        setCalendarGenerated(hasMatches || drawIsCompleted);
+        
+      } catch (err) {
+        console.error('Error checking calendar:', err);
+        setCalendarGenerated(false);
+      } finally {
+        setCheckingCalendar(false);
+      }
+    };
+    
+    checkCalendarStatus();
   }, []);
 
   // Calcular standings cuando cambien los datos
@@ -72,7 +96,8 @@ export default function StandingsView() {
           return {
             group,
             standings,
-            advancingCount
+            // ✅ En playoffs siempre avanzan 2, en grupos usa la config
+            advancingCount: isPlayoffGroup ? 2 : advancingCount
           };
         })
       );
@@ -82,6 +107,37 @@ export default function StandingsView() {
 
     buildStandings();
   }, [groups, assignments, matches, advancingCount]);
+
+  // ✅ Mientras se verifica el estado del calendario
+  if (checkingCalendar) {
+    return (
+      <div className={styles.loading}>
+        <div className={styles.spinner} />
+        <p>Verificando calendario...</p>
+      </div>
+    );
+  }
+
+  // ✅ Si el calendario aún no se ha generado
+  if (!calendarGenerated) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>📅</div>
+          <h2>Calendario no generado</h2>
+          <p>
+            La clasificación estará disponible una vez que el administrador 
+            genere el calendario de partidos.
+          </p>
+          <div className={styles.emptyInfo}>
+            <p> Los grupos se han configurado correctamente</p>
+            <p>🔹 Los equipos están registrados</p>
+            <p>🔹 Falta: Generar el sorteo y calendario</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -103,17 +159,15 @@ export default function StandingsView() {
   return (
     <div className={styles.container}>
       <div className={styles.grid}>
-        {calculatedData
-          // 🔥 FILTRO VISUAL FINAL: Ocultar grupos Z y W al 100%
-          .filter(({ group }) => !shouldHideGroup(group.name))
-          .map(({ group, standings }) => (
-            <GroupStandings
-              key={group.id}
-              group={group}
-              standings={standings}
-              advancingCount={advancingCount}
-            />
-          ))}
+        {/* ✅ Mostrar TODOS los grupos incluyendo Z y W */}
+        {calculatedData.map(({ group, standings, advancingCount: groupAdvancing }) => (
+          <GroupStandings
+            key={group.id}
+            group={group}
+            standings={standings}
+            advancingCount={groupAdvancing}
+          />
+        ))}
       </div>
     </div>
   );
@@ -121,10 +175,13 @@ export default function StandingsView() {
 
 // ============================================================================
 // FUNCIÓN PARA CALCULAR STANDINGS DE PLAYOFFS (CORREGIDA - NOMBRES REALES)
+// Ya no depende de group_assignments (que no existen para Z/W)
+// Obtiene los nombres directamente de la tabla profiles
 // ============================================================================
 async function calculatePlayoffGroupStandings(group, allMatches, allAssignments = []) {
   if (!group?.id) return [];
 
+  // Filtrar partidos finalizados de este grupo de playoff
   const groupMatches = allMatches.filter(m => {
     const isCorrectGroup = m?.group_id === group.id;
     const isPlayoffPhase = m?.phase === 'playoff_group';
@@ -133,65 +190,46 @@ async function calculatePlayoffGroupStandings(group, allMatches, allAssignments 
     return isCorrectGroup && isPlayoffPhase && isFinished;
   });
 
-  if (groupMatches.length === 0) return [];
+  // ✅ EXTRAER TODOS los equipos que participan en este grupo
+  // (incluso si no hay partidos finalizados aún, para mostrar la tabla vacía)
+  const allGroupMatches = allMatches.filter(m => {
+    const isCorrectGroup = m?.group_id === group.id;
+    const isPlayoffPhase = m?.phase === 'playoff_group';
+    return isCorrectGroup && isPlayoffPhase;
+  });
 
-  // Extraer equipos únicos de los partidos
   const teamIds = [...new Set(
-    groupMatches.flatMap(m => [m.home_team_id, m.away_team_id].filter(Boolean))
+    allGroupMatches.flatMap(m => [m.home_team_id, m.away_team_id].filter(Boolean))
   )];
 
   if (teamIds.length === 0) return [];
 
-  // ✅ SOLUCIÓN: Crear mapa de equipos con nombres reales
-  const teamsMap = {};
+  // ✅ SOLUCIÓN CLAVE: Consultar profiles directamente para obtener nombres reales
+  let teamsMap = {};
   
-  // 1. Primero, intentar obtener datos de assignments (ya tiene join con profiles)
-  allAssignments.forEach(assignment => {
-    if (assignment.team_id && assignment.profiles) {
-      teamsMap[assignment.team_id] = {
-        name: assignment.profiles.team_name || 'Equipo',
-        badge: assignment.profiles.badge_url || null
-      };
+  try {
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, team_name, badge_url')
+      .in('id', teamIds);
+
+    if (profilesError) {
+      console.warn('⚠️ Error cargando profiles para playoff:', profilesError);
     }
-  });
 
-  // 2. Si no hay datos en assignments, consultar profiles directamente
-  if (Object.keys(teamsMap).length === 0 && teamIds.length > 0) {
-    try {
-      const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, team_name, badge_url')
-        .in('id', teamIds);
-
-      profilesData?.forEach(profile => {
+    if (profilesData) {
+      profilesData.forEach(profile => {
         teamsMap[profile.id] = {
           name: profile.team_name || 'Equipo',
           badge: profile.badge_url || null
         };
       });
-    } catch (e) {
-      console.warn('⚠️ Error cargando profiles:', e);
     }
+  } catch (e) {
+    console.warn('⚠️ Error en consulta de profiles:', e);
   }
 
-  // 3. Si aún no hay datos, intentar consultar tabla teams (si existe)
-  if (Object.keys(teamsMap).length === 0 && teamIds.length > 0) {
-    try {
-      const { data: teamsData } = await supabase
-        .from('teams')
-        .select('id, team_name, badge_url')
-        .in('id', teamIds);
-
-      teamsData?.forEach(team => {
-        teamsMap[team.id] = {
-          name: team.team_name || 'Equipo',
-          badge: team.badge_url || null
-        };
-      });
-    } catch (e) {
-      console.warn('⚠️ Error cargando teams:', e);
-    }
-  }
+  console.log(`📊 Grupo ${group.name}: ${teamIds.length} equipos, ${Object.keys(teamsMap).length} con datos`);
 
   // Inicializar objetos de equipo con datos reales
   const teams = {};
@@ -209,7 +247,12 @@ async function calculatePlayoffGroupStandings(group, allMatches, allAssignments 
     };
   });
 
-  // Procesar cada partido
+  // Si no hay partidos finalizados, retornar la tabla vacía con los equipos
+  if (groupMatches.length === 0) {
+    return Object.values(teams);
+  }
+
+  // Procesar cada partido finalizado
   groupMatches.forEach(match => {
     const homeId = match.home_team_id;
     const awayId = match.away_team_id;

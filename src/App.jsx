@@ -35,6 +35,7 @@ import TournamentDraw from './pages/admin/TournamentDraw';
 import AdminMatches from './pages/admin/AdminMatches';
 import AdminMediaManager from './pages/admin/AdminMediaManager';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+import ManualGroupAssignment from './pages/admin/ManualGroupAssignment';
 
 export default function App() {
   useAuthSync();
@@ -92,6 +93,7 @@ export default function App() {
                 <Route path="admin/matches" element={<AdminMatches />} />
                 <Route path="admin/media" element={<AdminMediaManager />} />
                 <Route path="admin/announcements" element={<AdminAnnouncements />} />
+                <Route path="admin/manual-groups" element={<ManualGroupAssignment />} />
               </Route>
               
               {/* Redirección por defecto */}

@@ -330,33 +330,181 @@ function resolveTie(tiedTeams, allMatches) {
 }
 
 /**
- * Obtiene los equipos clasificados de todos los grupos
+ * ✅ NUEVA FUNCIÓN: Obtiene los equipos clasificados según el número de grupos
+ * 
+ * REGLAS:
+ * - 2 grupos: Pasan los 4 primeros de cada grupo (8 equipos total)
+ * - 3 grupos: Pasan los 2 primeros de cada grupo (6 equipos) + los 2 mejores terceros (2 equipos) = 8 total
+ * 
+ * Criterios para mejores terceros:
+ * 1. Más partidos ganados (pts)
+ * 2. Mejor diferencia de sets (sf - sc)
+ * 3. Mejor diferencia de puntos (pf - pa)
  */
-export function getQualifiedTeams(allGroups, allAssignments, allMatches, teamsAdvancingPerGroup) {
+export function getQualifiedTeams(allGroups, allAssignments, allMatches, config) {
   var qualified = [];
+  var numGroups = allGroups.length;
   
+  console.log('🎯 Calculando clasificados para', numGroups, 'grupos');
+  
+  // Calcular standings de todos los grupos
+  var allStandings = {};
   for (var gIdx = 0; gIdx < allGroups.length; gIdx++) {
     var group = allGroups[gIdx];
     var standings = calculateGroupStandings(group, allAssignments, allMatches);
-    
-    // Tomar los N primeros clasificados
-    var qualifiers = standings.slice(0, teamsAdvancingPerGroup);
-    
-    for (var qIdx = 0; qIdx < qualifiers.length; qIdx++) {
-      var team = qualifiers[qIdx];
-      qualified.push({
-        id: team.id,
-        team_name: team.name,
-        original_group_id: group.id,
-        original_group_name: group.name,
-        position_in_group: qIdx + 1, // 1 = primero, 2 = segundo, etc.
-        points: team.pts,
-        sets_diff: team.sf - team.sc
-      });
-    }
-    
-    console.log('✅ Grupo', group.name, ':', qualifiers.length, 'clasificados');
+    allStandings[group.id] = standings;
+    console.log('📊 Grupo', group.name, ':', standings.length, 'equipos');
   }
   
+  // ========================================================================
+  // CASO 1: 2 GRUPOS - Pasan los 4 primeros de cada grupo
+  // ========================================================================
+  if (numGroups === 2) {
+    console.log('✅ Modo 2 grupos: Top 4 de cada grupo');
+    
+    for (var gIdx = 0; gIdx < allGroups.length; gIdx++) {
+      var group = allGroups[gIdx];
+      var standings = allStandings[group.id];
+      
+      // Tomar los 4 primeros
+      var qualifiers = standings.slice(0, 4);
+      
+      for (var qIdx = 0; qIdx < qualifiers.length; qIdx++) {
+        var team = qualifiers[qIdx];
+        qualified.push({
+          id: team.id,
+          team_name: team.name,
+          original_group_id: group.id,
+          original_group_name: group.name,
+          position_in_group: qIdx + 1,
+          points: team.pts,
+          sets_diff: team.sf - team.sc,
+          points_diff: team.pf - team.pa
+        });
+      }
+      
+      console.log('  ✅ Grupo', group.name, ':', qualifiers.length, 'clasificados');
+    }
+  }
+  
+  // ========================================================================
+  // CASO 2: 3 GRUPOS - Top 2 de cada grupo + 2 mejores terceros
+  // ========================================================================
+  else if (numGroups === 3) {
+    console.log('✅ Modo 3 grupos: Top 2 + 2 mejores terceros');
+    
+    // Paso 1: Tomar los 2 primeros de cada grupo (6 equipos)
+    for (var gIdx = 0; gIdx < allGroups.length; gIdx++) {
+      var group = allGroups[gIdx];
+      var standings = allStandings[group.id];
+      
+      // Tomar los 2 primeros
+      var top2 = standings.slice(0, 2);
+      
+      for (var qIdx = 0; qIdx < top2.length; qIdx++) {
+        var team = top2[qIdx];
+        qualified.push({
+          id: team.id,
+          team_name: team.name,
+          original_group_id: group.id,
+          original_group_name: group.name,
+          position_in_group: qIdx + 1,
+          points: team.pts,
+          sets_diff: team.sf - team.sc,
+          points_diff: team.pf - team.pa,
+          qualified_as: 'top2'
+        });
+      }
+      
+      console.log('  ✅ Grupo', group.name, ': Top 2 clasificados');
+    }
+    
+    // Paso 2: Recopilar los terceros de cada grupo
+    var thirdPlaces = [];
+    
+    for (var gIdx = 0; gIdx < allGroups.length; gIdx++) {
+      var group = allGroups[gIdx];
+      var standings = allStandings[group.id];
+      
+      if (standings.length >= 3) {
+        var third = standings[2]; // Índice 2 = tercer lugar
+        thirdPlaces.push({
+          id: third.id,
+          team_name: third.name,
+          original_group_id: group.id,
+          original_group_name: group.name,
+          position_in_group: 3,
+          points: third.pts,
+          sets_diff: third.sf - third.sc,
+          points_diff: third.pf - third.pa,
+          qualified_as: 'best_third'
+        });
+      }
+    }
+    
+    console.log('  📊 Terceros encontrados:', thirdPlaces.length);
+    
+    // Paso 3: Ordenar terceros por criterios
+    // 1. Más puntos (partidos ganados)
+    // 2. Mejor diferencia de sets
+    // 3. Mejor diferencia de puntos
+    thirdPlaces.sort(function(a, b) {
+      // Criterio 1: Puntos (partidos ganados)
+      if (b.points !== a.points) {
+        return b.points - a.points;
+      }
+      
+      // Criterio 2: Diferencia de sets
+      if (b.sets_diff !== a.sets_diff) {
+        return b.sets_diff - a.sets_diff;
+      }
+      
+      // Criterio 3: Diferencia de puntos
+      return b.points_diff - a.points_diff;
+    });
+    
+    // Paso 4: Tomar los 2 mejores terceros
+    var bestThirds = thirdPlaces.slice(0, 2);
+    
+    for (var tIdx = 0; tIdx < bestThirds.length; tIdx++) {
+      qualified.push(bestThirds[tIdx]);
+      console.log('  ✅ Mejor tercero:', bestThirds[tIdx].team_name, 
+                  '(', bestThirds[tIdx].points, 'pts,', 
+                  bestThirds[tIdx].sets_diff, 'sets diff)');
+    }
+  }
+  
+  // ========================================================================
+  // CASO POR DEFECTO: Usar teamsAdvancingPerGroup (compatibilidad hacia atrás)
+  // ========================================================================
+  else {
+    console.log('⚠️ Modo por defecto: usando teamsAdvancingPerGroup');
+    var teamsAdvancingPerGroup = config?.teams_advancing || 2;
+    
+    for (var gIdx = 0; gIdx < allGroups.length; gIdx++) {
+      var group = allGroups[gIdx];
+      var standings = allStandings[group.id];
+      
+      var qualifiers = standings.slice(0, teamsAdvancingPerGroup);
+      
+      for (var qIdx = 0; qIdx < qualifiers.length; qIdx++) {
+        var team = qualifiers[qIdx];
+        qualified.push({
+          id: team.id,
+          team_name: team.name,
+          original_group_id: group.id,
+          original_group_name: group.name,
+          position_in_group: qIdx + 1,
+          points: team.pts,
+          sets_diff: team.sf - team.sc,
+          points_diff: team.pf - team.pa
+        });
+      }
+      
+      console.log('  ✅ Grupo', group.name, ':', qualifiers.length, 'clasificados');
+    }
+  }
+  
+  console.log('🎉 Total clasificados:', qualified.length);
   return qualified;
 }

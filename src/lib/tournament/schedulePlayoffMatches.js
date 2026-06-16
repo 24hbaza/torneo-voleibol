@@ -1,7 +1,7 @@
 /**
  * Genera horarios para los partidos de la fase de playoffs
- * Restricción: Los árbitros solo pueden ser equipos participantes en esta fase.
- * Prioridad: Asignar árbitro antes que llenar todas las pistas.
+ * ✅ NUEVA REGLA: Siempre intentar completar todas las pistas disponibles
+ * Si no hay árbitros suficientes, algunos partidos se quedan sin árbitro (se asigna manualmente)
  */
 
 export async function schedulePlayoffMatches(
@@ -87,13 +87,12 @@ export async function schedulePlayoffMatches(
   const scheduled = [];
 
   // ========================================================================
-  // BUCLE PRINCIPAL - PRIORIZANDO ÁRBITROS
+  // BUCLE PRINCIPAL - PRIORIZANDO LLENAR TODAS LAS PISTAS
   // ========================================================================
   while (sortedMatches.length > 0) {
     const slotMatches = [];
     const slotPlayingTeams = new Set();
     const slotReferees = new Set();
-    let slotAdminBusy = false;
 
     // Filtrar partidos disponibles para este slot
     const availableMatches = sortedMatches.filter(match => {
@@ -104,27 +103,11 @@ export async function schedulePlayoffMatches(
         !slotPlayingTeams.has(match.away_team_id);
     });
 
-    // ========================================================================
-    // CÁLCULO DE PISTAS MÁXIMAS BASADO EN ÁRBITROS DISPONIBLES
-    // ========================================================================
-    // Total equipos libres en este momento
-    const freeTeamsCount = allTeams.filter(t => 
-      playoffTeamIds.has(t.id) && 
-      !slotPlayingTeams.has(t.id) &&
-      (teamBusyUntil[t.id] || 0) <= currentTime
-    ).length;
-
-    // Cada partido necesita 2 equipos jugando + 1 árbitro = 3 equipos
-    // Pero los árbitros pueden ser compartidos si no juegan.
-    // La fórmula segura es: 
-    // Si tenemos N equipos libres, y cada partido consume 2 equipos,
-    // los restantes (N - 2*partidos) deben ser >= partidos (para que haya 1 árbitro por partido).
-    // N - 2P >= P  =>  N >= 3P  =>  P <= N/3
+    // ✅ NUEVA REGLA: Usar directamente num_courts como límite máximo
+    // No limitar por disponibilidad de árbitros
+    const maxPistasToUse = Math.min(num_courts, availableMatches.length);
     
-    const maxMatchesByReferees = Math.floor(freeTeamsCount / 3);
-    const maxPistasToUse = Math.min(num_courts, maxMatchesByReferees, availableMatches.length);
-    
-    // Si no podemos asignar ni un árbitro, avanzamos el tiempo
+    // Si no hay partidos disponibles, avanzamos el tiempo
     if (maxPistasToUse === 0) {
       const nextFree = Object.values(teamBusyUntil).filter(t => t > currentTime);
       if (nextFree.length > 0) {
@@ -135,20 +118,15 @@ export async function schedulePlayoffMatches(
       continue;
     }
 
-    console.log(`⏱️ Slot ${new Date(currentTime).toLocaleTimeString('es-ES')} - Equipos libres: ${freeTeamsCount}, Pistas a usar: ${maxPistasToUse}`);
+    console.log(`⏱️ Slot ${new Date(currentTime).toLocaleTimeString('es-ES')} - Intentando llenar ${maxPistasToUse} pistas de ${num_courts} disponibles`);
 
-    // Asignar a pistas (respetando el límite calculado)
+    // Asignar a pistas (intentando llenar todas las disponibles)
     for (let court = 1; court <= maxPistasToUse; court++) {
       let selectedMatch = null;
 
       for (const match of availableMatches) {
         if (slotPlayingTeams.has(match.home_team_id) || 
             slotPlayingTeams.has(match.away_team_id)) continue;
-
-        const hasAdmin = adminTeamIds.includes(match.home_team_id) || 
-                        adminTeamIds.includes(match.away_team_id);
-
-        if (hasAdmin && slotAdminBusy) continue;
 
         selectedMatch = match;
         break;
@@ -159,11 +137,6 @@ export async function schedulePlayoffMatches(
       slotMatches.push({ ...selectedMatch, court });
       slotPlayingTeams.add(selectedMatch.home_team_id);
       slotPlayingTeams.add(selectedMatch.away_team_id);
-
-      if (adminTeamIds.includes(selectedMatch.home_team_id) ||
-          adminTeamIds.includes(selectedMatch.away_team_id)) {
-        slotAdminBusy = true;
-      }
 
       const idx = availableMatches.indexOf(selectedMatch);
       if (idx !== -1) availableMatches.splice(idx, 1);
@@ -206,6 +179,7 @@ export async function schedulePlayoffMatches(
         return 0;
       });
 
+      // ✅ NUEVA REGLA: Si no hay árbitros disponibles, dejar como null
       const referee = possibleRefs.length > 0 ? possibleRefs[0] : null;
 
       if (referee) {
@@ -228,12 +202,18 @@ export async function schedulePlayoffMatches(
 
       const homeName = allTeams.find(t => t.id === match.home_team_id)?.team_name?.slice(0, 10) || '???';
       const awayName = allTeams.find(t => t.id === match.away_team_id)?.team_name?.slice(0, 10) || '???';
-      const refName = referee?.team_name?.slice(0, 10) || 'SIN ÁRBITRO';
+      const refName = referee?.team_name?.slice(0, 10) || '⚠️ SIN ÁRBITRO';
       
       onLog(`🏟️ P${match.court} | ${new Date(currentTime).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'})} | ${homeName} vs ${awayName} | Árbitro: ${refName}`);
     }
 
     currentTime += duration;
+  }
+
+  // ✅ Log de partidos sin árbitro
+  const matchesWithoutReferee = scheduled.filter(m => !m.referee_team_id);
+  if (matchesWithoutReferee.length > 0) {
+    onLog(`⚠️ ${matchesWithoutReferee.length} partidos programados SIN árbitro (asignar manualmente)`);
   }
 
   onLog(`✅ ${scheduled.length} partidos programados`);

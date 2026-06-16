@@ -18,7 +18,14 @@ export default function AdminTeamEditor() {
     badge_url: '',
     receipt_url: '',
     player_count: 0,
-    captain_id: 0
+    captain_id: 0,
+    availability: [] // ✅ NUEVO: Disponibilidad horaria
+  });
+
+  // ✅ Estado para el formulario de disponibilidad (fecha completa)
+  const [newAvailability, setNewAvailability] = useState({
+    start_datetime: '',
+    end_datetime: ''
   });
 
   useEffect(() => {
@@ -41,7 +48,8 @@ export default function AdminTeamEditor() {
             badge_url: data.badge_url || '',
             receipt_url: data.receipt_url || '',
             player_count: data.player_count || 0,
-            captain_id: data.captain_id || 0
+            captain_id: data.captain_id || 0,
+            availability: data.availability || [] // ✅ Cargar disponibilidad
           });
         }
       } catch (err) {
@@ -111,6 +119,62 @@ export default function AdminTeamEditor() {
     }
   };
 
+  // ✅ FUNCIONES PARA GESTIÓN DE DISPONIBILIDAD (FECHAS COMPLETAS)
+  const addAvailability = () => {
+    const { start_datetime, end_datetime } = newAvailability;
+    
+    // Validación básica
+    if (!start_datetime || !end_datetime) {
+      alert('Por favor, completa la fecha de inicio y fin');
+      return;
+    }
+    
+    const start = new Date(start_datetime);
+    const end = new Date(end_datetime);
+    
+    if (start >= end) {
+      alert('La fecha de inicio debe ser anterior a la fecha de fin');
+      return;
+    }
+    
+    // Verificar si ya existe una franja similar (mismo rango)
+    const exists = formData.availability.some(
+      a => a.start_datetime === start_datetime && a.end_datetime === end_datetime
+    );
+    
+    if (exists) {
+      alert('Esta franja horaria ya está añadida');
+      return;
+    }
+    
+    const newAvail = [...formData.availability, { 
+      start_datetime, 
+      end_datetime,
+      created_at: new Date().toISOString()
+    }];
+    updateField('availability', newAvail);
+    
+    // Resetear formulario
+    setNewAvailability({ start_datetime: '', end_datetime: '' });
+  };
+
+  const removeAvailability = (index) => {
+    const newAvail = formData.availability.filter((_, i) => i !== index);
+    updateField('availability', newAvail);
+  };
+
+  const formatDate = (datetimeString) => {
+    if (!datetimeString) return '';
+    const date = new Date(datetimeString);
+    return date.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -118,7 +182,6 @@ export default function AdminTeamEditor() {
       const femaleCount = formData.players.filter(p => p.gender === 'female').length;
       if (femaleCount < 2) throw new Error('Cada equipo debe tener al menos 2 jugadoras femeninas');
 
-      // ✅ CORREGIDO: Eliminada la línea 'updated_at' que causaba el error de esquema
       const { error } = await supabase.from('profiles').update({
         team_name: formData.team_name.trim(),
         status: formData.status,
@@ -126,7 +189,8 @@ export default function AdminTeamEditor() {
         player_count: formData.players.length,
         badge_url: formData.badge_url,
         receipt_url: formData.receipt_url,
-        captain_id: formData.captain_id
+        captain_id: formData.captain_id,
+        availability: formData.availability // ✅ Guardar disponibilidad
       }).eq('id', teamId);
 
       if (error) throw error;
@@ -194,6 +258,70 @@ export default function AdminTeamEditor() {
         </div>
         
         {formData.players.length < 12 && <Button variant="ghost" onClick={addPlayer} fullWidth className={styles.addBtn}>+ Añadir Jugador</Button>}
+
+        {/* ✅ NUEVA SECCIÓN: DISPONIBILIDAD HORARIA (FECHAS COMPLETAS) */}
+        <h3 className={styles.sectionTitle}>🕐 Disponibilidad Horaria</h3>
+        <p className={styles.sectionDescription}>
+          Define las fechas y franjas horarias en las que el equipo <strong>NO puede jugar</strong> (pero sí puede arbitrar).
+        </p>
+        
+        <div className={styles.availabilityForm}>
+          <div className={styles.availabilityRow}>
+            <div className={styles.availabilityField}>
+              <label>Desde (fecha y hora)</label>
+              <input 
+                type="datetime-local" 
+                value={newAvailability.start_datetime} 
+                onChange={(e) => setNewAvailability(prev => ({ ...prev, start_datetime: e.target.value }))}
+                className={styles.inputSmall}
+              />
+            </div>
+            
+            <div className={styles.availabilityField}>
+              <label>Hasta (fecha y hora)</label>
+              <input 
+                type="datetime-local" 
+                value={newAvailability.end_datetime} 
+                onChange={(e) => setNewAvailability(prev => ({ ...prev, end_datetime: e.target.value }))}
+                className={styles.inputSmall}
+              />
+            </div>
+            
+            <Button variant="primary" onClick={addAvailability} className={styles.addAvailabilityBtn}>
+              + Añadir Franja
+            </Button>
+          </div>
+        </div>
+
+        {formData.availability.length > 0 ? (
+          <div className={styles.availabilityList}>
+            <h4 className={styles.availabilityListTitle}>Franjas no disponibles ({formData.availability.length})</h4>
+            {formData.availability.map((avail, index) => (
+              <div key={index} className={styles.availabilityItem}>
+                <div className={styles.availabilityDateTime}>
+                  <span className={styles.availabilityLabel}>Desde:</span>
+                  <span className={styles.availabilityTime}>{formatDate(avail.start_datetime)}</span>
+                </div>
+                <div className={styles.availabilityDateTime}>
+                  <span className={styles.availabilityLabel}>Hasta:</span>
+                  <span className={styles.availabilityTime}>{formatDate(avail.end_datetime)}</span>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => removeAvailability(index)} 
+                  className={styles.removeAvailabilityBtn}
+                  title="Eliminar franja"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.availabilityEmpty}>
+            <p>✅ El equipo puede jugar en cualquier horario</p>
+          </div>
+        )}
 
         <div className={styles.docsSection}>
           <h3 className={styles.sectionTitle}>📂 Documentos</h3>

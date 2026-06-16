@@ -1,3 +1,4 @@
+// src/pages/admin/TournamentDraw.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Button, Card } from '../../design-system/components';
@@ -7,7 +8,7 @@ import { getQualifiedTeams } from '../../lib/tournament/standingsCalculator';
 import styles from './TournamentDraw.module.css';
 
 // ============================================================================
-// 🛡️ UTILIDADES
+// ️ UTILIDADES
 // ============================================================================
 
 const safeTime = function(dateInput) {
@@ -30,6 +31,85 @@ const shuffleArray = function(array) {
     arr[j] = temp;
   }
   return arr;
+};
+
+// ============================================================================
+// ✅ NUEVA FUNCIÓN: VERIFICAR DISPONIBILIDAD DE UN EQUIPO (FECHAS COMPLETAS)
+// ============================================================================
+
+/**
+ * Verifica si un equipo puede jugar en una fecha/hora específica
+ * @param {Object} team - Objeto del equipo con campo availability
+ * @param {Date} matchDate - Fecha y hora del partido
+ * @returns {boolean} - true si puede jugar, false si no está disponible
+ */
+const canTeamPlay = function(team, matchDate) {
+  // Si no tiene disponibilidad definida, puede jugar siempre
+  if (!team.availability || !Array.isArray(team.availability) || team.availability.length === 0) {
+    return true;
+  }
+  
+  const matchTime = matchDate.getTime();
+  
+  // Verificar cada franja de no disponibilidad
+  for (let i = 0; i < team.availability.length; i++) {
+    const avail = team.availability[i];
+    
+    if (!avail.start_datetime || !avail.end_datetime) {
+      continue;
+    }
+    
+    const startDateTime = new Date(avail.start_datetime).getTime();
+    const endDateTime = new Date(avail.end_datetime).getTime();
+    
+    // Verificar si la hora del partido está dentro de la franja
+    if (matchTime >= startDateTime && matchTime < endDateTime) {
+      // El partido cae en una franja de no disponibilidad
+      return false;
+    }
+  }
+  
+  // Si no está en ninguna franja de no disponibilidad, puede jugar
+  return true;
+};
+
+// ============================================================================
+// ✅ NUEVA FUNCIÓN: VERIFICAR FRANJA HORARIA GLOBAL SIN PARTIDOS (21:00 - 21:30)
+// ============================================================================
+
+/**
+ * Verifica si una hora está dentro de la franja horaria global sin partidos
+ * Franja: 21:00 a 21:30 todos los días
+ * @param {Date} date - Fecha y hora a verificar
+ * @returns {boolean} - true si está en la franja prohibida
+ */
+const isBlackoutTime = function(date) {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const timeInMinutes = hours * 60 + minutes;
+  
+  // 21:00 = 1260 minutos, 21:30 = 1290 minutos
+  const blackoutStart = 21 * 60 + 0;  // 21:00
+  const blackoutEnd = 21 * 60 + 30;   // 21:30
+  
+  return timeInMinutes >= blackoutStart && timeInMinutes < blackoutEnd;
+};
+
+/**
+ * Si la hora actual está en la franja prohibida, avanza hasta las 21:30
+ * @param {number} currentTime - Timestamp actual
+ * @returns {number} - Timestamp ajustado (21:30 si estaba en la franja)
+ */
+const skipBlackout = function(currentTime) {
+  const date = new Date(currentTime);
+  
+  if (isBlackoutTime(date)) {
+    // Avanzar a las 21:30 del mismo día
+    date.setHours(21, 30, 0, 0);
+    return date.getTime();
+  }
+  
+  return currentTime;
 };
 
 // ============================================================================
@@ -79,7 +159,7 @@ const generateRoundRobinMatches = function(teams, isDouble) {
 };
 
 // ============================================================================
-// 🧠 SCHEDULER ULTRA OPTIMIZADO CON RESTRICCIÓN ADMIN TEAMS
+// 🧠 SCHEDULER ULTRA OPTIMIZADO CON DISPONIBILIDAD Y FRANJA SIN PARTIDOS
 // ============================================================================
 
 const scheduleMatches = function(groupsWithTeams, config, onLog) {
@@ -92,6 +172,9 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
   var duration = (match_duration_minutes + buffer_minutes) * 60000;
   var currentTime = new Date(start_datetime).getTime();
   var scheduled = [];
+
+  // ✅ Saltar franja horaria inicial si coincide
+  currentTime = skipBlackout(currentTime);
 
   // Estado de equipos
   var teamBusyUntil = {};
@@ -136,7 +219,7 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
   });
 
   // ============================================================================
-  // 🔥 EQUIPOS ADMINISTRADORES - RESTRICCIÓN DE SIMULTANEIDAD
+  // 🔥 EQUIPOS ADMINISTRADORES - IDENTIFICACIÓN (sin restricción de arbitraje)
   // ============================================================================
   var adminTeamIds = [];
   for (var at = 0; at < allTeams.length; at++) {
@@ -147,27 +230,43 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
   }
 
   // ============================================================================
-  // 🔥 BUCLE PRINCIPAL OPTIMIZADO
+  // 🔥 BUCLE PRINCIPAL OPTIMIZADO CON DISPONIBILIDAD
   // ============================================================================
-  while (pendingMatches.length > 0) {
-
+  var maxAttempts = 1000; // Límite de seguridad para evitar bucles infinitos
+  var attempts = 0;
+  
+  while (pendingMatches.length > 0 && attempts < maxAttempts) {
+    attempts++;
+    
+    // ✅ Saltar franja horaria si coincide
+    currentTime = skipBlackout(currentTime);
+    
     var slotMatches = [];
     var slotPlayingTeams = new Set();
     var slotReferees = new Set();
-    
-    // ✅ NUEVO: Estado global del slot para admins (jugando O arbitrando)
-    var slotAdminBusy = false;
+
+    // ✅ Fecha y hora del slot actual para verificar disponibilidad
+    var slotDate = new Date(currentTime);
 
     // ============================================================================
-    // 🔥 FILTRAR PARTIDOS DISPONIBLES (solo restricciones básicas)
+    // 🔥 FILTRAR PARTIDOS DISPONIBLES (restricciones básicas + disponibilidad)
     // ============================================================================
     var availableMatches = pendingMatches.filter(function(match) {
       var homeFree = (teamBusyUntil[match.home_team_id] || 0) <= currentTime;
       var awayFree = (teamBusyUntil[match.away_team_id] || 0) <= currentTime;
 
+      // ✅ Verificar disponibilidad horaria
+      var homeTeam = allTeams.find(function(t) { return t.id === match.home_team_id; });
+      var awayTeam = allTeams.find(function(t) { return t.id === match.away_team_id; });
+      
+      var homeAvailable = canTeamPlay(homeTeam, slotDate);
+      var awayAvailable = canTeamPlay(awayTeam, slotDate);
+
       return (
         homeFree &&
         awayFree &&
+        homeAvailable &&
+        awayAvailable &&
         !slotPlayingTeams.has(match.home_team_id) &&
         !slotPlayingTeams.has(match.away_team_id)
       );
@@ -201,7 +300,6 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
 
     // ============================================================================
     // 🔥 LLENAR TODAS LAS PISTAS POSIBLES
-    // ✅ CORRECCIÓN: Validación admin con slotAdminBusy
     // ============================================================================
     for (var court = 1; court <= num_courts; court++) {
       var selectedMatch = null;
@@ -212,16 +310,6 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
         // ✅ Verificación básica de equipos ocupados
         if (slotPlayingTeams.has(match.home_team_id) || 
             slotPlayingTeams.has(match.away_team_id)) {
-          continue;
-        }
-
-        // ✅ 🔥 NUEVO: Validar restricción de equipos admin con estado global
-        var matchHasAdmin = 
-          adminTeamIds.indexOf(match.home_team_id) !== -1 || 
-          adminTeamIds.indexOf(match.away_team_id) !== -1;
-
-        // ⛔ Si el partido tiene admin Y el slot ya tiene un admin ocupado → saltar
-        if (matchHasAdmin && slotAdminBusy) {
           continue;
         }
 
@@ -236,14 +324,6 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
       slotMatches.push({ ...selectedMatch, court: court });
       slotPlayingTeams.add(selectedMatch.home_team_id);
       slotPlayingTeams.add(selectedMatch.away_team_id);
-
-      // ✅ 🔥 Si el partido seleccionado tiene admin → marcar slot ocupado
-      if (
-        adminTeamIds.indexOf(selectedMatch.home_team_id) !== -1 ||
-        adminTeamIds.indexOf(selectedMatch.away_team_id) !== -1
-      ) {
-        slotAdminBusy = true;
-      }
 
       var idx = availableMatches.indexOf(selectedMatch);
       if (idx !== -1) {
@@ -315,12 +395,6 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
             !slotReferees.has(team.id) &&
             (teamBusyUntil[team.id] || 0) <= currentTime) {
           
-          // ✅ 🔥 BLOQUEAR árbitro admin si ya hay admin ocupado en el slot
-          var refIsAdmin = adminTeamIds.indexOf(team.id) !== -1;
-          if (refIsAdmin && slotAdminBusy) {
-            continue;
-          }
-          
           possibleRefs.push(team);
         }
       }
@@ -335,12 +409,6 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
               !slotReferees.has(team.id) &&
               (teamBusyUntil[team.id] || 0) <= currentTime) {
             
-            // ✅ 🔥 BLOQUEAR árbitro admin si ya hay admin ocupado en el slot (búsqueda global)
-            var refIsAdmin = adminTeamIds.indexOf(team.id) !== -1;
-            if (refIsAdmin && slotAdminBusy) {
-              continue;
-            }
-            
             possibleRefs.push(team);
           }
         }
@@ -348,18 +416,15 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
 
       // 🔥 BALANCEO REAL: Priorizar admins, luego menos arbitrajes, luego menos partidos jugados
       possibleRefs.sort(function(a, b) {
-        // Primero: equipos admin tienen prioridad para arbitrar
         var aIsAdmin = adminTeamIds.indexOf(a.id) !== -1 ? 1 : 0;
         var bIsAdmin = adminTeamIds.indexOf(b.id) !== -1 ? 1 : 0;
         if (bIsAdmin !== aIsAdmin) {
           return bIsAdmin - aIsAdmin;
         }
-        // Segundo: menos arbitrajes previos
         var diff = teamRefereeCount[a.id] - teamRefereeCount[b.id];
         if (diff !== 0) {
           return diff;
         }
-        // Tercero: menos partidos jugados
         return teamPlayedCount[a.id] - teamPlayedCount[b.id];
       });
 
@@ -368,11 +433,6 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
       if (referee) {
         slotReferees.add(referee.id);
         teamRefereeCount[referee.id] = teamRefereeCount[referee.id] + 1;
-        
-        // ✅ 🔥 Si el árbitro es admin → marcar slot ocupado
-        if (adminTeamIds.indexOf(referee.id) !== -1) {
-          slotAdminBusy = true;
-        }
       }
 
       scheduled.push({
@@ -389,7 +449,7 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
         away_score: 0,
         points_to_win: config.points_to_win || 25,
         sets_to_win: config.sets_to_win || 2,
-        phase: 'group' // Fase de grupos inicial
+        phase: 'group'
       });
 
       // 🔥 Actualizar estados SOLO por jugar (no por arbitrar)
@@ -409,6 +469,10 @@ const scheduleMatches = function(groupsWithTeams, config, onLog) {
 
     // Avanzar slot
     currentTime = currentTime + duration;
+  }
+
+  if (attempts >= maxAttempts) {
+    onLog('⚠️ Se alcanzó el límite de intentos. Algunos partidos podrían no haberse programado.');
   }
 
   console.log('📊 Referees:', teamRefereeCount);
@@ -473,15 +537,33 @@ export default function TournamentDraw() {
     addLog('🚀 Iniciando proceso de sorteo...');
 
     try {
-      if (!config?.start_datetime || !config?.num_groups || !config?.num_courts) {
-        throw new Error('Falta configuración obligatoria.');
+      // ✅ DEBUG: Ver qué hay en config
+      console.log('🔍 Configuración actual:', config);
+      
+      // ✅ Validación mejorada con mensajes específicos
+      const missingFields = [];
+      
+      if (!config?.start_datetime) {
+        missingFields.push('Fecha y hora de inicio');
+      }
+      if (!config?.num_groups) {
+        missingFields.push('Número de grupos');
+      }
+      if (!config?.num_courts) {
+        missingFields.push('Número de pistas');
+      }
+      
+      if (missingFields.length > 0) {
+        const errorMsg = 'Falta configuración obligatoria:\n\n' + missingFields.join('\n') + '\n\nVe a "Configuración" y completa estos campos.';
+        console.error('❌ ' + errorMsg);
+        throw new Error(errorMsg);
       }
 
       addLog('📋 Obteniendo equipos aceptados...');
       
       const { data: teams, error: errTeams } = await supabase
         .from('profiles')
-        .select('id, team_name, is_admin_team')
+        .select('id, team_name, is_admin_team, availability')
         .eq('status', 'accepted')
         .order('team_name');
       
@@ -493,70 +575,135 @@ export default function TournamentDraw() {
       }
       addLog('✅ ' + teams.length + ' equipos listos.');
 
+      var teamsWithAvailability = teams.filter(function(t) { 
+        return t.availability && t.availability.length > 0; 
+      });
+      if (teamsWithAvailability.length > 0) {
+        addLog('⏰ ' + teamsWithAvailability.length + ' equipos tienen restricciones horarias');
+      }
+
       var safeId = '00000000-0000-0000-0000-000000000000';
       
-      addLog('🧹 Limpiando datos anteriores...');
+      addLog('🧹 Limpiando partidos anteriores...');
       var { error: e1 } = await supabase.from('matches').delete().neq('id', safeId);
       if (e1) throw e1;
-      
-      var { error: e2 } = await supabase.from('group_assignments').delete().neq('id', safeId);
-      if (e2) throw e2;
-      
-      var { error: e3 } = await supabase.from('groups').delete().neq('id', safeId);
-      if (e3) throw e3;
 
-      addLog('📂 Creando grupos oficiales...');
-      var groupsPayload = [];
-      for (var i = 0; i < config.num_groups; i++) {
-        groupsPayload.push({ 
-          name: 'Grupo ' + String.fromCharCode(65 + i), 
-          draw_order: i + 1 
-        });
-      }
-      
-      const { data: createdGroups, error: errGrp } = await supabase
+      // ✅ VERIFICAR SI YA EXISTEN GRUPOS CREADOS MANUALMENTE
+      addLog('🔍 Verificando grupos existentes...');
+      const { data: existingGroups, error: groupsError } = await supabase
         .from('groups')
-        .insert(groupsPayload)
-        .select('id, name, draw_order');
+        .select('*')
+        .order('draw_order');
       
-      if (errGrp) {
-        throw new Error('Error creando grupos: ' + errGrp.message);
+      if (groupsError) {
+        throw new Error('Error consultando grupos: ' + groupsError.message);
       }
-      if (!createdGroups) {
-        throw new Error('No se recibieron IDs de grupos creados.');
-      }
-      addLog('✅ ' + createdGroups.length + ' grupos creados.');
 
-      addLog('🎲 Asignando equipos (Fisher-Yates)...');
-      var shuffledTeams = shuffleArray(teams);
-      var assignments = [];
       var groupsWithTeams = [];
-      
-      for (var cg = 0; cg < createdGroups.length; cg++) {
-        groupsWithTeams.push({ 
-          ...createdGroups[cg], 
-          teams: [] 
-        });
+      var usingManualGroups = false;
+
+      // ✅ SI EXISTEN GRUPOS, VERIFICAR SI TIENEN ASIGNACIONES
+      if (existingGroups && existingGroups.length > 0) {
+        addLog('📂 Encontrados ' + existingGroups.length + ' grupos existentes');
+        
+        const { data: existingAssignments, error: assignmentsError } = await supabase
+          .from('group_assignments')
+          .select('group_id, team_id')
+          .in('group_id', existingGroups.map(g => g.id));
+        
+        if (assignmentsError) {
+          throw new Error('Error consultando asignaciones: ' + assignmentsError.message);
+        }
+
+        // ✅ SI HAY ASIGNACIONES, USAR LOS GRUPOS MANUALES
+        if (existingAssignments && existingAssignments.length > 0) {
+          usingManualGroups = true;
+          addLog('✅ Usando grupos asignados manualmente (' + existingAssignments.length + ' equipos asignados)');
+          
+          // Construir estructura groupsWithTeams con los grupos existentes
+          existingGroups.forEach(group => {
+            const groupTeamIds = existingAssignments
+              .filter(a => a.group_id === group.id)
+              .map(a => a.team_id);
+            
+            const groupTeams = groupTeamIds.map(teamId => {
+              const team = teams.find(t => t.id === teamId);
+              return team || { id: teamId, team_name: 'Equipo desconocido' };
+            });
+            
+            groupsWithTeams.push({
+              ...group,
+              teams: groupTeams
+            });
+          });
+          
+          addLog('✅ ' + groupsWithTeams.length + ' grupos cargados con equipos asignados');
+        } else {
+          addLog('⚠️ Grupos encontrados pero sin asignaciones. Creando grupos aleatorios...');
+        }
       }
 
-      for (var ti = 0; ti < shuffledTeams.length; ti++) {
-        var team = shuffledTeams[ti];
-        var groupIdx = ti % config.num_groups;
-        assignments.push({ 
-          group_id: groupsWithTeams[groupIdx].id, 
-          team_id: team.id, 
-          draw_order: ti + 1 
-        });
-        groupsWithTeams[groupIdx].teams.push(team);
+      // ✅ SI NO HAY GRUPOS MANUALES, CREARLOS ALEATORIAMENTE
+      if (!usingManualGroups) {
+        addLog('🧹 Limpiando grupos y asignaciones anteriores...');
+        var { error: e2 } = await supabase.from('group_assignments').delete().neq('id', safeId);
+        if (e2) throw e2;
+        
+        var { error: e3 } = await supabase.from('groups').delete().neq('id', safeId);
+        if (e3) throw e3;
+
+        addLog('📂 Creando grupos oficiales...');
+        var groupsPayload = [];
+        for (var i = 0; i < config.num_groups; i++) {
+          groupsPayload.push({ 
+            name: 'Grupo ' + String.fromCharCode(65 + i), 
+            draw_order: i + 1 
+          });
+        }
+        
+        const { data: createdGroups, error: errGrp } = await supabase
+          .from('groups')
+          .insert(groupsPayload)
+          .select('id, name, draw_order');
+        
+        if (errGrp) {
+          throw new Error('Error creando grupos: ' + errGrp.message);
+        }
+        if (!createdGroups) {
+          throw new Error('No se recibieron IDs de grupos creados.');
+        }
+        addLog('✅ ' + createdGroups.length + ' grupos creados.');
+
+        addLog('🎲 Asignando equipos (Fisher-Yates)...');
+        var shuffledTeams = shuffleArray(teams);
+        var assignments = [];
+        
+        for (var cg = 0; cg < createdGroups.length; cg++) {
+          groupsWithTeams.push({ 
+            ...createdGroups[cg], 
+            teams: [] 
+          });
+        }
+
+        for (var ti = 0; ti < shuffledTeams.length; ti++) {
+          var team = shuffledTeams[ti];
+          var groupIdx = ti % config.num_groups;
+          assignments.push({ 
+            group_id: groupsWithTeams[groupIdx].id, 
+            team_id: team.id, 
+            draw_order: ti + 1 
+          });
+          groupsWithTeams[groupIdx].teams.push(team);
+        }
+
+        var { error: errAssign } = await supabase.from('group_assignments').insert(assignments);
+        if (errAssign) {
+          throw new Error('Error asignando equipos: ' + errAssign.message);
+        }
+        addLog('✅ Distribución aleatoria completada.');
       }
 
-      var { error: errAssign } = await supabase.from('group_assignments').insert(assignments);
-      if (errAssign) {
-        throw new Error('Error asignando equipos: ' + errAssign.message);
-      }
-      addLog('✅ Distribución completada.');
-
-      addLog('⚔️ Generando horarios por slots optimizados...');
+      addLog('⚔️ Generando horarios por slots optimizados (respetando disponibilidad y franja 21:00-21:30)...');
       var finalScheduled = scheduleMatches(groupsWithTeams, config, addLog);
       
       addLog('💾 Guardando calendario de fase de grupos...');
@@ -569,34 +716,25 @@ export default function TournamentDraw() {
       // 🔥 NUEVO: GENERAR FASE ELIMINATORIA (Grupos Z/W + Semifinales + Final)
       // ========================================================================
       
-      // Verificar si hay configuración para fase eliminatoria
-      // Asumimos que si teams_advancing existe y es > 0, generamos eliminatoria
-      var teamsAdvancing = config.teams_advancing || 2; // Por defecto 2 por grupo
-      var totalQualified = createdGroups.length * teamsAdvancing;
+      var teamsAdvancing = config.teams_advancing || 2;
+      var totalQualified = groupsWithTeams.length * teamsAdvancing;
       
       if (totalQualified === 8) {
         addLog('🔄 Generando fase eliminatoria con ' + totalQualified + ' equipos...');
         
-        // NOTA: En un entorno real, aquí esperaríamos a que terminen los grupos
-        // Para este ejemplo, generamos la estructura pero con status 'pending'
-        // que se activará cuando los grupos terminen
-        
-        // Crear estructura de grupos Z y W (placeholders)
         var groupZ = {
           id: 'group_z_knockout',
           name: 'Grupo Z (Fase Eliminatoria)',
-          teams: [] // Se llenará cuando terminen los grupos
+          teams: []
         };
         
         var groupW = {
           id: 'group_w_knockout',
           name: 'Grupo W (Fase Eliminatoria)',
-          teams: [] // Se llenará cuando terminen los grupos
+          teams: []
         };
         
-        // Generar partidos de semifinales y final (placeholders)
         var knockoutMatches = [
-          // Semifinal 1: 1º Z vs 2º W
           {
             group_id: null,
             group_name: 'Fase Final',
@@ -619,7 +757,6 @@ export default function TournamentDraw() {
             points_to_win: config.points_to_win || 25,
             sets_to_win: config.sets_to_win || 2
           },
-          // Semifinal 2: 2º Z vs 1º W
           {
             group_id: null,
             group_name: 'Fase Final',
@@ -642,7 +779,6 @@ export default function TournamentDraw() {
             points_to_win: config.points_to_win || 25,
             sets_to_win: config.sets_to_win || 2
           },
-          // Final
           {
             group_id: null,
             group_name: 'Fase Final',
@@ -665,7 +801,6 @@ export default function TournamentDraw() {
             points_to_win: config.points_to_win || 25,
             sets_to_win: config.sets_to_win || 2
           },
-          // 3er y 4to puesto
           {
             group_id: null,
             group_name: 'Fase Final',
@@ -690,7 +825,6 @@ export default function TournamentDraw() {
           }
         ];
         
-        // Guardar partidos de fase final (pendientes)
         if (knockoutMatches.length > 0) {
           var { error: errKnockout } = await supabase
             .from('matches')
@@ -844,12 +978,13 @@ export default function TournamentDraw() {
             <li>🏟️ Pistas disponibles: {config?.num_courts || 1}</li>
             <li>👥 Formato: {config?.match_format === 'double' ? 'Ida y Vuelta' : 'Solo Ida'}</li>
             <li>🎟️ Equipos que avanzan: {config?.teams_advancing || 2} por grupo</li>
+            <li>🚫 Franja sin partidos: 21:00 - 21:30</li>
           </ul>
         </Card>
         
         <Card className={styles.controlCard}>
           <h3>🚀 Ejecutar Algoritmo</h3>
-          <p>Scheduler optimizado: maximización de pistas, separación lógica jugador/árbitro, equipos administradores y sin bloqueos artificiales.</p>
+          <p>Scheduler optimizado: maximización de pistas, separación lógica jugador/árbitro, equipos administradores, <strong>disponibilidad horaria</strong>, <strong>franja 21:00-21:30</strong> y sin bloqueos artificiales.</p>
           <Button 
             onClick={function() {
               setConfirmDialog({ 

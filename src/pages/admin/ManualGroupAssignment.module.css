@@ -1,0 +1,389 @@
+/* src/pages/admin/ManualGroupAssignment.module.css */
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--space-md);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border-default);
+  border-top-color: var(--volley-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.header h1 {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.infoBar {
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.infoLabel {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.infoValue {
+  font-size: var(--text-base);
+  color: var(--volley-gold);
+  font-weight: 700;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.unassignedPanel {
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.unassignedPanel h2 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.teamsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.teamCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.teamBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-default);
+}
+
+.teamName {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.emptyMessage {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: var(--space-lg);
+  margin: 0;
+}
+
+.groupsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-md);
+}
+
+.groupPanel {
+  background: var(--surface);
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+.groupPanel:hover {
+  border-color: var(--volley-blue);
+}
+
+.groupFull {
+  border-color: var(--volley-green);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.groupHeader h3 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.groupCount {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--volley-gold);
+  background: var(--surface-elevated);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+.groupTeams {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 200px;
+}
+
+.assignedTeamCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.assignedTeamCard:hover {
+  border-color: var(--volley-red);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.removeBtn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--volley-red);
+  color: var(--volley-red);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: all var(--transition-fast);
+}
+
+.removeBtn:hover {
+  background: var(--volley-red);
+  color: white;
+}
+
+.assignmentPanel {
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.assignmentPanel h2 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-lg) 0;
+}
+
+.assignmentGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.assignmentRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.assignmentRow:hover {
+  border-color: var(--volley-blue);
+}
+
+.teamInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 200px;
+}
+
+.assignedBadge {
+  font-size: var(--text-xs);
+  color: var(--volley-green);
+  font-weight: 600;
+  margin-left: var(--space-xs);
+}
+
+.groupButtons {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.groupBtn {
+  padding: 0.4rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.groupBtn:hover:not(:disabled) {
+  background: var(--volley-blue);
+  border-color: var(--volley-blue);
+  color: white;
+}
+
+.groupBtnActive {
+  background: var(--volley-blue);
+  border-color: var(--volley-blue);
+  color: white;
+}
+
+.groupBtnDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.footerActions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  padding: var(--space-lg);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.logsContainer {
+  margin-top: var(--space-xl);
+}
+
+.logsContainer h3 {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.logs {
+  background: #000;
+  color: #0f0;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  font-family: monospace;
+  font-size: var(--text-sm);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.logEntry {
+  margin: 0;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #222;
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+  }
+  
+  .unassignedPanel {
+    order: 2;
+  }
+  
+  .groupsContainer {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .assignmentRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .teamInfo {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .groupButtons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .groupBtn {
+    flex: 1;
+    text-align: center;
+  }
+}

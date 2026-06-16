@@ -33,8 +33,8 @@ export default function DashboardLayout() {
     { path: '/dashboard/clasificacion', label: 'Clasificación', icon: '🏆' },
   ];
 
-  // Añadimos Árbitro si aplica
-  const menuItems = !isGuestView && profile?.status === 'accepted'
+  // ✅ Añadimos Árbitro si aplica (equipos aceptados O admins)
+  const menuItems = !isGuestView && (profile?.status === 'accepted' || profile?.is_admin)
     ? [...baseMenuItems, { path: '/arbitro', label: 'Árbitro', icon: '🟥' }]
     : baseMenuItems;
 
