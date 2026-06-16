@@ -183,7 +183,7 @@
 }
 
 /* ============================================================================
-   📋 LISTA DE PARTIDOS
+    LISTA DE PARTIDOS
    ============================================================================ */
 .matchesList {
   display: flex;
@@ -263,8 +263,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
-  margin: 14px 16px 0;
+  padding: 6px 14px;
+  margin: 16px 16px 0;
   border-radius: var(--radius-full);
   font-size: 0.75rem;
   font-weight: 600;
@@ -288,7 +288,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px 16px;
+  padding: 14px 16px 16px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -296,7 +296,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
   font-size: 0.7rem;
   font-weight: 700;
@@ -696,11 +696,11 @@
 }
 
 /* ============================================================================
-   📱 RESPONSIVE - MOBILE
+   📱 RESPONSIVE - MOBILE (CORREGIDO)
    ============================================================================ */
 @media (max-width: 768px) {
   .container {
-    padding: 16px 12px 130px;
+    padding: 12px 10px 130px;
   }
   
   .title {
@@ -722,29 +722,34 @@
     font-size: 0.85rem;
   }
   
+  /* ✅ Header de tarjeta reorganizado para móvil */
   .cardHeader {
-    grid-template-columns: 1fr;
-    grid-template-areas: "phase" "status" "datetime" "court";
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     padding: 12px 14px 14px;
+    align-items: center;
   }
   
   .phaseBadge {
-    grid-area: phase;
     margin: 0;
-    justify-self: start;
+    order: 1;
+    padding: 5px 12px;
+    font-size: 0.7rem;
   }
   
   .statusBadge {
-    grid-area: status;
-    justify-self: start;
+    order: 2;
+    padding: 5px 12px;
+    font-size: 0.7rem;
   }
   
   .dateTime {
-    grid-area: datetime;
+    order: 3;
     flex-direction: row;
-    justify-content: flex-start;
     gap: 8px;
+    flex: 1;
+    justify-content: flex-start;
   }
   
   .time {
@@ -756,9 +761,14 @@
   }
   
   .courtBadge {
-    grid-area: court;
-    justify-self: start;
-    width: fit-content;
+    order: 4;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+  
+  .courtText {
+    display: inline;
   }
   
   .refereeBadge {
@@ -772,8 +782,9 @@
     font-size: 0.8rem;
   }
   
+  /* ✅ Marcador adaptado para móvil */
   .scoreboard {
-    padding: 18px 14px;
+    padding: 20px 16px;
     gap: 12px;
   }
   
@@ -790,9 +801,15 @@
     font-size: 1.8rem;
   }
   
+  /* ✅ Nombres de equipo en 2 líneas en móvil */
   .teamName {
     font-size: 1rem;
-    max-width: 140px;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.3;
+    overflow: visible;
+    text-overflow: unset;
+    min-height: 2.6em;
   }
   
   .setsNumber {
@@ -804,7 +821,7 @@
   }
   
   .setsDetails {
-    margin: 0 12px 10px;
+    margin: 0 14px 10px;
   }
   
   .setRow {
@@ -817,7 +834,7 @@
   }
   
   .cardActions {
-    padding: 10px 12px 16px;
+    padding: 10px 14px 16px;
     flex-direction: column;
   }
   
@@ -830,13 +847,14 @@
   }
 }
 
+/* ✅ Mobile muy pequeño (< 400px) */
 @media (max-width: 400px) {
   .container {
-    padding: 12px 10px 120px;
+    padding: 10px 8px 120px;
   }
   
   .scoreboard {
-    padding: 16px 10px;
+    padding: 16px 12px;
     gap: 10px;
   }
   
@@ -855,8 +873,7 @@
   
   .teamName {
     font-size: 0.95rem;
-    max-width: 110px;
-    line-height: 1.25;
+    min-height: 2.4em;
   }
   
   .time {
@@ -868,7 +885,7 @@
   }
   
   .phaseText {
-    display: none;
+    display: inline;
   }
   
   .phaseBadge {
@@ -876,7 +893,7 @@
   }
   
   .courtText {
-    display: none;
+    display: inline;
   }
   
   .courtBadge {
@@ -896,10 +913,11 @@
   }
 }
 
+/* ✅ Ajuste específico para iPhone SE / pantallas < 360px */
 @media (max-width: 360px) {
   .teamName {
     font-size: 0.9rem;
-    max-width: 100px;
+    min-height: 2.2em;
   }
   
   .teamBadge {
@@ -922,7 +940,7 @@
 }
 
 /* ============================================================================
-   ♿ ACCESIBILIDAD
+    ACCESIBILIDAD
    ============================================================================ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
