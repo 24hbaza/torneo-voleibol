@@ -6,10 +6,6 @@ import { useAuthStore } from '../store';
 import { Card } from '../design-system/components';
 import styles from './MatchesView.module.css';
 
-// ============================================================================
-// ✅ FUNCIONES AUXILIARES (Sin cambios de lógica)
-// ============================================================================
-
 const parseSafeDate = (dateValue) => {
   if (!dateValue) return null;
   const normalized = String(dateValue).replace(' ', 'T');
@@ -41,7 +37,6 @@ const formatTimeBadge = (dateValue) => {
   };
 };
 
-// ✅ Configuración de fases - Simplificada y clara
 const PHASE_CONFIG = {
   group: { 
     label: 'Fase de Grupos', 
@@ -89,26 +84,12 @@ const getPhaseConfig = (match) => {
   return STAGE_TO_CONFIG[stage] || PHASE_CONFIG.group;
 };
 
-// ============================================================================
-// ✅ COMPONENTE PRINCIPAL
-// ============================================================================
-
 export default function MatchesView() {
   const { user } = useAuthStore();
-  
-  const getInitialTab = () => {
-    const savedTab = localStorage.getItem('matches_active_tab');
-    if (savedTab && ['my', 'live', 'finished', 'all'].includes(savedTab)) {
-      return savedTab;
-    }
-    return 'my';
-  };
-
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState(getInitialTab);
-  
+  const [activeTab, setActiveTab] = useState('my');
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -262,10 +243,6 @@ export default function MatchesView() {
   );
 }
 
-// ============================================================================
-// ✅ TARJETA DE PARTIDO - Diseño limpio con highlight para árbitro
-// ============================================================================
-
 function MatchCard({ match, userId }) {
   const isReferee = userId && match.referee_team_id === userId;
   const isPlayer = userId && (match.home_team_id === userId || match.away_team_id === userId);
@@ -279,7 +256,6 @@ function MatchCard({ match, userId }) {
   };
   const status = statusConfig[match.status] || statusConfig.scheduled;
 
-  // Parsear sets
   let setsHome = 0, setsAway = 0, setsDetails = [];
   try {
     if (match.sets_details) {
@@ -323,7 +299,6 @@ function MatchCard({ match, userId }) {
             '--status-bg': status.bg
           }}>
       
-      {/* Badge de Fase - Visible y claro */}
       <div className={styles.phaseBadge} style={{ 
         backgroundColor: phaseConfig.bg,
         color: phaseConfig.color,
@@ -333,7 +308,6 @@ function MatchCard({ match, userId }) {
         <span className={styles.phaseText}>{phaseConfig.label}</span>
       </div>
 
-      {/* Badge de Árbitro - Solo si eres tú quien arbitra */}
       {isReferee && (
         <div className={styles.refereeBadge}>
           <span className={styles.refereeBadgeIcon}>🎫</span>
@@ -341,9 +315,7 @@ function MatchCard({ match, userId }) {
         </div>
       )}
 
-      {/* Header: Estado + Fecha/Hora + Pista */}
       <div className={styles.cardHeader}>
-        {/* Estado del partido - Muy visible */}
         <div className={styles.statusBadge} style={{
           backgroundColor: status.bg,
           color: status.color,
@@ -353,20 +325,17 @@ function MatchCard({ match, userId }) {
           {status.label}
         </div>
 
-        {/* Fecha y Hora - Grande y legible */}
         <div className={styles.dateTime}>
           <span className={styles.time}>{timeBadge.time}</span>
           <span className={styles.date}>{timeBadge.day} {timeBadge.month}</span>
         </div>
 
-        {/* Pista */}
         <div className={styles.courtBadge}>
           <span className={styles.courtIcon}>🏟️</span>
           <span className={styles.courtText}>Pista {match.court_number || 'TBD'}</span>
         </div>
       </div>
 
-      {/* Marcador Principal - Equipos GRANDES y claros */}
       <div className={styles.scoreboard}>
         <TeamDisplay 
           team={homeTeam} 
@@ -390,7 +359,6 @@ function MatchCard({ match, userId }) {
         />
       </div>
 
-      {/* Resultado por sets - Expandible solo si hay datos */}
       {isFinished && setsDetails.length > 0 && (
         <details className={styles.setsDetails}>
           <summary className={styles.setsSummary}>
@@ -419,13 +387,11 @@ function MatchCard({ match, userId }) {
         </details>
       )}
 
-      {/* Info del árbitro - Discreta pero accesible */}
       <div className={styles.refereeInfo}>
         <span className={styles.refereeLabel}>Árbitro:</span>
         <span className={styles.refereeName}>{referee.name}</span>
       </div>
 
-      {/* Acciones - Claras y contextuales */}
       <div className={styles.cardActions}>
         {isReferee && (
           <Link to={`/arbitro/partido/${match.id}`} className={styles.btnPrimary}>
@@ -445,17 +411,13 @@ function MatchCard({ match, userId }) {
   );
 }
 
-// ============================================================================
-// ✅ Subcomponente: Display de Equipo - MÁS GRANDE
-// ============================================================================
-
 function TeamDisplay({ team, sets, points, isWinner, side }) {
   return (
     <div className={`${styles.team} ${styles[`team${side.charAt(0).toUpperCase() + side.slice(1)}`]}`}>
       <div className={styles.teamBadgeContainer}>
         <div className={styles.teamBadge}>
           {team.badge ? (
-            <img src={team.badge} alt={team.name} loading="lazy" />
+            <img src={team.badge} alt={team.name} loading="lazy" style={{ objectFit: 'contain' }} />
           ) : (
             <span className={styles.badgePlaceholder}>🏐</span>
           )}

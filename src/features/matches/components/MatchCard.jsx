@@ -30,7 +30,6 @@ export default function MatchCard({ match, userTeamId }) {
   const dateStr = dateObj ? dateObj.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
   const timeStr = dateObj ? dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
 
-  // ✅ FIX #7: Validación flexible sin límite de caracteres
   const handleRefereeAccess = (e) => {
     e.preventDefault();
     const inputCode = codeInput.trim().toUpperCase();
@@ -59,7 +58,18 @@ export default function MatchCard({ match, userTeamId }) {
 
       <div className={styles.content}>
         <div className={`${styles.team} ${isHome ? styles.active : ''}`}>
-          <div className={styles.badgeWrapper}>{homeTeam?.badge_url ? <img src={homeTeam.badge_url} alt={homeTeam.team_name} className={styles.badge} /> : <div className={styles.badgePlaceholder}>🏐</div>}</div>
+          <div className={styles.badgeWrapper}>
+            {homeTeam?.badge_url ? (
+              <img 
+                src={homeTeam.badge_url} 
+                alt={homeTeam.team_name} 
+                className={styles.badge}
+                style={{ objectFit: 'contain' }}
+              />
+            ) : (
+              <div className={styles.badgePlaceholder}>🏐</div>
+            )}
+          </div>
           <div className={styles.teamInfo}>
             <span className={styles.teamName}>{homeTeam?.team_name || 'Local'}</span>
             {isHome && <span className={styles.myTeamTag}>👤 Tu equipo</span>}
@@ -67,16 +77,32 @@ export default function MatchCard({ match, userTeamId }) {
         </div>
 
         <div className={styles.scoreCenter}>
-          <div className={styles.scoreRow}><span className={styles.scoreLabel}>SETS</span><span className={styles.setsScore}>{setsHome} - {setsAway}</span></div>
+          <div className={styles.scoreRow}>
+            <span className={styles.scoreLabel}>SETS</span>
+            <span className={styles.setsScore}>{setsHome} - {setsAway}</span>
+          </div>
           <div className={styles.scoreRow}>
             <span className={styles.scoreLabel}>PUNTOS</span>
-            <span className={`${styles.pointsScore} ${isLive ? styles.livePulse : ''}`}>{(ptsHome > 0 || ptsAway > 0 || isLive || isFinished) ? `${ptsHome} - ${ptsAway}` : 'VS'}</span>
+            <span className={`${styles.pointsScore} ${isLive ? styles.livePulse : ''}`}>
+              {(ptsHome > 0 || ptsAway > 0 || isLive || isFinished) ? `${ptsHome} - ${ptsAway}` : 'VS'}
+            </span>
           </div>
           {match.current_set && isLive && <span className={styles.currentSetTag}>Set {match.current_set}</span>}
         </div>
 
         <div className={`${styles.team} ${isAway ? styles.active : ''}`}>
-          <div className={styles.badgeWrapper}>{awayTeam?.badge_url ? <img src={awayTeam.badge_url} alt={awayTeam.team_name} className={styles.badge} /> : <div className={styles.badgePlaceholder}>🏐</div>}</div>
+          <div className={styles.badgeWrapper}>
+            {awayTeam?.badge_url ? (
+              <img 
+                src={awayTeam.badge_url} 
+                alt={awayTeam.team_name} 
+                className={styles.badge}
+                style={{ objectFit: 'contain' }}
+              />
+            ) : (
+              <div className={styles.badgePlaceholder}>🏐</div>
+            )}
+          </div>
           <div className={styles.teamInfo}>
             <span className={styles.teamName}>{awayTeam?.team_name || 'Visitante'}</span>
             {isAway && <span className={styles.myTeamTag}>👤 Tu equipo</span>}
@@ -84,7 +110,6 @@ export default function MatchCard({ match, userTeamId }) {
         </div>
       </div>
 
-      {/* ✅ FIX #7: Formulario sin maxLength, validación robusta */}
       {isMyRefereeMatch && !isFinished && (
         <form onSubmit={handleRefereeAccess} className={styles.refereeZone}>
           <span className={styles.refereeLabel}>🟥 Eres el árbitro. Introduce el código:</span>
@@ -103,7 +128,6 @@ export default function MatchCard({ match, userTeamId }) {
         </form>
       )}
 
-      {/* MVPs del Partido */}
       {(match.mvp_male_voted || match.mvp_female_voted) && (
         <div className={styles.mvpSection}>
           {match.mvp_male_voted && (
