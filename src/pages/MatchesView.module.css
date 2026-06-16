@@ -1,7 +1,7 @@
-/* src/features/matches/components/MatchCard.module.css */
+/* src/pages/MatchesView.module.css */
 
 /* ============================================================================
-   🎨 VARIABLES - Tema oscuro limpio
+   🎨 VARIABLES Y BASE
    ============================================================================ */
 :root {
   --bg-app: #0f1420;
@@ -35,18 +35,167 @@
 }
 
 /* ============================================================================
-   🔄 BASE
+   📦 CONTENEDOR PRINCIPAL
    ============================================================================ */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 20px 140px;
+  min-height: 100vh;
+  background: var(--bg-app);
+}
+
+/* ============================================================================
+   📰 HEADER
+   ============================================================================ */
+.header {
+  text-align: center;
+  margin-bottom: 28px;
+  padding: 8px 0;
+}
+
+.title {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+/* ============================================================================
+   📑 PESTAÑAS
+   ============================================================================ */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
+.tabActive {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  font-weight: 600;
+}
+
+.tabCount {
+  background: var(--status-live);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  min-width: 20px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ============================================================================
+   ⚠️ ESTADOS (Loading, Error, Empty)
+   ============================================================================ */
+.state {
+  text-align: center;
+  padding: 50px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.stateEmpty {
+  color: var(--text-secondary);
+}
+
+.stateError {
+  color: var(--status-live);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.stateIcon {
+  font-size: 2.5rem;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--text-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.emptyLink {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition);
+}
+
+.emptyLink:hover {
+  color: #60a5fa;
+}
+
+/* ============================================================================
+   📋 LISTA DE PARTIDOS
+   ============================================================================ */
+.matchesList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* ============================================================================
    🎴 TARJETA DE PARTIDO
    ============================================================================ */
 .card {
+  padding: 0;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -54,7 +203,6 @@
   transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   position: relative;
   overflow: hidden;
-  margin-bottom: 16px;
 }
 
 .card:hover {
@@ -63,549 +211,713 @@
   box-shadow: var(--shadow-card-hover);
 }
 
-.card.live {
-  border-left: 4px solid var(--status-live);
+.cardHighlight {
+  border-color: rgba(251, 191, 36, 0.4);
 }
 
-.card.finished {
-  border-left: 4px solid var(--status-finished);
+.cardHighlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #fbbf24, transparent);
 }
 
-.card.myMatch {
-  border-left: 4px solid #3b82f6;
-}
-
-.card.refereeMatch {
+.cardReferee {
   border-left: 4px solid var(--referee-accent);
   background: linear-gradient(to right, var(--referee-bg), var(--bg-card));
 }
 
-/* ============================================================================
-   📰 HEADER
-   ============================================================================ */
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-subtle);
+.cardReferee:hover {
+  border-left-color: var(--referee-accent);
+  box-shadow: 0 8px 30px rgba(167, 139, 250, 0.25), var(--shadow-card-hover);
+}
+
+/* Badge de Árbitro */
+.refereeBadge {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: inline-flex;
   align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--referee-bg);
+  border: 1px solid var(--referee-accent);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--referee-accent);
+  z-index: 2;
 }
 
-.date, .time, .court {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+.refereeBadgeIcon {
+  font-size: 0.85rem;
+  line-height: 1;
 }
 
-.liveBadge {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--status-live);
-  padding: 4px 12px;
+/* Badge de Fase */
+.phaseBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  margin: 14px 16px 0;
   border-radius: var(--radius-full);
   font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid;
+}
+
+.phaseIcon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.phaseText {
+  white-space: nowrap;
+}
+
+/* Header de tarjeta */
+.cardHeader {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: 1px solid;
+  position: relative;
 }
 
-.pulse {
+.statusPulse {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 50%;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
 }
 
-.statusBadge {
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.statusLive {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--status-live);
-}
-
-.statusFinished {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--status-finished);
-}
-
-.statusScheduled {
-  background: rgba(100, 116, 139, 0.15);
-  color: var(--status-scheduled);
-}
-
-.roleBadge {
-  background: rgba(167, 139, 250, 0.15);
-  color: var(--referee-accent);
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-/* ============================================================================
-   📦 CONTENT
-   ============================================================================ */
-.content {
-  padding: 24px 20px;
+.dateTime {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Montserrat', system-ui, sans-serif;
+  line-height: 1;
+}
+
+.date {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.courtBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.courtIcon {
+  font-size: 0.9rem;
+}
+
+.courtText {
+  color: var(--text-primary);
 }
 
 /* ============================================================================
-   👥 TEAM DISPLAY
+   🏆 MARCADOR
    ============================================================================ */
+.scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 28px;
+}
+
 .team {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 12px 0;
 }
 
-.team.active {
-  background: rgba(59, 130, 246, 0.08);
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  margin: -12px -16px;
+.teamBadgeContainer {
+  position: relative;
 }
 
-.badgeWrapper {
-  width: 64px;
-  height: 64px;
+.teamBadge {
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   overflow: hidden;
   background: var(--bg-surface);
   border: 3px solid var(--border-subtle);
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: border-color var(--transition);
 }
 
-.badge {
+.card:hover .teamBadge {
+  border-color: var(--border-focus);
+}
+
+.teamBadge img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 8px;
+  padding: 10px;
 }
 
 .badgePlaceholder {
-  font-size: 2rem;
+  font-size: 2.2rem;
   opacity: 0.5;
 }
 
-.teamInfo {
-  flex: 1;
-  min-width: 0;
+.winnerBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 1.3rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .teamName {
-  display: block;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  text-align: center;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.3;
 }
 
-.myTeamTag {
-  display: inline-block;
-  font-size: 0.75rem;
-  color: #3b82f6;
-  font-weight: 500;
-}
-
-/* ============================================================================
-   📊 SCORE CENTER
-   ============================================================================ */
-.scoreCenter {
-  text-align: center;
-  padding: 20px;
-  background: var(--bg-surface);
-  border-radius: var(--radius-md);
-  margin: 8px 0;
-}
-
-.scoreRow {
+.scoreContainer {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.scoreRow:last-child {
-  margin-bottom: 0;
-}
-
-.scoreLabel {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  gap: 8px;
 }
 
 .setsScore {
-  font-size: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 20px;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  min-width: 68px;
+  transition: border-color var(--transition);
+}
+
+.setsScoreWinner {
+  border-color: var(--status-finished);
+}
+
+.setsLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.setsNumber {
+  font-size: 2rem;
   font-weight: 800;
   color: var(--text-primary);
   font-family: 'Montserrat', system-ui, sans-serif;
+  line-height: 1;
 }
 
 .pointsScore {
-  font-size: 1.6rem;
+  padding: 4px 16px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+.pointsNumber {
+  font-size: 1.1rem;
   font-weight: 700;
   color: #60a5fa;
   font-family: 'Montserrat', system-ui, sans-serif;
 }
 
-.livePulse {
+.scoreSeparator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 8px;
+}
+
+.vsText {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.liveIndicator {
+  width: 10px;
+  height: 10px;
+  background: var(--status-live);
+  border-radius: 50%;
   animation: pulse 2s infinite;
 }
 
-.currentSetTag {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 6px 16px;
-  background: rgba(239, 68, 68, 0.15);
-  border-radius: var(--radius-full);
+/* ============================================================================
+   📊 DETALLES DE SETS
+   ============================================================================ */
+.setsDetails {
+  margin: 0 16px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.setsSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: color var(--transition);
+}
+
+.setsSummary:hover {
+  color: var(--text-primary);
+}
+
+.setsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.setsArrow {
+  transition: transform var(--transition);
   font-size: 0.8rem;
+}
+
+.setsDetails[open] .setsArrow {
+  transform: rotate(180deg);
+}
+
+.setsList {
+  padding: 0 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.setNumber {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.setScores {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setScore {
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--status-live);
+  font-family: 'Montserrat', system-ui, sans-serif;
+  padding: 3px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  min-width: 36px;
+  text-align: center;
+}
+
+.setScoreWinner {
+  color: var(--status-finished);
+  font-weight: 700;
+}
+
+.setDivider {
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 /* ============================================================================
-   🟥 REFEREE ZONE
+   👤 INFO ÁRBITRO
    ============================================================================ */
-.refereeZone {
-  margin: 16px;
-  padding: 20px;
-  background: var(--referee-bg);
-  border: 1px solid var(--referee-accent);
-  border-radius: var(--radius-md);
+.refereeInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px 14px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .refereeLabel {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--referee-accent);
-  font-weight: 600;
-  margin-bottom: 12px;
+  font-weight: 500;
 }
 
-.codeInputRow {
+.refereeName {
+  color: var(--text-secondary);
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   🔘 ACCIONES
+   ============================================================================ */
+.cardActions {
+  padding: 12px 16px 18px;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.codeInput {
-  flex: 1;
-  padding: 12px 16px;
-  background: var(--bg-card);
-  border: 2px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: 2px;
-  transition: border-color var(--transition);
-}
-
-.codeInput:focus {
-  outline: none;
-  border-color: var(--referee-accent);
-}
-
-.accessBtn {
-  padding: 12px 24px;
-  background: var(--referee-accent);
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--status-finished);
   color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  cursor: pointer;
+  text-decoration: none;
+  border-radius: var(--radius-full);
   transition: all var(--transition);
+  border: none;
+  cursor: pointer;
 }
 
-.accessBtn:hover {
-  background: #9333ea;
+.btnPrimary:hover {
+  background: #16a34a;
   transform: translateY(-1px);
 }
 
-/* ============================================================================
-   🏆 MVP SECTION
-   ============================================================================ */
-.mvpSection {
-  display: flex;
-  gap: 16px;
-  padding: 16px 20px;
-  background: rgba(251, 191, 36, 0.08);
-  border-top: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.mvpItem {
-  display: flex;
+.btnSecondary {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.mvpImg {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--border-subtle);
-}
-
-.mvpInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.mvpLabel {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.mvpName {
-  font-size: 0.95rem;
-  font-weight: 600;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--bg-surface);
   color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  transition: all var(--transition);
+  cursor: pointer;
 }
 
-/* ============================================================================
-   📄 FOOTER
-   ============================================================================ */
-.footer {
-  padding: 12px 20px 16px;
-  text-align: center;
+.btnSecondary:hover {
+  border-color: var(--border-focus);
+  background: var(--bg-card-hover);
 }
 
-.refereeInfo {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+.btnSpectator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-full);
 }
 
 /* ============================================================================
    📱 RESPONSIVE - MOBILE
    ============================================================================ */
-
 @media (max-width: 768px) {
-  .card {
-    margin: 0 -8px 16px;
-    border-radius: var(--radius-md);
+  .container {
+    padding: 16px 12px 130px;
   }
   
-  .header {
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-    align-items: flex-start;
+  .title {
+    font-size: 1.4rem;
   }
   
-  .date, .time, .court {
-    font-size: 0.85rem;
-  }
-  
-  .content {
-    padding: 16px 12px;
-  }
-  
-  /* ✅ Equipos en fila con score center en medio */
-  .team {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  
-  .team:last-child {
-    border-bottom: none;
-  }
-  
-  .team.active {
-    padding: 12px;
-    margin: -12px -12px;
-  }
-  
-  .badgeWrapper {
-    width: 56px;
-    height: 56px;
-    flex-shrink: 0;
-  }
-  
-  .badge {
-    padding: 6px;
-  }
-  
-  .teamInfo {
-    flex: 1;
-    margin-left: 12px;
-    min-width: 0;
-  }
-  
-  .teamName {
-    font-size: 0.95rem;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-  
-  /* ✅ Score center más compacto y centrado */
-  .scoreCenter {
-    order: -1;
-    margin: 16px 0;
-    padding: 16px;
-    background: var(--bg-surface);
-    border-radius: var(--radius-md);
-    text-align: center;
-  }
-  
-  .scoreRow {
-    margin-bottom: 8px;
-  }
-  
-  .scoreRow:last-child {
-    margin-bottom: 0;
-  }
-  
-  .scoreLabel {
-    font-size: 0.7rem;
-    letter-spacing: 0.5px;
-  }
-  
-  .setsScore {
-    font-size: 2rem;
-    font-weight: 800;
-  }
-  
-  .pointsScore {
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-  
-  .livePulse {
-    animation: pulse 2s infinite;
-  }
-  
-  .currentSetTag {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 4px 12px;
-    background: rgba(239, 68, 68, 0.15);
-    border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--status-live);
-  }
-  
-  /* ✅ Formulario de árbitro en móvil */
-  .refereeZone {
-    margin: 12px;
-    padding: 16px;
-  }
-  
-  .codeInputRow {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .codeInput,
-  .accessBtn {
-    width: 100%;
-  }
-  
-  /* ✅ MVPs en columna en móvil */
-  .mvpSection {
-    flex-direction: column;
-    padding: 12px;
-  }
-  
-  .mvpItem {
-    width: 100%;
-    margin-bottom: 12px;
-  }
-  
-  .mvpItem:last-child {
-    margin-bottom: 0;
-  }
-  
-  .mvpImg {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .footer {
-    padding: 12px;
-    font-size: 0.85rem;
-  }
-}
-
-/* ✅ Mobile muy pequeño (< 360px) */
-@media (max-width: 360px) {
-  .badgeWrapper {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .teamName {
+  .subtitle {
     font-size: 0.9rem;
   }
   
-  .setsScore {
-    font-size: 1.6rem;
+  .tabs {
+    gap: 4px;
+    padding: 3px;
+    margin-bottom: 16px;
   }
   
-  .pointsScore {
+  .tab {
+    padding: 9px 14px;
+    font-size: 0.85rem;
+  }
+  
+  .cardHeader {
+    grid-template-columns: 1fr;
+    grid-template-areas: "phase" "status" "datetime" "court";
+    gap: 10px;
+    padding: 12px 14px 14px;
+  }
+  
+  .phaseBadge {
+    grid-area: phase;
+    margin: 0;
+    justify-self: start;
+  }
+  
+  .statusBadge {
+    grid-area: status;
+    justify-self: start;
+  }
+  
+  .dateTime {
+    grid-area: datetime;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  
+  .time {
     font-size: 1.3rem;
   }
   
-  .scoreCenter {
-    padding: 12px;
+  .date {
+    font-size: 0.8rem;
   }
   
-  .content {
-    padding: 12px 10px;
-  }
-}
-
-/* ✅ Tablets (768px - 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .content {
-    padding: 20px;
+  .courtBadge {
+    grid-area: court;
+    justify-self: start;
+    width: fit-content;
   }
   
-  .badgeWrapper {
-    width: 64px;
-    height: 64px;
+  .refereeBadge {
+    top: 12px;
+    right: 14px;
+    padding: 3px 8px;
+    font-size: 0.65rem;
+  }
+  
+  .refereeBadgeIcon {
+    font-size: 0.8rem;
+  }
+  
+  .scoreboard {
+    padding: 18px 14px;
+    gap: 12px;
+  }
+  
+  .teamBadge {
+    width: 72px;
+    height: 72px;
+  }
+  
+  .teamBadge img {
+    padding: 8px;
+  }
+  
+  .badgePlaceholder {
+    font-size: 1.8rem;
   }
   
   .teamName {
     font-size: 1rem;
+    max-width: 140px;
   }
   
-  .scoreCenter {
-    padding: 18px;
+  .setsNumber {
+    font-size: 1.6rem;
+  }
+  
+  .pointsNumber {
+    font-size: 1rem;
+  }
+  
+  .setsDetails {
+    margin: 0 12px 10px;
+  }
+  
+  .setRow {
+    padding: 7px 10px;
+  }
+  
+  .setScore {
+    padding: 3px 12px;
+    font-size: 0.95rem;
+  }
+  
+  .cardActions {
+    padding: 10px 12px 16px;
+    flex-direction: column;
+  }
+  
+  .btnPrimary,
+  .btnSecondary,
+  .btnSpectator {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 12px 10px 120px;
+  }
+  
+  .scoreboard {
+    padding: 16px 10px;
+    gap: 10px;
+  }
+  
+  .teamBadge {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .teamBadge img {
+    padding: 6px;
+  }
+  
+  .badgePlaceholder {
+    font-size: 1.6rem;
+  }
+  
+  .teamName {
+    font-size: 0.95rem;
+    max-width: 110px;
+    line-height: 1.25;
+  }
+  
+  .time {
+    font-size: 1.2rem;
+  }
+  
+  .date {
+    font-size: 0.75rem;
+  }
+  
+  .phaseText {
+    display: none;
+  }
+  
+  .phaseBadge {
+    padding: 5px 10px;
+  }
+  
+  .courtText {
+    display: none;
+  }
+  
+  .courtBadge {
+    padding: 6px 10px;
+  }
+  
+  .setsNumber {
+    font-size: 1.4rem;
+  }
+  
+  .pointsNumber {
+    font-size: 0.95rem;
+  }
+  
+  .refereeName {
+    max-width: 140px;
+  }
+}
+
+@media (max-width: 360px) {
+  .teamName {
+    font-size: 0.9rem;
+    max-width: 100px;
+  }
+  
+  .teamBadge {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .dateTime {
+    gap: 4px;
+  }
+  
+  .time {
+    font-size: 1.1rem;
+  }
+  
+  .statusBadge {
+    padding: 4px 10px;
+    font-size: 0.65rem;
   }
 }
 
@@ -618,6 +930,14 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.tab:focus-visible,
+.btnPrimary:focus-visible,
+.btnSecondary:focus-visible,
+.setsSummary:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 /* ============================================================================
