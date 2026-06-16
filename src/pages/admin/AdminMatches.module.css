@@ -12,13 +12,20 @@
   color: var(--text-primary);
 }
 
-/* Tabla */
 .tableWrapper {
   background: var(--surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  overflow-x: auto;
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
+}
+
+/* ✅ NUEVO: Contenedor con scroll */
+.tableScroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .table {
@@ -26,6 +33,7 @@
   border-collapse: collapse;
   text-align: left;
   font-size: var(--text-sm);
+  min-width: 1200px; /* ✅ Ancho mínimo para scroll horizontal */
 }
 
 .table th {
@@ -35,6 +43,9 @@
   font-weight: 600;
   border-bottom: 2px solid var(--border-default);
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table td {
@@ -57,7 +68,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Selector de fase */
 .stageBadge {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -115,7 +125,6 @@
   background: var(--danger);
 }
 
-/* ✅ Badge de resultado */
 .resultBadge {
   background: var(--surface-elevated);
   padding: 0.4rem 0.8rem;
@@ -126,7 +135,6 @@
   font-family: var(--font-display);
 }
 
-/* ✅ Botón de edición completa */
 .editFullBtn {
   background: var(--volley-blue);
   color: white;
@@ -140,6 +148,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  white-space: nowrap;
 }
 
 .editFullBtn:hover {
@@ -148,7 +157,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* ✅ Celda de MVPs en la tabla */
 .mvpCell {
   display: flex;
   gap: 0.4rem;
@@ -163,10 +171,6 @@
   font-size: 0.9rem;
   cursor: help;
 }
-
-/* ============================================
-   ✅ MODAL DE EDICIÓN COMPLETA
-   ============================================ */
 
 .modalOverlay {
   position: fixed;
@@ -307,7 +311,6 @@
   gap: var(--space-md);
 }
 
-/* Sección de Sets */
 .setsSection {
   background: var(--surface-elevated);
   border: 1px solid var(--border-default);
@@ -466,10 +469,6 @@
   color: var(--volley-gold);
   margin-right: var(--space-sm);
 }
-
-/* ============================================
-   ✅ SECCIÓN DE MVPs
-   ============================================ */
 
 .mvpSection {
   background: var(--surface-elevated);
@@ -671,8 +670,24 @@
   bottom: 0;
 }
 
-/* Responsive */
+/* ✅ RESPONSIVE MÓVIL */
 @media (max-width: 768px) {
+  .container {
+    padding: var(--space-md) var(--space-sm);
+  }
+  
+  .title {
+    font-size: var(--text-xl);
+  }
+  
+  .tableWrapper {
+    border-radius: var(--radius-md);
+  }
+  
+  .tableScroll {
+    max-height: 70vh;
+  }
+  
   .table {
     font-size: var(--text-xs);
   }

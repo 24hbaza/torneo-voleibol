@@ -1,3 +1,4 @@
+// src/pages/admin/TeamManagement.jsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
@@ -19,7 +20,6 @@ export default function TeamManagement() {
   const fetchTeams = async function() {
     setLoading(true);
     try {
-      // ✅ CORREGIDO: data: teamsData (alias correcto)
       const { data: teamsData, error: fetchError } = await supabase
         .from('profiles')
         .select(`
@@ -72,7 +72,6 @@ export default function TeamManagement() {
         });
       }
 
-      // 🔔 ENVIAR NOTIFICACIÓN
       if (newStatus === 'accepted') {
         await sendToTeam(teamId, 'team_approved', '✅ Equipo Aceptado', 'Tu equipo ha sido aprobado. ¡Prepárate para el torneo!');
       } else if (newStatus === 'rejected') {
@@ -86,7 +85,6 @@ export default function TeamManagement() {
 
   const updateAdminTeam = async function(teamId, isAdmin) {
     try {
-      // ✅ VALIDAR MÁXIMO 2 EQUIPOS ADMINISTRADORES
       if (isAdmin) {
         var currentAdmins = teams.filter(function(t) {
           return t.is_admin_team === true;
@@ -118,7 +116,6 @@ export default function TeamManagement() {
 
   const openTeamDetails = async function(team) {
     if (!team.players || team.players.length === 0) {
-      // ✅ CORREGIDO: data: teamData (alias correcto)
       const { data: teamData, error: detailError } = await supabase
         .from('profiles')
         .select('*')
@@ -183,135 +180,262 @@ export default function TeamManagement() {
       {loading ? (
         <div className={styles.loading}>Cargando equipos...</div>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Equipo</th>
-                <th>Capitán</th>
-                <th>Jugadores</th>
-                <th>Registro</th>
-                <th>Estado</th>
-                <th>Admin</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTeams.length === 0 ? (
+        <>
+          {/* ✅ TABLA PARA DESKTOP */}
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan="7" className={styles.emptyRow}>
-                    No hay equipos que coincidan con el filtro.
-                  </td>
+                  <th>Equipo</th>
+                  <th>Capitán</th>
+                  <th>Jugadores</th>
+                  <th>Registro</th>
+                  <th>Estado</th>
+                  <th>Admin</th>
+                  <th>Acciones</th>
                 </tr>
-              ) : (
-                filteredTeams.map(function(team) {
-                  return (
-                    <tr key={team.id} className={styles.row}>
-                      <td>
-                        <div className={styles.teamCell}>
-                          {team.badge_url ? (
-                            <img 
-                              src={team.badge_url} 
-                              alt="Escudo" 
-                              className={styles.miniBadge} 
-                            />
-                          ) : (
-                            <div className={styles.miniBadgePlaceholder}>🏐</div>
-                          )}
-                          <div>
-                            <strong className={styles.teamName}>
-                              {team.team_name || 'Sin nombre'}
-                              {team.is_admin_team && (
-                                <Badge variant="warning" size="sm" className={styles.adminBadge}>
-                                  ADMIN
-                                </Badge>
-                              )}
-                            </strong>
+              </thead>
+              <tbody>
+                {filteredTeams.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className={styles.emptyRow}>
+                      No hay equipos que coincidan con el filtro.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTeams.map(function(team) {
+                    return (
+                      <tr key={team.id} className={styles.row}>
+                        <td>
+                          <div className={styles.teamCell}>
+                            {team.badge_url ? (
+                              <img 
+                                src={team.badge_url} 
+                                alt="Escudo" 
+                                className={styles.miniBadge} 
+                              />
+                            ) : (
+                              <div className={styles.miniBadgePlaceholder}>🏐</div>
+                            )}
+                            <div>
+                              <strong className={styles.teamName}>
+                                {team.team_name || 'Sin nombre'}
+                                {team.is_admin_team && (
+                                  <Badge variant="warning" size="sm" className={styles.adminBadge}>
+                                    ADMIN
+                                  </Badge>
+                                )}
+                              </strong>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        {team.players && team.players[team.captain_id || 0] ? (
-                          <span className={styles.captainName}>
-                            {team.players[team.captain_id]?.name} {team.players[team.captain_id]?.surname}
-                          </span>
-                        ) : (
-                          <span className={styles.noData}>-</span>
-                        )}
-                      </td>
-                      <td>
-                        <Badge variant="default" size="sm">
-                          {team.player_count || 0} jugadores
-                        </Badge>
-                      </td>
-                      <td>
-                        <span className={styles.dateText}>{formatDate(team.created_at)}</span>
-                      </td>
-                      <td>
-                        <Badge 
-                          variant={
-                            team.status === 'accepted' ? 'success' : 
-                            team.status === 'rejected' ? 'error' : 'pending'
-                          } 
-                          size="sm"
-                        >
-                          {team.status}
-                        </Badge>
-                      </td>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={team.is_admin_team || false}
-                          onChange={async function(e) {
-                            var isChecked = e.target.checked;
-                            await updateAdminTeam(team.id, isChecked);
-                          }}
-                          className={styles.adminCheckbox}
-                          title="Marcar como equipo administrador (máx. 2)"
+                        </td>
+                        <td>
+                          {team.players && team.players[team.captain_id || 0] ? (
+                            <span className={styles.captainName}>
+                              {team.players[team.captain_id]?.name} {team.players[team.captain_id]?.surname}
+                            </span>
+                          ) : (
+                            <span className={styles.noData}>-</span>
+                          )}
+                        </td>
+                        <td>
+                          <Badge variant="default" size="sm">
+                            {team.player_count || 0} jugadores
+                          </Badge>
+                        </td>
+                        <td>
+                          <span className={styles.dateText}>{formatDate(team.created_at)}</span>
+                        </td>
+                        <td>
+                          <Badge 
+                            variant={
+                              team.status === 'accepted' ? 'success' : 
+                              team.status === 'rejected' ? 'error' : 'pending'
+                            } 
+                            size="sm"
+                          >
+                            {team.status}
+                          </Badge>
+                        </td>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={team.is_admin_team || false}
+                            onChange={async function(e) {
+                              var isChecked = e.target.checked;
+                              await updateAdminTeam(team.id, isChecked);
+                            }}
+                            className={styles.adminCheckbox}
+                            title="Marcar como equipo administrador (máx. 2)"
+                          />
+                        </td>
+                        <td className={styles.actions}>
+                          <Button variant="ghost" size="sm" onClick={function() {
+                            openTeamDetails(team);
+                          }}>
+                            👁️ Ver
+                          </Button>
+                          <Link 
+                            to={'/admin/teams/edit/' + team.id} 
+                            className={styles.editLink}
+                          >
+                            ✏️ Editar
+                          </Link>
+                          {team.status === 'pending' && (
+                            <>
+                              <Button 
+                                variant="success" 
+                                size="sm" 
+                                onClick={function() {
+                                  updateTeamStatus(team.id, 'accepted');
+                                }}
+                              >
+                                ✅
+                              </Button>
+                              <Button 
+                                variant="danger" 
+                                size="sm" 
+                                onClick={function() {
+                                  updateTeamStatus(team.id, 'rejected');
+                                }}
+                              >
+                                ❌
+                              </Button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ✅ TARJETAS PARA MÓVIL */}
+          <div className={styles.mobileCards}>
+            {filteredTeams.length === 0 ? (
+              <div className={styles.emptyRow}>
+                No hay equipos que coincidan con el filtro.
+              </div>
+            ) : (
+              filteredTeams.map(function(team) {
+                return (
+                  <div key={team.id} className={styles.mobileCard}>
+                    <div className={styles.mobileCardHeader}>
+                      {team.badge_url ? (
+                        <img 
+                          src={team.badge_url} 
+                          alt="Escudo" 
+                          className={styles.mobileCardBadge} 
                         />
-                      </td>
-                      <td className={styles.actions}>
-                        <Button variant="ghost" size="sm" onClick={function() {
-                          openTeamDetails(team);
-                        }}>
-                          👁️ Ver
-                        </Button>
-                        <Link 
-                          to={'/admin/teams/edit/' + team.id} 
-                          className={styles.editLink}
-                        >
-                          ✏️ Editar
-                        </Link>
-                        {team.status === 'pending' && (
-                          <>
-                            <Button 
-                              variant="success" 
-                              size="sm" 
-                              onClick={function() {
-                                updateTeamStatus(team.id, 'accepted');
-                              }}
-                            >
-                              ✅
-                            </Button>
-                            <Button 
-                              variant="danger" 
-                              size="sm" 
-                              onClick={function() {
-                                updateTeamStatus(team.id, 'rejected');
-                              }}
-                            >
-                              ❌
-                            </Button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                      ) : (
+                        <div className={styles.miniBadgePlaceholder}>🏐</div>
+                      )}
+                      <div className={styles.mobileCardTitle}>
+                        <h3>
+                          {team.team_name || 'Sin nombre'}
+                          {team.is_admin_team && (
+                            <Badge variant="warning" size="sm" className={styles.adminBadge}>
+                              ADMIN
+                            </Badge>
+                          )}
+                        </h3>
+                        <p>
+                          {team.players && team.players[team.captain_id || 0] ? (
+                            <>Capitán: {team.players[team.captain_id]?.name} {team.players[team.captain_id]?.surname}</>
+                          ) : (
+                            <>Capitán: -</>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className={styles.mobileCardBody}>
+                      <div className={styles.mobileCardRow}>
+                        <span className={styles.mobileCardLabel}>Jugadores</span>
+                        <span className={styles.mobileCardValue}>
+                          <Badge variant="default" size="sm">
+                            {team.player_count || 0}
+                          </Badge>
+                        </span>
+                      </div>
+                      <div className={styles.mobileCardRow}>
+                        <span className={styles.mobileCardLabel}>Registro</span>
+                        <span className={styles.mobileCardValue}>{formatDate(team.created_at)}</span>
+                      </div>
+                      <div className={styles.mobileCardRow}>
+                        <span className={styles.mobileCardLabel}>Estado</span>
+                        <span className={styles.mobileCardValue}>
+                          <Badge 
+                            variant={
+                              team.status === 'accepted' ? 'success' : 
+                              team.status === 'rejected' ? 'error' : 'pending'
+                            } 
+                            size="sm"
+                          >
+                            {team.status}
+                          </Badge>
+                        </span>
+                      </div>
+                      <div className={styles.mobileCardRow}>
+                        <span className={styles.mobileCardLabel}>Equipo Admin</span>
+                        <span className={styles.mobileCardValue}>
+                          <input
+                            type="checkbox"
+                            checked={team.is_admin_team || false}
+                            onChange={async function(e) {
+                              var isChecked = e.target.checked;
+                              await updateAdminTeam(team.id, isChecked);
+                            }}
+                            className={styles.adminCheckbox}
+                            title="Marcar como equipo administrador (máx. 2)"
+                          />
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.mobileCardFooter}>
+                      <Button variant="ghost" size="sm" onClick={function() {
+                        openTeamDetails(team);
+                      }}>
+                        👁️ Ver
+                      </Button>
+                      <Link 
+                        to={'/admin/teams/edit/' + team.id} 
+                        className={styles.editLink}
+                      >
+                        ✏️ Editar
+                      </Link>
+                      {team.status === 'pending' && (
+                        <>
+                          <Button 
+                            variant="success" 
+                            size="sm" 
+                            onClick={function() {
+                              updateTeamStatus(team.id, 'accepted');
+                            }}
+                          >
+                            ✅
+                          </Button>
+                          <Button 
+                            variant="danger" 
+                            size="sm" 
+                            onClick={function() {
+                              updateTeamStatus(team.id, 'rejected');
+                            }}
+                          >
+                            ❌
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </>
       )}
 
       <Modal 

@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabaseClient';
 import { Badge, Button } from '../../design-system/components';
 import styles from './AdminMatches.module.css';
 
-// ✅ Opciones de fase para el selector
 const STAGE_OPTIONS = [
   { value: 'group', label: '📊 Fase de Grupos' },
   { value: 'playoff', label: '🔥 Playoffs' },
@@ -13,7 +12,6 @@ const STAGE_OPTIONS = [
   { value: 'third_place', label: '🥉 3º y 4º' }
 ];
 
-// ✅ Opciones de estado
 const STATUS_OPTIONS = [
   { value: 'scheduled', label: '⏳ Programado' },
   { value: 'live', label: '🔴 En Vivo' },
@@ -27,7 +25,6 @@ export default function AdminMatches() {
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   
-  // ✅ Estado para el modal de edición completa
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [editForm, setEditForm] = useState({
@@ -45,7 +42,6 @@ export default function AdminMatches() {
     mvp_female_photo_url: ''
   });
 
-  // ✅ Estado para los jugadores de ambos equipos
   const [homePlayers, setHomePlayers] = useState([]);
   const [awayPlayers, setAwayPlayers] = useState([]);
 
@@ -90,10 +86,8 @@ export default function AdminMatches() {
     setLoading(false);
   };
 
-  // ✅ Cargar jugadores de ambos equipos
   const fetchPlayers = async (homeTeamId, awayTeamId) => {
     try {
-      // Cargar jugadores del equipo local
       const { data: homeData, error: homeError } = await supabase
         .from('profiles')
         .select('players')
@@ -106,7 +100,6 @@ export default function AdminMatches() {
         setHomePlayers([]);
       }
       
-      // Cargar jugadores del equipo visitante
       const { data: awayData, error: awayError } = await supabase
         .from('profiles')
         .select('players')
@@ -125,7 +118,6 @@ export default function AdminMatches() {
     }
   };
 
-  // ✅ Actualizar fase de un partido (mantener funcionalidad existente)
   const updateMatchStage = async (matchId, newStage) => {
     setSaving(true);
     const { error } = await supabase
@@ -145,11 +137,9 @@ export default function AdminMatches() {
     setEditingId(null);
   };
 
-  // ✅ Abrir modal de edición completa
   const openEditModal = async (match) => {
     setSelectedMatch(match);
     
-    // Parsear sets_details si existe
     let setsDetails = [];
     try {
       if (match.sets_details) {
@@ -164,7 +154,6 @@ export default function AdminMatches() {
       setsDetails = [];
     }
     
-    // Convertir fecha a formato local para el input
     let localDate = '';
     if (match.match_date) {
       const date = new Date(match.match_date);
@@ -191,7 +180,6 @@ export default function AdminMatches() {
       mvp_female_photo_url: match.mvp_female_photo_url || ''
     });
     
-    // ✅ Cargar jugadores de ambos equipos
     if (match.home_team_id && match.away_team_id) {
       await fetchPlayers(match.home_team_id, match.away_team_id);
     }
@@ -199,7 +187,6 @@ export default function AdminMatches() {
     setIsModalOpen(true);
   };
 
-  // ✅ Cerrar modal
   const closeEditModal = () => {
     setIsModalOpen(false);
     setSelectedMatch(null);
@@ -221,7 +208,6 @@ export default function AdminMatches() {
     });
   };
 
-  // ✅ Añadir set
   const addSet = () => {
     setEditForm(prev => ({
       ...prev,
@@ -229,7 +215,6 @@ export default function AdminMatches() {
     }));
   };
 
-  // ✅ Actualizar puntuación de un set
   const updateSetScore = (setIndex, team, value) => {
     const newSets = [...editForm.sets_details];
     const set = [...newSets[setIndex]];
@@ -242,7 +227,6 @@ export default function AdminMatches() {
     
     newSets[setIndex] = set;
     
-    // Calcular automáticamente home_score y away_score
     let homeWon = 0;
     let awayWon = 0;
     newSets.forEach(s => {
@@ -258,11 +242,9 @@ export default function AdminMatches() {
     }));
   };
 
-  // ✅ Eliminar set
   const removeSet = (setIndex) => {
     const newSets = editForm.sets_details.filter((_, i) => i !== setIndex);
     
-    // Recalcular scores
     let homeWon = 0;
     let awayWon = 0;
     newSets.forEach(s => {
@@ -278,7 +260,6 @@ export default function AdminMatches() {
     }));
   };
 
-  // ✅ Seleccionar MVP masculino
   const selectMvpMale = (player) => {
     if (!player) {
       setEditForm(prev => ({
@@ -297,7 +278,6 @@ export default function AdminMatches() {
     }));
   };
 
-  // ✅ Seleccionar MVP femenino
   const selectMvpFemale = (player) => {
     if (!player) {
       setEditForm(prev => ({
@@ -316,7 +296,6 @@ export default function AdminMatches() {
     }));
   };
 
-  // ✅ Filtrar jugadores por género
   const getPlayersByGender = (gender) => {
     const allPlayers = [...homePlayers, ...awayPlayers];
     return allPlayers.filter(p => {
@@ -330,13 +309,11 @@ export default function AdminMatches() {
     });
   };
 
-  // ✅ Guardar cambios del partido
   const saveMatch = async () => {
     if (!selectedMatch) return;
     
     setSaving(true);
     try {
-      // Convertir fecha local a ISO
       let matchDateISO = null;
       if (editForm.match_date) {
         matchDateISO = new Date(editForm.match_date).toISOString();
@@ -353,7 +330,6 @@ export default function AdminMatches() {
         away_score: editForm.away_score
       };
       
-      // Si el estado es finished y hay sets, asegurar que los scores estén correctos
       if (editForm.status === 'finished' && editForm.sets_details.length > 0) {
         let homeWon = 0;
         let awayWon = 0;
@@ -365,13 +341,11 @@ export default function AdminMatches() {
         updateData.away_score = awayWon;
       }
       
-      // ✅ MVPs - Solo actualizar si hay selección
       if (editForm.mvp_male_name) {
         updateData.mvp_male_name = editForm.mvp_male_name;
         updateData.mvp_male_photo_url = editForm.mvp_male_photo_url;
         updateData.mvp_male_voted = true;
       } else {
-        // Si se borró, limpiar los campos
         updateData.mvp_male_name = null;
         updateData.mvp_male_photo_url = null;
         updateData.mvp_male_voted = false;
@@ -387,7 +361,6 @@ export default function AdminMatches() {
         updateData.mvp_female_voted = false;
       }
       
-      // Si ambos MVPs están votados, marcar mvp_voted como true
       if (editForm.mvp_male_name && editForm.mvp_female_name) {
         updateData.mvp_voted = true;
       } else if (!editForm.mvp_male_name && !editForm.mvp_female_name) {
@@ -420,7 +393,6 @@ export default function AdminMatches() {
     return opt?.label || 'Fase desconocida';
   };
 
-  // ✅ Calcular sets ganados para mostrar en la tabla
   const calculateSets = (match) => {
     let homeWon = 0;
     let awayWon = 0;
@@ -449,7 +421,6 @@ export default function AdminMatches() {
     return `${homeWon} - ${awayWon}`;
   };
 
-  // ✅ Obtener nombre del equipo del jugador
   const getPlayerTeamName = (player) => {
     if (player.team_id === selectedMatch?.home_team_id) {
       return selectedMatch.home?.team_name || 'Local';
@@ -467,124 +438,121 @@ export default function AdminMatches() {
         <p>Cargando...</p>
       ) : (
         <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Fecha / Hora</th>
-                <th>Enfrentamiento</th>
-                <th>Pista</th>
-                <th>Árbitro</th>
-                <th>Código</th>
-                <th>🎯 Fase</th>
-                <th>Resultado</th>
-                <th>MVPs</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matches.map(m => (
-                <tr key={m.id}>
-                  <td>{formatDate(m.match_date)}</td>
-                  <td>
-                    <strong>{m.home?.team_name}</strong> vs <strong>{m.away?.team_name}</strong>
-                  </td>
-                  <td>{m.court_number || '-'}</td>
-                  <td>
-                    {m.referee?.team_name || <span style={{color:'var(--text-muted)'}}>Sin asignar</span>}
-                  </td>
-                  <td><code className={styles.code}>{m.verification_code || '-'}</code></td>
-                  
-                  {/* ✅ SELECTOR DE FASE */}
-                  <td>
-                    {editingId === m.id ? (
-                      <div className={styles.stageEditor}>
-                        <select
-                          className={styles.stageSelect}
-                          value={m.stage || 'group'}
-                          onChange={(e) => updateMatchStage(m.id, e.target.value)}
-                          disabled={saving}
-                          autoFocus
-                        >
-                          {STAGE_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                        <button 
-                          className={styles.cancelBtn}
-                          onClick={() => setEditingId(null)}
-                          disabled={saving}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className={styles.stageBadge}
-                        onClick={() => setEditingId(m.id)}
-                        title="Click para editar fase"
-                      >
-                        {getStageLabel(m.stage || 'group')}
-                        <span className={styles.editIcon}>✏️</span>
-                      </button>
-                    )}
-                  </td>
-                  
-                  {/* ✅ COLUMNA: RESULTADO */}
-                  <td>
-                    <span className={styles.resultBadge}>
-                      {calculateSets(m)}
-                    </span>
-                  </td>
-                  
-                  {/* ✅ NUEVA COLUMNA: MVPs */}
-                  <td>
-                    <div className={styles.mvpCell}>
-                      {m.mvp_male_voted && (
-                        <div className={styles.mvpMiniBadge} title={`MVP Masculino: ${m.mvp_male_name}`}>
-                          👨
-                        </div>
-                      )}
-                      {m.mvp_female_voted && (
-                        <div className={styles.mvpMiniBadge} title={`MVP Femenino: ${m.mvp_female_name}`}>
-                          👩
-                        </div>
-                      )}
-                      {!m.mvp_male_voted && !m.mvp_female_voted && (
-                        <span style={{color:'var(--text-muted)', fontSize: '0.8rem'}}>-</span>
-                      )}
-                    </div>
-                  </td>
-                  
-                  <td>
-                    <Badge variant={
-                      m.status === 'live' ? 'live' : 
-                      m.status === 'finished' ? 'finished' : 'scheduled'
-                    }>
-                      {m.status}
-                    </Badge>
-                  </td>
-                  
-                  {/* ✅ COLUMNA: ACCIONES */}
-                  <td>
-                    <button
-                      className={styles.editFullBtn}
-                      onClick={() => openEditModal(m)}
-                      title="Editar partido completo"
-                    >
-                      ✏️ Editar
-                    </button>
-                  </td>
+          <div className={styles.tableScroll}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Fecha / Hora</th>
+                  <th>Enfrentamiento</th>
+                  <th>Pista</th>
+                  <th>Árbitro</th>
+                  <th>Código</th>
+                  <th>🎯 Fase</th>
+                  <th>Resultado</th>
+                  <th>MVPs</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {matches.map(m => (
+                  <tr key={m.id}>
+                    <td>{formatDate(m.match_date)}</td>
+                    <td>
+                      <strong>{m.home?.team_name}</strong> vs <strong>{m.away?.team_name}</strong>
+                    </td>
+                    <td>{m.court_number || '-'}</td>
+                    <td>
+                      {m.referee?.team_name || <span style={{color:'var(--text-muted)'}}>Sin asignar</span>}
+                    </td>
+                    <td><code className={styles.code}>{m.verification_code || '-'}</code></td>
+                    
+                    <td>
+                      {editingId === m.id ? (
+                        <div className={styles.stageEditor}>
+                          <select
+                            className={styles.stageSelect}
+                            value={m.stage || 'group'}
+                            onChange={(e) => updateMatchStage(m.id, e.target.value)}
+                            disabled={saving}
+                            autoFocus
+                          >
+                            {STAGE_OPTIONS.map(opt => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button 
+                            className={styles.cancelBtn}
+                            onClick={() => setEditingId(null)}
+                            disabled={saving}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className={styles.stageBadge}
+                          onClick={() => setEditingId(m.id)}
+                          title="Click para editar fase"
+                        >
+                          {getStageLabel(m.stage || 'group')}
+                          <span className={styles.editIcon}>✏️</span>
+                        </button>
+                      )}
+                    </td>
+                    
+                    <td>
+                      <span className={styles.resultBadge}>
+                        {calculateSets(m)}
+                      </span>
+                    </td>
+                    
+                    <td>
+                      <div className={styles.mvpCell}>
+                        {m.mvp_male_voted && (
+                          <div className={styles.mvpMiniBadge} title={`MVP Masculino: ${m.mvp_male_name}`}>
+                            👨
+                          </div>
+                        )}
+                        {m.mvp_female_voted && (
+                          <div className={styles.mvpMiniBadge} title={`MVP Femenino: ${m.mvp_female_name}`}>
+                            👩
+                          </div>
+                        )}
+                        {!m.mvp_male_voted && !m.mvp_female_voted && (
+                          <span style={{color:'var(--text-muted)', fontSize: '0.8rem'}}>-</span>
+                        )}
+                      </div>
+                    </td>
+                    
+                    <td>
+                      <Badge variant={
+                        m.status === 'live' ? 'live' : 
+                        m.status === 'finished' ? 'finished' : 'scheduled'
+                      }>
+                        {m.status}
+                      </Badge>
+                    </td>
+                    
+                    <td>
+                      <button
+                        className={styles.editFullBtn}
+                        onClick={() => openEditModal(m)}
+                        title="Editar partido completo"
+                      >
+                        ✏️ Editar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* ✅ MODAL DE EDICIÓN COMPLETA */}
       {isModalOpen && selectedMatch && (
         <div className={styles.modalOverlay} onClick={closeEditModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -594,12 +562,10 @@ export default function AdminMatches() {
             </div>
 
             <div className={styles.modalBody}>
-              {/* Información del enfrentamiento */}
               <div className={styles.matchInfo}>
                 <strong>{selectedMatch.home?.team_name}</strong> vs <strong>{selectedMatch.away?.team_name}</strong>
               </div>
 
-              {/* Fecha y Hora */}
               <div className={styles.formGroup}>
                 <label>📅 Fecha y Hora</label>
                 <input
@@ -610,7 +576,6 @@ export default function AdminMatches() {
                 />
               </div>
 
-              {/* Pista y Árbitro */}
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>🏟️ Pista</label>
@@ -642,7 +607,6 @@ export default function AdminMatches() {
                 </div>
               </div>
 
-              {/* Fase y Estado */}
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>🎯 Fase</label>
@@ -675,7 +639,6 @@ export default function AdminMatches() {
                 </div>
               </div>
 
-              {/* Sets y Puntuaciones */}
               <div className={styles.setsSection}>
                 <div className={styles.setsHeader}>
                   <h3>🏐 Sets ({editForm.sets_details.length})</h3>
@@ -730,7 +693,6 @@ export default function AdminMatches() {
                   </div>
                 )}
 
-                {/* Resumen de sets ganados */}
                 {editForm.sets_details.length > 0 && (
                   <div className={styles.setsSummary}>
                     <strong>Resultado final:</strong> {editForm.home_score} - {editForm.away_score}
@@ -738,14 +700,12 @@ export default function AdminMatches() {
                 )}
               </div>
 
-              {/* ✅ SECCIÓN DE MVPs */}
               <div className={styles.mvpSection}>
                 <h3>🏆 MVPs del Partido</h3>
                 <p className={styles.mvpDescription}>
                   Selecciona los jugadores más destacados del partido (opcional)
                 </p>
 
-                {/* MVP Masculino */}
                 <div className={styles.mvpGroup}>
                   <div className={styles.mvpGroupHeader}>
                     <span className={styles.mvpGroupIcon}>👨</span>
@@ -796,7 +756,6 @@ export default function AdminMatches() {
                   )}
                 </div>
 
-                {/* MVP Femenino */}
                 <div className={styles.mvpGroup}>
                   <div className={styles.mvpGroupHeader}>
                     <span className={styles.mvpGroupIcon}>👩</span>
