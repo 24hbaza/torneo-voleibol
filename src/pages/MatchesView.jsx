@@ -13,19 +13,6 @@ const parseSafeDate = (dateValue) => {
   return isNaN(dateObject.getTime()) ? null : dateObject;
 };
 
-const formatMatchDate = (dateValue) => {
-  const dateObject = parseSafeDate(dateValue);
-  if (!dateObject) return 'Fecha no definida';
-  
-  return dateObject.toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    day: 'numeric', 
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
 const formatTimeBadge = (dateValue) => {
   const dateObject = parseSafeDate(dateValue);
   if (!dateObject) return { time: '--:--', day: '--', month: '--' };
@@ -38,37 +25,11 @@ const formatTimeBadge = (dateValue) => {
 };
 
 const PHASE_CONFIG = {
-  group: { 
-    label: 'Fase de Grupos', 
-    icon: '📊', 
-    color: '#3b82f6',
-    bg: 'rgba(59, 130, 246, 0.12)'
-  },
-  playoff_group: { 
-    label: 'Playoffs', 
-    icon: '🔥', 
-    color: '#8b5cf6',
-    bg: 'rgba(139, 92, 246, 0.12)'
-  },
-  playoff_semifinal: { 
-    label: 'Semifinal', 
-    icon: '⚔️', 
-    color: '#94a3b8',
-    bg: 'rgba(148, 163, 184, 0.12)'
-  },
-  playoff_final: { 
-    label: '🏆 FINAL', 
-    icon: '🏆', 
-    color: '#fbbf24',
-    bg: 'rgba(251, 191, 36, 0.15)',
-    highlight: true
-  },
-  playoff_third: { 
-    label: '3º y 4º', 
-    icon: '🥉', 
-    color: '#f59e0b',
-    bg: 'rgba(245, 158, 11, 0.12)'
-  }
+  group: { label: 'Fase de Grupos', icon: '📊', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)' },
+  playoff_group: { label: 'Playoffs', icon: '🔥', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.12)' },
+  playoff_semifinal: { label: 'Semifinal', icon: '⚔️', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)' },
+  playoff_final: { label: '🏆 FINAL', icon: '🏆', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)', highlight: true },
+  playoff_third: { label: '3º y 4º', icon: '🥉', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' }
 };
 
 const STAGE_TO_CONFIG = {
@@ -118,11 +79,13 @@ export default function MatchesView() {
 
     fetchMatches();
 
+    // ✅ Realtime: escucha TODOS los updates de la tabla matches
     const channel = supabase
       .channel('matches-realtime')
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'matches' },
         (payload) => {
+          console.log('🔄 Realtime update recibido:', payload.new.id, 'sets:', payload.new.sets_details);
           setMatches(prev => prev.map(match => 
             match.id === payload.new.id ? { ...match, ...payload.new } : match
           ));
@@ -215,9 +178,7 @@ export default function MatchesView() {
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.label}
-            {tab.count > 0 && (
-              <span className={styles.tabCount}>{tab.count}</span>
-            )}
+            {tab.count > 0 && <span className={styles.tabCount}>{tab.count}</span>}
           </button>
         ))}
       </nav>
@@ -231,11 +192,7 @@ export default function MatchesView() {
           </div>
         ) : (
           currentMatches.map(match => (
-            <MatchCard 
-              key={match.id} 
-              match={match} 
-              userId={user?.id ?? null} 
-            />
+            <MatchCard key={match.id} match={match} userId={user?.id ?? null} />
           ))
         )}
       </div>
@@ -256,21 +213,35 @@ function MatchCard({ match, userId }) {
   };
   const status = statusConfig[match.status] || statusConfig.scheduled;
 
+  // ✅ CORRECCIÓN: Parseo robusto de sets_details (maneja string Y array)
   let setsHome = 0, setsAway = 0, setsDetails = [];
-  try {
-    if (match.sets_details) {
-      const parsed = JSON.parse(match.sets_details);
-      if (Array.isArray(parsed)) {
-        setsDetails = parsed;
-        parsed.forEach(s => {
+  
+  if (match.sets_details) {
+    try {
+      if (typeof match.sets_details === 'string') {
+        setsDetails = JSON.parse(match.sets_details);
+      } else if (Array.isArray(match.sets_details)) {
+        setsDetails = match.sets_details;
+      }
+      
+      if (Array.isArray(setsDetails)) {
+        setsDetails.forEach(s => {
           if (Array.isArray(s) && s.length === 2) {
             if (s[0] > s[1]) setsHome++;
             else if (s[1] > s[0]) setsAway++;
           }
         });
       }
+    } catch (e) {
+      console.warn('⚠️ Error parseando sets_details:', e);
+      setsHome = match.home_score || 0;
+      setsAway = match.away_score || 0;
     }
-  } catch {}
+  } else {
+    // Fallback si no hay sets_details
+    setsHome = match.home_score || 0;
+    setsAway = match.away_score || 0;
+  }
 
   const homeTeam = {
     name: match.home_team?.team_name || 'Equipo Local',
@@ -292,12 +263,12 @@ function MatchCard({ match, userId }) {
     <Card className={`${styles.card} 
       ${phaseConfig.highlight ? styles.cardHighlight : ''} 
       ${isReferee ? styles.cardReferee : ''}`}
-          style={{
-            '--phase-color': phaseConfig.color,
-            '--phase-bg': phaseConfig.bg,
-            '--status-color': status.color,
-            '--status-bg': status.bg
-          }}>
+      style={{
+        '--phase-color': phaseConfig.color,
+        '--phase-bg': phaseConfig.bg,
+        '--status-color': status.color,
+        '--status-bg': status.bg
+      }}>
       
       <div className={styles.phaseBadge} style={{ 
         backgroundColor: phaseConfig.bg,
@@ -399,9 +370,7 @@ function MatchCard({ match, userId }) {
           </Link>
         )}
         {!isReferee && isPlayer && (
-          <button className={styles.btnSecondary}>
-            📊 Ver detalles
-          </button>
+          <button className={styles.btnSecondary}>📊 Ver detalles</button>
         )}
         {!isReferee && !isPlayer && (
           <span className={styles.btnSpectator}>👁️ Ver como espectador</span>
@@ -425,9 +394,7 @@ function TeamDisplay({ team, sets, points, isWinner, side }) {
         {isWinner && <span className={styles.winnerBadge}>🏆</span>}
       </div>
       
-      <span className={styles.teamName} title={team.name}>
-        {team.name}
-      </span>
+      <span className={styles.teamName} title={team.name}>{team.name}</span>
       
       <div className={styles.scoreContainer}>
         <div className={`${styles.setsScore} ${isWinner ? styles.setsScoreWinner : ''}`}>
