@@ -74,12 +74,12 @@ const canTeamPlay = function(team, matchDate) {
 };
 
 // ============================================================================
-// ✅ NUEVA FUNCIÓN: VERIFICAR FRANJA HORARIA GLOBAL SIN PARTIDOS (21:00 - 21:30)
+// ✅ NUEVA FUNCIÓN: VERIFICAR FRANJA HORARIA GLOBAL SIN PARTIDOS (21:15 - 21:30)
 // ============================================================================
 
 /**
  * Verifica si una hora está dentro de la franja horaria global sin partidos
- * Franja: 21:00 a 21:30 todos los días
+ * Franja: 21:15 a 21:30 todos los días (sorteo)
  * @param {Date} date - Fecha y hora a verificar
  * @returns {boolean} - true si está en la franja prohibida
  */
@@ -88,9 +88,9 @@ const isBlackoutTime = function(date) {
   const minutes = date.getMinutes();
   const timeInMinutes = hours * 60 + minutes;
   
-  // 21:00 = 1260 minutos, 21:30 = 1290 minutos
-  const blackoutStart = 21 * 60 + 0;  // 21:00
-  const blackoutEnd = 21 * 60 + 30;   // 21:30
+  // 21:15 = 1275 minutos, 21:30 = 1290 minutos
+  const blackoutStart = 21 * 60 + 15;  // 21:15
+  const blackoutEnd = 21 * 60 + 30;    // 21:30
   
   return timeInMinutes >= blackoutStart && timeInMinutes < blackoutEnd;
 };
@@ -703,7 +703,7 @@ export default function TournamentDraw() {
         addLog('✅ Distribución aleatoria completada.');
       }
 
-      addLog('⚔️ Generando horarios por slots optimizados (respetando disponibilidad y franja 21:00-21:30)...');
+      addLog('⚔️ Generando horarios por slots optimizados (respetando disponibilidad y franja 21:15-21:30 para sorteo)...');
       var finalScheduled = scheduleMatches(groupsWithTeams, config, addLog);
       
       addLog('💾 Guardando calendario de fase de grupos...');
@@ -978,13 +978,13 @@ export default function TournamentDraw() {
             <li>🏟️ Pistas disponibles: {config?.num_courts || 1}</li>
             <li>👥 Formato: {config?.match_format === 'double' ? 'Ida y Vuelta' : 'Solo Ida'}</li>
             <li>🎟️ Equipos que avanzan: {config?.teams_advancing || 2} por grupo</li>
-            <li>🚫 Franja sin partidos: 21:00 - 21:30</li>
+            <li>🚫 Franja sin partidos (sorteo): 21:15 - 21:30</li>
           </ul>
         </Card>
         
         <Card className={styles.controlCard}>
           <h3>🚀 Ejecutar Algoritmo</h3>
-          <p>Scheduler optimizado: maximización de pistas, separación lógica jugador/árbitro, equipos administradores, <strong>disponibilidad horaria</strong>, <strong>franja 21:00-21:30</strong> y sin bloqueos artificiales.</p>
+          <p>Scheduler optimizado: maximización de pistas, separación lógica jugador/árbitro, equipos administradores, <strong>disponibilidad horaria</strong>, <strong>franja 21:15-21:30 (sorteo)</strong> y sin bloqueos artificiales.</p>
           <Button 
             onClick={function() {
               setConfirmDialog({ 

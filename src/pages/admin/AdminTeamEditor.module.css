@@ -586,3 +586,89 @@
     font-size: var(--text-base);
   }
 }
+/* Añadir al final del archivo AdminTeamEditor.module.css */
+
+/* ============================================================================
+   ✅ ESTILOS PARA ESCUDO DEL EQUIPO
+   ============================================================================ */
+
+.badgePreview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-left: var(--space-md);
+}
+
+.badgePreviewImg {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 2px solid var(--border-default);
+  background: var(--surface);
+  padding: 4px;
+}
+
+.fileInputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.fileInput {
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+}
+
+.fileInputLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.5rem 1rem;
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.fileInputLabel:hover {
+  background: var(--volley-blue);
+  border-color: var(--volley-blue);
+  color: white;
+}
+
+.fileInputLabel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive para badge */
+@media (max-width: 768px) {
+  .badgePreview {
+    margin-left: 0;
+    margin-top: var(--space-sm);
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .docRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .fileInputRow {
+    width: 100%;
+  }
+  
+  .fileInputLabel {
+    flex: 1;
+    justify-content: center;
+  }
+}

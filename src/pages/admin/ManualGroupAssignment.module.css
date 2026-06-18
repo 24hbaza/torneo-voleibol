@@ -387,3 +387,321 @@
     text-align: center;
   }
 }
+/* Añadir al final de ManualGroupAssignment.module.css */
+
+/* ============================================================================
+   🔮 SECCIÓN DE CALENDARIO FANTASMA (DRAFT)
+   ============================================================================ */
+
+.draftSection {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.08));
+  border: 2px solid var(--volley-blue);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.draftSection .sectionTitle {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-sm) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.draftSection .sectionDescription {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-lg) 0;
+  line-height: 1.5;
+}
+
+.draftActions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.confirmedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--volley-green);
+  border-radius: var(--radius-pill);
+  color: var(--volley-green);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   📋 VISTA PREVIA DE PARTIDOS
+   ============================================================================ */
+
+.draftPreview {
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.previewTitle {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-lg) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.draftMatchesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-md);
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: var(--space-xs);
+}
+
+.draftMatchesList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.draftMatchesList::-webkit-scrollbar-track {
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+.draftMatchesList::-webkit-scrollbar-thumb {
+  background: var(--volley-blue);
+  border-radius: 4px;
+}
+
+.draftMatchCard {
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+.draftMatchCard:hover {
+  border-color: var(--volley-blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.draftMatchHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.draftMatchNumber {
+  background: var(--volley-blue);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.draftMatchGroup {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--volley-gold);
+  flex: 1;
+}
+
+.draftMatchCode {
+  font-family: monospace;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.draftMatchBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.draftMatchTeams {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  flex-wrap: wrap;
+}
+
+.draftMatchTeams strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vs {
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  flex-shrink: 0;
+}
+
+.draftMatchInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.draftMatchActions {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-default);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.editDraftBtn {
+  background: var(--volley-blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.editDraftBtn:hover {
+  background: var(--volley-blue-hover);
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   ✏️ FORMULARIO DE EDICIÓN DE PARTIDO
+   ============================================================================ */
+
+.draftMatchEdit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.editField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editField label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.editInput {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: var(--volley-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.editActions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+/* ============================================================================
+   📱 RESPONSIVE MÓVIL
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .draftSection {
+    padding: var(--space-md);
+  }
+  
+  .draftActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .draftActions button {
+    width: 100%;
+  }
+  
+  .draftMatchesList {
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+  
+  .draftMatchCard {
+    padding: var(--space-sm);
+  }
+  
+  .draftMatchHeader {
+    flex-wrap: wrap;
+  }
+  
+  .draftMatchCode {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .draftMatchTeams {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  
+  .draftMatchTeams strong {
+    width: 100%;
+  }
+  
+  .vs {
+    align-self: center;
+  }
+}

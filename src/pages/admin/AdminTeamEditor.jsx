@@ -19,10 +19,9 @@ export default function AdminTeamEditor() {
     receipt_url: '',
     player_count: 0,
     captain_id: 0,
-    availability: [] // ✅ NUEVO: Disponibilidad horaria
+    availability: []
   });
 
-  // ✅ Estado para el formulario de disponibilidad (fecha completa)
   const [newAvailability, setNewAvailability] = useState({
     start_datetime: '',
     end_datetime: ''
@@ -49,7 +48,7 @@ export default function AdminTeamEditor() {
             receipt_url: data.receipt_url || '',
             player_count: data.player_count || 0,
             captain_id: data.captain_id || 0,
-            availability: data.availability || [] // ✅ Cargar disponibilidad
+            availability: data.availability || []
           });
         }
       } catch (err) {
@@ -119,11 +118,70 @@ export default function AdminTeamEditor() {
     }
   };
 
-  // ✅ FUNCIONES PARA GESTIÓN DE DISPONIBILIDAD (FECHAS COMPLETAS)
+  // ✅ FUNCIONES PARA SUBIR/CAMBIAR ESCUDO
+  const handleBadgeUpload = async (file) => {
+    if (!file || !teamId) return;
+    
+    try {
+      setSaving(true);
+      const ext = file.name.split('.').pop();
+      const path = `team-badges/${teamId}_${Date.now()}.${ext}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('team-badges')
+        .upload(path, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage.from('team-badges').getPublicUrl(path);
+      
+      // Eliminar escudo anterior si existe
+      if (formData.badge_url) {
+        await removeBadgeFile(formData.badge_url);
+      }
+      
+      updateField('badge_url', data.publicUrl);
+      alert('✅ Escudo actualizado correctamente');
+    } catch (err) {
+      console.error('Error uploading badge:', err);
+      alert('❌ Error al subir el escudo: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeBadgeFile = async (badgeUrl) => {
+    try {
+      const urlParts = badgeUrl.split('/team-badges/');
+      if (urlParts.length > 1) {
+        const path = `team-badges/${urlParts[1]}`;
+        await supabase.storage.from('team-badges').remove([path]);
+      }
+    } catch (err) {
+      console.error('Error removing badge:', err);
+    }
+  };
+
+  const removeBadge = async () => {
+    if (!formData.badge_url) return;
+    
+    if (!confirm('¿Estás seguro de que quieres eliminar el escudo?')) {
+      return;
+    }
+    
+    try {
+      await removeBadgeFile(formData.badge_url);
+      updateField('badge_url', '');
+      alert('✅ Escudo eliminado');
+    } catch (err) {
+      console.error('Error removing badge:', err);
+      alert('Error al eliminar el escudo');
+    }
+  };
+
   const addAvailability = () => {
     const { start_datetime, end_datetime } = newAvailability;
     
-    // Validación básica
     if (!start_datetime || !end_datetime) {
       alert('Por favor, completa la fecha de inicio y fin');
       return;
@@ -137,7 +195,6 @@ export default function AdminTeamEditor() {
       return;
     }
     
-    // Verificar si ya existe una franja similar (mismo rango)
     const exists = formData.availability.some(
       a => a.start_datetime === start_datetime && a.end_datetime === end_datetime
     );
@@ -153,8 +210,6 @@ export default function AdminTeamEditor() {
       created_at: new Date().toISOString()
     }];
     updateField('availability', newAvail);
-    
-    // Resetear formulario
     setNewAvailability({ start_datetime: '', end_datetime: '' });
   };
 
@@ -190,7 +245,7 @@ export default function AdminTeamEditor() {
         badge_url: formData.badge_url,
         receipt_url: formData.receipt_url,
         captain_id: formData.captain_id,
-        availability: formData.availability // ✅ Guardar disponibilidad
+        availability: formData.availability
       }).eq('id', teamId);
 
       if (error) throw error;
@@ -259,7 +314,7 @@ export default function AdminTeamEditor() {
         
         {formData.players.length < 12 && <Button variant="ghost" onClick={addPlayer} fullWidth className={styles.addBtn}>+ Añadir Jugador</Button>}
 
-        {/* ✅ NUEVA SECCIÓN: DISPONIBILIDAD HORARIA (FECHAS COMPLETAS) */}
+        {/* ✅ SECCIÓN DE DISPONIBILIDAD HORARIA */}
         <h3 className={styles.sectionTitle}>🕐 Disponibilidad Horaria</h3>
         <p className={styles.sectionDescription}>
           Define las fechas y franjas horarias en las que el equipo <strong>NO puede jugar</strong> (pero sí puede arbitrar).
@@ -323,15 +378,43 @@ export default function AdminTeamEditor() {
           </div>
         )}
 
+        {/* ✅ SECCIÓN DE DOCUMENTOS CON ESCUDO EDITABLE */}
+        <h3 className={styles.sectionTitle}>📂 Documentos</h3>
+        
         <div className={styles.docsSection}>
-          <h3 className={styles.sectionTitle}>📂 Documentos</h3>
+          {/* Escudo */}
           <div className={styles.docRow}>
-            <label>🏐 Escudo</label>
-            {formData.badge_url && <a href={formData.badge_url} target="_blank" rel="noopener noreferrer" className={styles.docLink}>👁️ Ver</a>}
+            <label>🏐 Escudo del Equipo</label>
+            {formData.badge_url && (
+              <div className={styles.badgePreview}>
+                <img src={formData.badge_url} alt="Escudo actual" className={styles.badgePreviewImg} />
+                <Button variant="danger" size="sm" onClick={removeBadge} title="Eliminar escudo">
+                  🗑️
+                </Button>
+              </div>
+            )}
           </div>
+          
           <div className={styles.docRow}>
-            <label>📄 Recibo</label>
-            {formData.receipt_url && <a href={formData.receipt_url} target="_blank" rel="noopener noreferrer" className={styles.docLink}>👁️ Ver</a>}
+            <label>Subir nuevo escudo</label>
+            <div className={styles.fileInputRow}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={(e) => handleBadgeUpload(e.target.files?.[0])}
+                className={styles.fileInput}
+                id="badge-upload"
+                disabled={saving}
+              />
+              <label htmlFor="badge-upload" className={styles.fileInputLabel}>
+                {saving ? '⏳ Subiendo...' : '📁 Seleccionar imagen'}
+              </label>
+            </div>
+          </div>
+          
+          <div className={styles.docRow}>
+            <label>📄 Recibo de pago</label>
+            {formData.receipt_url && <a href={formData.receipt_url} target="_blank" rel="noopener noreferrer" className={styles.docLink}>👁️ Ver recibo</a>}
           </div>
         </div>
 

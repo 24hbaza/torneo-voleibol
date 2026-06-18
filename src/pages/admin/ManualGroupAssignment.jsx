@@ -3,6 +3,16 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { Button, Card } from '../../design-system/components';
+import { scheduleMatchesPreview } from '../../lib/tournament/previewScheduler';
+import { 
+  saveDraftMatches, 
+  loadDraftMatches, 
+  updateDraftMatch, 
+  confirmDraft, 
+  hasDraft, 
+  hasConfirmedDraft,
+  clearDraft 
+} from '../../lib/tournament/draftStorage';
 import styles from './ManualGroupAssignment.module.css';
 
 export default function ManualGroupAssignment() {
@@ -15,6 +25,14 @@ export default function ManualGroupAssignment() {
   const [saving, setSaving] = useState(false);
   const [logs, setLogs] = useState([]);
   const initialized = useRef(false);
+  
+  // ✅ Estados para el calendario fantasma (draft)
+  const [draftMatches, setDraftMatches] = useState([]);
+  const [showDraftPreview, setShowDraftPreview] = useState(false);
+  const [editingDraftId, setEditingDraftId] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [allTeamsList, setAllTeamsList] = useState([]);
+  const [isDraftConfirmed, setIsDraftConfirmed] = useState(false);
 
   useEffect(() => {
     if (!initialized.current) {
@@ -30,14 +48,15 @@ export default function ManualGroupAssignment() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Obtener configuración
-      const { data: configData } = await supabase
+      const { data: configData, error: configError } = await supabase
         .from('tournament_config')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
       
+      if (configError) throw configError;
+
       if (!configData) {
         addLog('⚠️ No hay configuración. Ve a Configuración primero.');
         setLoading(false);
@@ -45,56 +64,63 @@ export default function ManualGroupAssignment() {
       }
       
       setConfig(configData);
-      addLog('✅ Configuración cargada: ' + configData.num_groups + ' grupos');
+      addLog(`✅ Configuración cargada: ${configData.num_groups} grupos`);
 
-      // Obtener equipos aceptados
-      const { data: teamsData } = await supabase
+      const { data: teamsData, error: teamsError } = await supabase
         .from('profiles')
-        .select('id, team_name, badge_url')
+        .select('id, team_name, badge_url, is_admin_team, availability')
         .eq('status', 'accepted')
         .order('team_name');
       
-      setTeams(teamsData || []);
-      addLog('✅ ' + (teamsData?.length || 0) + ' equipos cargados');
+      if (teamsError) throw teamsError;
 
-      // Verificar si ya existen grupos
+      const cleanTeams = teamsData || [];
+      setTeams(cleanTeams);
+      setAllTeamsList(cleanTeams);
+      addLog(`✅ ${cleanTeams.length} equipos cargados`);
+
       const { data: existingGroups, error: groupsError } = await supabase
         .from('groups')
         .select('*')
         .order('draw_order');
       
-      if (groupsError) {
-        throw groupsError;
-      }
+      if (groupsError) throw groupsError;
 
       if (existingGroups && existingGroups.length > 0) {
-        // ✅ ELIMINAR DUPLICADOS por ID
-        const uniqueGroups = existingGroups.filter((group, index, self) =>
-          index === self.findIndex((g) => g.id === group.id)
-        );
+        const uniqueGroupsMap = new Map();
+        existingGroups.forEach(g => uniqueGroupsMap.set(g.id, g));
+        const uniqueGroups = Array.from(uniqueGroupsMap.values());
         
         setGroups(uniqueGroups);
+        addLog(`✅ Grupos cargados de la BD: ${uniqueGroups.length}`);
         
-        // Cargar asignaciones existentes
-        const { data: existingAssignments } = await supabase
+        const { data: existingAssignments, error: assignError } = await supabase
           .from('group_assignments')
           .select('group_id, team_id');
         
+        if (assignError) throw assignError;
+        
+        const assignMap = {};
+        uniqueGroups.forEach(g => { assignMap[g.id] = []; });
+
         if (existingAssignments) {
-          const assignMap = {};
           existingAssignments.forEach(a => {
-            if (!assignMap[a.group_id]) assignMap[a.group_id] = [];
-            if (!assignMap[a.group_id].includes(a.team_id)) {
+            if (assignMap[a.group_id] && !assignMap[a.group_id].includes(a.team_id)) {
               assignMap[a.group_id].push(a.team_id);
             }
           });
-          setAssignments(assignMap);
         }
-        
-        addLog('✅ Grupos cargados: ' + uniqueGroups.length);
+        setAssignments(assignMap);
       } else {
-        // Crear grupos según configuración
         await createGroups(configData);
+      }
+
+      // ✅ Cargar draft existente si hay
+      const existingDraft = loadDraftMatches();
+      if (existingDraft) {
+        setDraftMatches(existingDraft.matches);
+        setIsDraftConfirmed(hasConfirmedDraft());
+        addLog(`📝 Draft encontrado: ${existingDraft.matches.length} partidos ${hasConfirmedDraft() ? '(CONFIRMADO)' : '(pendiente)'}`);
       }
 
     } catch (err) {
@@ -106,15 +132,11 @@ export default function ManualGroupAssignment() {
   };
 
   const createGroups = async (configData) => {
-    if (!configData) {
-      addLog('❌ Error: No hay configuración disponible');
-      return;
-    }
+    if (!configData) return;
     
     try {
       addLog('📂 Creando grupos...');
       
-      // ✅ Verificar primero si ya existen
       const { data: checkGroups } = await supabase
         .from('groups')
         .select('id')
@@ -141,17 +163,15 @@ export default function ManualGroupAssignment() {
       
       if (error) throw error;
       
-      // ✅ Usar setGroups directamente, no añadir
-      setGroups(createdGroups);
+      setGroups(createdGroups || []);
       
-      // Inicializar asignaciones vacías
       const emptyAssignments = {};
-      createdGroups.forEach(g => {
+      (createdGroups || []).forEach(g => {
         emptyAssignments[g.id] = [];
       });
       setAssignments(emptyAssignments);
       
-      addLog('✅ ' + createdGroups.length + ' grupos creados');
+      addLog(`✅ ${createdGroups?.length || 0} grupos creados con éxito`);
     } catch (err) {
       addLog('❌ Error creando grupos: ' + err.message);
     }
@@ -168,7 +188,10 @@ export default function ManualGroupAssignment() {
       if (!newAssignments[groupId]) {
         newAssignments[groupId] = [];
       }
-      newAssignments[groupId].push(teamId);
+      
+      if (!newAssignments[groupId].includes(teamId)) {
+        newAssignments[groupId].push(teamId);
+      }
       
       return newAssignments;
     });
@@ -177,7 +200,9 @@ export default function ManualGroupAssignment() {
   const removeTeamFromGroup = (teamId, groupId) => {
     setAssignments(prev => {
       const newAssignments = { ...prev };
-      newAssignments[groupId] = newAssignments[groupId].filter(id => id !== teamId);
+      if (newAssignments[groupId]) {
+        newAssignments[groupId] = newAssignments[groupId].filter(id => id !== teamId);
+      }
       return newAssignments;
     });
   };
@@ -198,7 +223,7 @@ export default function ManualGroupAssignment() {
       const { error: deleteError } = await supabase
         .from('group_assignments')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .gte('created_at', '1970-01-01T00:00:00.000Z');
       
       if (deleteError) throw deleteError;
       
@@ -223,20 +248,185 @@ export default function ManualGroupAssignment() {
         if (insertError) throw insertError;
       }
       
-      addLog('✅ ' + assignmentsToInsert.length + ' equipos asignados');
-      alert('✅ Asignaciones guardadas. Ve a "Sorteo y Calendario" para generar partidos.');
+      addLog(`✅ ${assignmentsToInsert.length} equipos guardados correctamente`);
+      alert('✅ Asignaciones guardadas con éxito.');
       
     } catch (err) {
       console.error('Error saving:', err);
       addLog('❌ Error: ' + err.message);
-      alert('❌ Error: ' + err.message);
+      alert('❌ Error al guardar: ' + err.message);
     } finally {
       setSaving(false);
     }
   };
 
+  // ✅ GENERAR CALENDARIO FANTASMA (PREVIEW)
+  const generateDraftCalendar = async () => {
+    if (!config) {
+      alert('❌ Primero configura el torneo');
+      return;
+    }
+
+    const totalAssigned = Object.values(assignments).reduce((sum, arr) => sum + arr.length, 0);
+    if (totalAssigned === 0) {
+      alert('❌ Primero asigna equipos a los grupos');
+      return;
+    }
+
+    addLog('🔮 Generando calendario fantasma (preview)...');
+
+    try {
+      // Construir estructura groupsWithTeams
+      const groupsWithTeams = groups.map(group => {
+        const groupTeamIds = assignments[group.id] || [];
+        const groupTeams = groupTeamIds.map(teamId => {
+          const team = teams.find(t => t.id === teamId);
+          return team || { id: teamId, team_name: 'Desconocido' };
+        });
+        return { ...group, teams: groupTeams };
+      });
+
+      // Generar partidos usando el algoritmo
+      const generatedMatches = scheduleMatchesPreview(groupsWithTeams, config, addLog);
+      
+      if (generatedMatches.length === 0) {
+        addLog('❌ No se pudieron generar partidos');
+        alert('❌ Error: no se pudieron generar partidos');
+        return;
+      }
+
+      setDraftMatches(generatedMatches);
+      setShowDraftPreview(true);
+      setIsDraftConfirmed(false);
+      
+      // Guardar en localStorage
+      saveDraftMatches(generatedMatches, groups);
+      
+      addLog(`✅ ${generatedMatches.length} partidos generados en modo preview`);
+      addLog('💡 Ahora puedes editar los partidos antes de confirmarlos');
+      
+    } catch (err) {
+      console.error('Error generando draft:', err);
+      addLog('❌ Error: ' + err.message);
+      alert('❌ Error al generar calendario: ' + err.message);
+    }
+  };
+
+  // ✅ EDITAR PARTIDO DEL DRAFT
+  const startEditDraftMatch = (match) => {
+    setEditingDraftId(match.draft_id);
+    
+    let localDate = '';
+    if (match.match_date) {
+      const date = new Date(match.match_date);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      localDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    setEditForm({
+      match_date: localDate,
+      court_number: match.court_number || '',
+      referee_team_id: match.referee_team_id || ''
+    });
+  };
+
+  const cancelEditDraft = () => {
+    setEditingDraftId(null);
+    setEditForm({});
+  };
+
+  const saveEditDraft = () => {
+    if (!editingDraftId) return;
+    
+    let matchDateISO = null;
+    if (editForm.match_date) {
+      matchDateISO = new Date(editForm.match_date).toISOString();
+    }
+    
+    const updates = {
+      match_date: matchDateISO,
+      court_number: editForm.court_number ? parseInt(editForm.court_number) : null,
+      referee_team_id: editForm.referee_team_id || null
+    };
+    
+    const success = updateDraftMatch(editingDraftId, updates);
+    
+    if (success) {
+      // Actualizar estado local
+      setDraftMatches(prev => prev.map(m => 
+        m.draft_id === editingDraftId ? { ...m, ...updates } : m
+      ));
+      addLog(`✅ Partido actualizado`);
+      cancelEditDraft();
+    } else {
+      alert('❌ Error al actualizar el partido');
+    }
+  };
+
+  // ✅ CONFIRMAR DRAFT (marcar como oficial pendiente)
+  const handleConfirmDraft = () => {
+    if (!confirm('¿Confirmar este calendario? Se guardará como oficial cuando vayas a "Generar Calendario".')) {
+      return;
+    }
+    
+    confirmDraft();
+    setIsDraftConfirmed(true);
+    addLog('✅ Calendario fantasma CONFIRMADO');
+    addLog('👉 Ve a "Sorteo y Calendario" para hacerlo oficial');
+    alert('✅ Calendario confirmado. Ve a "Sorteo y Calendario" para hacerlo oficial.');
+  };
+
+  // ✅ DESCARTAR DRAFT
+  const handleDiscardDraft = () => {
+    if (!confirm('¿Descartar el calendario fantasma? Esta acción no se puede deshacer.')) {
+      return;
+    }
+    
+    clearDraft();
+    setDraftMatches([]);
+    setShowDraftPreview(false);
+    setIsDraftConfirmed(false);
+    addLog('🗑️ Calendario fantasma descartado');
+  };
+
+  // ✅ CARGAR DRAFT EXISTENTE
+  const handleLoadDraft = () => {
+    const draft = loadDraftMatches();
+    if (draft) {
+      setDraftMatches(draft.matches);
+      setShowDraftPreview(true);
+      setIsDraftConfirmed(hasConfirmedDraft());
+      addLog(`📝 Draft cargado: ${draft.matches.length} partidos`);
+    }
+  };
+
   const goToScheduler = () => {
     navigate('/admin/draw');
+  };
+
+  const getTeamName = (teamId) => {
+    const team = allTeamsList.find(t => t.id === teamId);
+    return team?.team_name || 'Desconocido';
+  };
+
+  const getGroupName = (groupId) => {
+    const group = groups.find(g => g.id === groupId);
+    return group?.name || 'Grupo ?';
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return '-';
+    return new Date(iso).toLocaleString('es-ES', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (loading) {
@@ -260,11 +450,6 @@ export default function ManualGroupAssignment() {
     );
   }
 
-  // ✅ FILTRAR grupos duplicados para renderizado
-  const uniqueGroupsForRender = groups.filter((group, index, self) =>
-    index === self.findIndex((g) => g.id === group.id)
-  );
-
   const unassignedTeams = getUnassignedTeams();
   const totalAssigned = Object.values(assignments).reduce((sum, arr) => sum + arr.length, 0);
 
@@ -274,7 +459,7 @@ export default function ManualGroupAssignment() {
         <h1>🎯 Asignación Manual de Grupos</h1>
         <div className={styles.actions}>
           <Button variant="ghost" onClick={fetchData}>🔄 Recargar</Button>
-          <Button variant="primary" onClick={goToScheduler}>⚔️ Generar Calendario</Button>
+          <Button variant="primary" onClick={goToScheduler}>⚔️ Ir a Generar Calendario</Button>
         </div>
       </header>
 
@@ -297,6 +482,141 @@ export default function ManualGroupAssignment() {
         </div>
       </div>
 
+      {/* ✅ SECCIÓN DE CALENDARIO FANTASMA */}
+      <div className={styles.draftSection}>
+        <h2 className={styles.sectionTitle}>🔮 Calendario Fantasma (Preview)</h2>
+        <p className={styles.sectionDescription}>
+          Genera un calendario de prueba usando el mismo algoritmo. Podrás editar los partidos (hora, pista, árbitro) 
+          antes de confirmarlos. Una vez confirmado, ve a "Sorteo y Calendario" para hacerlo oficial.
+        </p>
+        
+        <div className={styles.draftActions}>
+          <Button 
+            variant="primary" 
+            onClick={generateDraftCalendar}
+            disabled={totalAssigned === 0}
+          >
+            🔮 Generar Preview
+          </Button>
+          
+          {hasDraft() && !showDraftPreview && (
+            <Button variant="ghost" onClick={handleLoadDraft}>
+              📝 Cargar Draft Existente
+            </Button>
+          )}
+          
+          {showDraftPreview && (
+            <>
+              {!isDraftConfirmed ? (
+                <Button variant="success" onClick={handleConfirmDraft}>
+                  ✅ Confirmar Calendario
+                </Button>
+              ) : (
+                <span className={styles.confirmedBadge}>✅ CONFIRMADO</span>
+              )}
+              <Button variant="danger" onClick={handleDiscardDraft}>
+                🗑️ Descartar
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ✅ VISTA PREVIA DE PARTIDOS GENERADOS */}
+      {showDraftPreview && draftMatches.length > 0 && (
+        <div className={styles.draftPreview}>
+          <h3 className={styles.previewTitle}>
+            📋 Partidos Generados ({draftMatches.length})
+            {isDraftConfirmed && <span className={styles.confirmedBadge}>✅ CONFIRMADO</span>}
+          </h3>
+          
+          <div className={styles.draftMatchesList}>
+            {draftMatches.map((match, idx) => (
+              <div key={match.draft_id} className={styles.draftMatchCard}>
+                {editingDraftId === match.draft_id ? (
+                  // ✅ MODO EDICIÓN
+                  <div className={styles.draftMatchEdit}>
+                    <div className={styles.draftMatchHeader}>
+                      <strong>#{idx + 1} - {getGroupName(match.group_id)}</strong>
+                    </div>
+                    <div className={styles.editForm}>
+                      <div className={styles.editField}>
+                        <label>Fecha y hora</label>
+                        <input
+                          type="datetime-local"
+                          value={editForm.match_date || ''}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, match_date: e.target.value }))}
+                          className={styles.editInput}
+                        />
+                      </div>
+                      <div className={styles.editField}>
+                        <label>Pista</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={editForm.court_number || ''}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, court_number: e.target.value }))}
+                          className={styles.editInput}
+                        />
+                      </div>
+                      <div className={styles.editField}>
+                        <label>Árbitro</label>
+                        <select
+                          value={editForm.referee_team_id || ''}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, referee_team_id: e.target.value }))}
+                          className={styles.editInput}
+                        >
+                          <option value="">Sin asignar</option>
+                          {allTeamsList.map(team => (
+                            <option key={team.id} value={team.id}>{team.team_name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className={styles.editActions}>
+                        <Button variant="primary" size="sm" onClick={saveEditDraft}>💾 Guardar</Button>
+                        <Button variant="ghost" size="sm" onClick={cancelEditDraft}>✕ Cancelar</Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // ✅ MODO VISUALIZACIÓN
+                  <>
+                    <div className={styles.draftMatchHeader}>
+                      <span className={styles.draftMatchNumber}>#{idx + 1}</span>
+                      <span className={styles.draftMatchGroup}>{getGroupName(match.group_id)}</span>
+                      <span className={styles.draftMatchCode}>🔑 {match.verification_code}</span>
+                    </div>
+                    <div className={styles.draftMatchBody}>
+                      <div className={styles.draftMatchTeams}>
+                        <strong>{getTeamName(match.home_team_id)}</strong>
+                        <span className={styles.vs}>vs</span>
+                        <strong>{getTeamName(match.away_team_id)}</strong>
+                      </div>
+                      <div className={styles.draftMatchInfo}>
+                        <span>📅 {formatDate(match.match_date)}</span>
+                        <span>🏟️ Pista {match.court_number || '-'}</span>
+                        <span>🎫 {match.referee_team_id ? getTeamName(match.referee_team_id) : 'Sin asignar'}</span>
+                      </div>
+                    </div>
+                    <div className={styles.draftMatchActions}>
+                      <button
+                        className={styles.editDraftBtn}
+                        onClick={() => startEditDraftMatch(match)}
+                        title="Editar partido"
+                      >
+                        ✏️ Editar
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* SECCIÓN DE GRUPOS */}
       <div className={styles.mainContent}>
         <div className={styles.unassignedPanel}>
           <h2>📋 Sin asignar ({unassignedTeams.length})</h2>
@@ -317,7 +637,7 @@ export default function ManualGroupAssignment() {
         </div>
 
         <div className={styles.groupsContainer}>
-          {uniqueGroupsForRender.map(group => {
+          {groups.map(group => {
             const groupTeams = assignments[group.id] || [];
             const isFull = config.teams_per_group && groupTeams.length >= config.teams_per_group;
             
@@ -361,6 +681,7 @@ export default function ManualGroupAssignment() {
         </div>
       </div>
 
+      {/* SECCIÓN DE ASIGNACIÓN */}
       <div className={styles.assignmentPanel}>
         <h2>🎯 Asignar equipos</h2>
         <div className={styles.assignmentGrid}>
@@ -384,7 +705,7 @@ export default function ManualGroupAssignment() {
                 </div>
                 
                 <div className={styles.groupButtons}>
-                  {uniqueGroupsForRender.map(group => {
+                  {groups.map(group => {
                     const isAssigned = assignedGroupId === group.id;
                     const groupTeams = assignments[group.id] || [];
                     const isFull = config.teams_per_group && groupTeams.length >= config.teams_per_group;
@@ -409,10 +730,10 @@ export default function ManualGroupAssignment() {
 
       <div className={styles.footerActions}>
         <Button variant="primary" onClick={saveAssignments} loading={saving} disabled={saving || totalAssigned === 0}>
-          💾 Guardar
+          💾 Guardar Asignaciones
         </Button>
         <Button variant="ghost" onClick={goToScheduler}>
-          ⚔️ Generar Calendario →
+          ⚔️ Ir a Generar Calendario →
         </Button>
       </div>
 
