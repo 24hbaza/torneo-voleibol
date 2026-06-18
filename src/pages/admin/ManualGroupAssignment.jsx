@@ -26,7 +26,7 @@ export default function ManualGroupAssignment() {
   const [logs, setLogs] = useState([]);
   const initialized = useRef(false);
   
-  // ✅ Estados para el calendario fantasma (draft)
+  // Estados para el calendario fantasma (draft)
   const [draftMatches, setDraftMatches] = useState([]);
   const [showDraftPreview, setShowDraftPreview] = useState(false);
   const [editingDraftId, setEditingDraftId] = useState(null);
@@ -119,6 +119,7 @@ export default function ManualGroupAssignment() {
       const existingDraft = loadDraftMatches();
       if (existingDraft) {
         setDraftMatches(existingDraft.matches);
+        setShowDraftPreview(true); // ✅ Mostrar automáticamente si hay draft
         setIsDraftConfirmed(hasConfirmedDraft());
         addLog(`📝 Draft encontrado: ${existingDraft.matches.length} partidos ${hasConfirmedDraft() ? '(CONFIRMADO)' : '(pendiente)'}`);
       }
@@ -261,7 +262,7 @@ export default function ManualGroupAssignment() {
   };
 
   // ✅ GENERAR CALENDARIO FANTASMA (PREVIEW)
-  const generateDraftCalendar = async () => {
+  const generateDraftCalendar = async (forceRandom = false) => {
     if (!config) {
       alert('❌ Primero configura el torneo');
       return;
@@ -273,10 +274,20 @@ export default function ManualGroupAssignment() {
       return;
     }
 
-    addLog('🔮 Generando calendario fantasma (preview)...');
+    // ✅ Si ya hay un draft, preguntar si sobrescribir
+    if (draftMatches.length > 0) {
+      if (!confirm('⚠️ Ya tienes un calendario editado. ¿Seguro que quieres generar uno nuevo? Se perderán los cambios.')) {
+        return;
+      }
+    }
+
+    if (forceRandom) {
+      addLog('🔀 Regenerando calendario aleatoriamente...');
+    } else {
+      addLog('🔮 Generando calendario fantasma (preview)...');
+    }
 
     try {
-      // Construir estructura groupsWithTeams
       const groupsWithTeams = groups.map(group => {
         const groupTeamIds = assignments[group.id] || [];
         const groupTeams = groupTeamIds.map(teamId => {
@@ -286,8 +297,45 @@ export default function ManualGroupAssignment() {
         return { ...group, teams: groupTeams };
       });
 
-      // Generar partidos usando el algoritmo
-      const generatedMatches = scheduleMatchesPreview(groupsWithTeams, config, addLog);
+      const getCurrentDraftHash = () => {
+        if (draftMatches.length === 0) return null;
+        return draftMatches
+          .map(m => `${m.home_team_id}-${m.away_team_id}-${m.match_date}`)
+          .sort()
+          .join('|');
+      };
+
+      const previousHash = getCurrentDraftHash();
+      
+      let generatedMatches = [];
+      let attempts = 0;
+      const maxAttempts = 5;
+      
+      do {
+        generatedMatches = scheduleMatchesPreview(
+          groupsWithTeams, 
+          config, 
+          addLog,
+          { randomize: forceRandom }
+        );
+        
+        attempts++;
+        
+        if (!previousHash || !forceRandom) break;
+        
+        const newHash = generatedMatches
+          .map(m => `${m.home_team_id}-${m.away_team_id}-${m.match_date}`)
+          .sort()
+          .join('|');
+        
+        if (newHash !== previousHash) break;
+        
+        addLog(`🔄 Intento ${attempts}: calendario igual al anterior, reintentando...`);
+      } while (attempts < maxAttempts);
+      
+      if (attempts >= maxAttempts) {
+        addLog('⚠️ Máximo de intentos alcanzado, usando último generado');
+      }
       
       if (generatedMatches.length === 0) {
         addLog('❌ No se pudieron generar partidos');
@@ -299,10 +347,10 @@ export default function ManualGroupAssignment() {
       setShowDraftPreview(true);
       setIsDraftConfirmed(false);
       
-      // Guardar en localStorage
+      // ✅ Guardar inmediatamente en localStorage
       saveDraftMatches(generatedMatches, groups);
       
-      addLog(`✅ ${generatedMatches.length} partidos generados en modo preview`);
+      addLog(`✅ ${generatedMatches.length} partidos generados${forceRandom ? ' (aleatorio)' : ''}`);
       addLog('💡 Ahora puedes editar los partidos antes de confirmarlos');
       
     } catch (err) {
@@ -353,21 +401,21 @@ export default function ManualGroupAssignment() {
       referee_team_id: editForm.referee_team_id || null
     };
     
-    const success = updateDraftMatch(editingDraftId, updates);
+    // ✅ Actualizar estado local
+    const updatedMatches = draftMatches.map(m => 
+      m.draft_id === editingDraftId ? { ...m, ...updates } : m
+    );
     
-    if (success) {
-      // Actualizar estado local
-      setDraftMatches(prev => prev.map(m => 
-        m.draft_id === editingDraftId ? { ...m, ...updates } : m
-      ));
-      addLog(`✅ Partido actualizado`);
-      cancelEditDraft();
-    } else {
-      alert('❌ Error al actualizar el partido');
-    }
+    setDraftMatches(updatedMatches);
+    
+    // ✅ CRÍTICO: Guardar en localStorage inmediatamente
+    saveDraftMatches(updatedMatches, groups);
+    
+    addLog(`✅ Partido actualizado y guardado`);
+    cancelEditDraft();
   };
 
-  // ✅ CONFIRMAR DRAFT (marcar como oficial pendiente)
+  // ✅ CONFIRMAR DRAFT
   const handleConfirmDraft = () => {
     if (!confirm('¿Confirmar este calendario? Se guardará como oficial cuando vayas a "Generar Calendario".')) {
       return;
@@ -482,7 +530,7 @@ export default function ManualGroupAssignment() {
         </div>
       </div>
 
-      {/* ✅ SECCIÓN DE CALENDARIO FANTASMA */}
+      {/* SECCIÓN DE CALENDARIO FANTASMA */}
       <div className={styles.draftSection}>
         <h2 className={styles.sectionTitle}>🔮 Calendario Fantasma (Preview)</h2>
         <p className={styles.sectionDescription}>
@@ -493,17 +541,20 @@ export default function ManualGroupAssignment() {
         <div className={styles.draftActions}>
           <Button 
             variant="primary" 
-            onClick={generateDraftCalendar}
+            onClick={() => generateDraftCalendar(false)}
             disabled={totalAssigned === 0}
           >
             🔮 Generar Preview
           </Button>
           
-          {hasDraft() && !showDraftPreview && (
-            <Button variant="ghost" onClick={handleLoadDraft}>
-              📝 Cargar Draft Existente
-            </Button>
-          )}
+          <Button 
+            variant="ghost" 
+            onClick={() => generateDraftCalendar(true)}
+            disabled={totalAssigned === 0 || isDraftConfirmed}
+            title="Regenerar con distribución aleatoria diferente"
+          >
+            🔀 Regenerar aleatoriamente
+          </Button>
           
           {showDraftPreview && (
             <>
@@ -522,7 +573,7 @@ export default function ManualGroupAssignment() {
         </div>
       </div>
 
-      {/* ✅ VISTA PREVIA DE PARTIDOS GENERADOS */}
+      {/* VISTA PREVIA DE PARTIDOS GENERADOS */}
       {showDraftPreview && draftMatches.length > 0 && (
         <div className={styles.draftPreview}>
           <h3 className={styles.previewTitle}>
@@ -534,7 +585,7 @@ export default function ManualGroupAssignment() {
             {draftMatches.map((match, idx) => (
               <div key={match.draft_id} className={styles.draftMatchCard}>
                 {editingDraftId === match.draft_id ? (
-                  // ✅ MODO EDICIÓN
+                  // MODO EDICIÓN
                   <div className={styles.draftMatchEdit}>
                     <div className={styles.draftMatchHeader}>
                       <strong>#{idx + 1} - {getGroupName(match.group_id)}</strong>
@@ -580,7 +631,7 @@ export default function ManualGroupAssignment() {
                     </div>
                   </div>
                 ) : (
-                  // ✅ MODO VISUALIZACIÓN
+                  // MODO VISUALIZACIÓN
                   <>
                     <div className={styles.draftMatchHeader}>
                       <span className={styles.draftMatchNumber}>#{idx + 1}</span>
@@ -604,6 +655,7 @@ export default function ManualGroupAssignment() {
                         className={styles.editDraftBtn}
                         onClick={() => startEditDraftMatch(match)}
                         title="Editar partido"
+                        disabled={isDraftConfirmed}
                       >
                         ✏️ Editar
                       </button>
